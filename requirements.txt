@@ -1,0 +1,6 @@
+aiogram
+aiohttp
+aiohttp-cors
+aiosqlite
+python-dotenv
+requests

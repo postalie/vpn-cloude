@@ -1,0 +1,30 @@
+import os
+
+# Замените на токен вашего бота
+BOT_TOKEN = "8051573863:AAEQndObhuUNmOyfM4ocpYpdOSDPsbeyyCU" 
+
+# ID администраторов (числами)
+ADMIN_IDS = [273761139]
+
+# Путь к БД
+DB_NAME = "data_base/bot_database.db"
+
+# Цены
+VPN_PRICE = 100
+
+# Основной бренд
+BRAND_NAME = "Cloude VPN"
+
+# Базовый URL для подписок (ТВОЙ САЙТ на Cloudflare)
+# Именно эту ссылку будут видеть юзеры в боте
+BASE_URL = "https://cloudevpn.cfd" 
+
+# URL страницы GitHub Pages
+# Сюда будет вести кнопка с зашифрованной подпиской
+GITHUB_PAGE_URL = "https://h1tezz.github.io/cloud" # <-- УКАЖИТЕ ЗДЕСЬ ВАШ ДОМЕН GITHUB PAGES
+
+# Секретный ключ для связи сайта и бота
+API_SECRET = "CloudeVpnVOIDAPI_1488"
+
+# CryptoBot Token
+CRYPTO_BOT_TOKEN = "520599:AAW21XjdInZ2LUECMGvQpoeoQIX73vfmYf3"

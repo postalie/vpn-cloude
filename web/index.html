@@ -1,0 +1,215 @@
+<!DOCTYPE html>
+<html lang="ru">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cloude VPN | Анонимный доступ в Интернет</title>
+    <meta name="description"
+        content="Cloude VPN - Премиальный доступ без границ. Протоколы нового поколения VLESS + Reality, 100% анонимность и молниеносная скорость.">
+    <!-- Прямая ссылка на стили (Cloudflare подхватит его из корня) -->
+    <link rel="stylesheet" href="style.css">
+</head>
+
+<body>
+
+    <div class="bg-glow"></div>
+    <div class="bg-glow"></div>
+
+    <header>
+        <div class="logo">CloudeVPN</div>
+        <div class="api-status" id="api-status-box">
+            <span class="status-dot" id="status-dot"></span>
+            <span id="status-text">Загрузка...</span>
+        </div>
+        <a href="https://t.me/CloudeVPNbot" class="nav-btn">Открыть в Telegram</a>
+    </header>
+
+    <section class="hero">
+        <h1>Твой личный коридор в<br><span>Свободный Интернет</span></h1>
+        <p>Забудьте о блокировках и медленной загрузке. Мы используем передовые Reality-протоколы, которые делают ваш
+            трафик неотличимым от обычного посещения сайтов. Максимальная защита на любом устройстве.</p>
+
+        <div class="stats-row">
+            <div class="stat-item">
+                <span class="stat-value" id="nodes-count">...</span>
+                <span class="stat-label">Серверов</span>
+            </div>
+            <div class="stat-item">
+                <span class="stat-value" id="locations-count">...</span>
+                <span class="stat-label">Локаций</span>
+            </div>
+            <div class="stat-item">
+                <span class="stat-value" id="users-count">...</span>
+                <span class="stat-label">Пользователей</span>
+            </div>
+        </div>
+
+        <div class="cta-group">
+            <a href="https://t.me/CloudeVPNbot" class="cta-primary">
+                ⚡ Подключить VPN
+            </a>
+        </div>
+    </section>
+
+    <section class="setup-section" id="setup">
+        <h2>🚀 Быстрая настройка</h2>
+        <p>Выберите вашу платформу и подходящие приложения для работы с Cloude VPN</p>
+
+        <div class="os-selector">
+            <button class="os-btn active" id="btn-ios" onclick="selectOS('ios')">
+                <span class="os-icon">🍎</span> iPhone / iPad
+            </button>
+            <button class="os-btn" id="btn-android" onclick="selectOS('android')">
+                <span class="os-icon">🤖</span> Android
+            </button>
+        </div>
+
+        <div class="apps-container" id="apps-list">
+            <!-- Приложения будут загружены через JS -->
+        </div>
+
+        <div class="selected-apps-info" id="selected-info" style="display: none;">
+            <h3>Выбранные приложения:</h3>
+            <div class="selected-tags" id="selected-tags"></div>
+            <a href="https://t.me/CloudeVPNbot" class="cta-secondary">Получить настройки для них</a>
+        </div>
+    </section>
+
+    <section class="features">
+        <div class="feature-card">
+            <div class="icon">🚀</div>
+            <h3>Turbo Speed</h3>
+            <p>Гигабитные каналы связи обеспечивают мгновенную загрузку 4K видео и низкий пинг в играх.</p>
+        </div>
+        <div class="feature-card">
+            <div class="icon">🛡️</div>
+            <h3>Max Security</h3>
+            <p>Наши сервера работают на протоколах VLESS + Reality для вашей полной безопасности.</p>
+        </div>
+        <div class="feature-card">
+            <div class="icon">📱</div>
+            <h3>All Devices</h3>
+            <p>Поддержка iOS, Android, Windows и macOS. До 5-ти устройств на одну подписку.</p>
+        </div>
+    </section>
+
+    <footer>
+        <p>© 2026 Cloude VPN. Все права защищены.</p>
+        <p style="margin-top: 10px; font-size: 0.9rem;">Powered by Hiddify & V2Ray Technology</p>
+    </footer>
+
+    <script>
+        const API_URL = "https://vpn-cloudee-production.up.railway.app";
+        const API_KEY = "CloudeVpnVOIDAPI_1488";
+
+        const appsData = {
+            ios: [
+                { id: 'v2box', name: 'V2Box', icon: '📦', link: 'https://apps.apple.com/ru/app/v2box-v2ray-client/id1640135618' },
+                { id: 'streisand', name: 'Streisand', icon: '🎻', link: 'https://apps.apple.com/ru/app/streisand/id6450534064' },
+                { id: 'shadowrocket', name: 'Shadowrocket', icon: '🚀', link: 'https://apps.apple.com/ru/app/shadowrocket/id932747118' },
+                { id: 'v2raytun', name: 'V2RayTun', icon: '🔧', link: 'https://apps.apple.com/ru/app/v2raytun/id1631551600' }
+            ],
+            android: [
+                { id: 'v2rayng', name: 'v2rayNG', icon: '📱', link: 'https://play.google.com/store/apps/details?id=com.v2ray.ang' },
+                { id: 'hiddify', name: 'Hiddify Next', icon: '🛡️', link: 'https://play.google.com/store/apps/details?id=app.hiddify.com' },
+                { id: 'v2raytun_and', name: 'V2RayTun', icon: '🔧', link: 'https://play.google.com/store/apps/details?id=com.v2ray.tun' },
+                { id: 'nekobox', name: 'NekoBox', icon: '🐱', link: 'https://github.com/MatsuriDayo/NekoBoxForAndroid/releases' }
+            ]
+        };
+
+        let selectedApps = new Set();
+        let currentOS = 'ios';
+
+        function selectOS(os) {
+            currentOS = os;
+            document.getElementById('btn-ios').classList.toggle('active', os === 'ios');
+            document.getElementById('btn-android').classList.toggle('active', os === 'android');
+            selectedApps.clear();
+            renderApps();
+            updateSelectedInfo();
+        }
+
+        function renderApps() {
+            const container = document.getElementById('apps-list');
+            container.innerHTML = '';
+
+            appsData[currentOS].forEach(app => {
+                const card = document.createElement('div');
+                card.className = `app-card ${selectedApps.has(app.id) ? 'selected' : ''}`;
+                card.onclick = () => toggleApp(app.id);
+                card.innerHTML = `
+                    <div class="app-icon">${app.icon}</div>
+                    <div class="app-name">${app.name}</div>
+                    <div class="app-check">${selectedApps.has(app.id) ? '✓' : '+'}</div>
+                `;
+                container.appendChild(card);
+            });
+        }
+
+        function toggleApp(appId) {
+            if (selectedApps.has(appId)) {
+                selectedApps.delete(appId);
+            } else {
+                selectedApps.add(appId);
+            }
+            renderApps();
+            updateSelectedInfo();
+        }
+
+        function updateSelectedInfo() {
+            const infoBox = document.getElementById('selected-info');
+            const tagsBox = document.getElementById('selected-tags');
+
+            if (selectedApps.size > 0) {
+                infoBox.style.display = 'block';
+                tagsBox.innerHTML = '';
+                selectedApps.forEach(id => {
+                    const app = appsData[currentOS].find(a => a.id === id);
+                    const tag = document.createElement('span');
+                    tag.className = 'app-tag';
+                    tag.innerText = app.name;
+                    tagsBox.appendChild(tag);
+                });
+            } else {
+                infoBox.style.display = 'none';
+            }
+        }
+
+        async function fetchStats() {
+            try {
+                const response = await fetch(`${API_URL}/api/status`, {
+                    headers: {
+                        "X-API-Key": API_KEY
+                    }
+                });
+
+                if (!response.ok) throw new Error("API Error");
+
+                const data = await response.json();
+
+                document.getElementById("nodes-count").innerText = data.nodes_online;
+                document.getElementById("locations-count").innerText = data.locations_count;
+                document.getElementById("users-count").innerText = data.total_users;
+
+                document.getElementById("status-text").innerText = "Онлайн";
+                document.getElementById("status-dot").style.background = "#00ff88";
+                document.getElementById("status-dot").style.boxShadow = "0 0 10px #00ff88";
+
+            } catch (error) {
+                console.error("Stats fetch error:", error);
+                document.getElementById("status-text").innerText = "Оффлайн";
+                document.getElementById("status-dot").style.background = "#ff4444";
+                document.getElementById("status-dot").style.boxShadow = "0 0 10px #ff4444";
+            }
+        }
+
+        fetchStats();
+        renderApps();
+        // Обновляем раз в минуту
+        setInterval(fetchStats, 60000);
+    </script>
+
+</body>
+
+</html>

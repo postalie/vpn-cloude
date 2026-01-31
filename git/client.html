@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="ru">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cloude VPN | Client Redirect</title>
+    <style>
+        body {
+            background-color: #0a0e17;
+            color: white;
+            font-family: -apple-system, system-ui, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+            text-align: center;
+        }
+
+        .loader {
+            border: 4px solid rgba(255, 255, 255, 0.1);
+            border-top: 4px solid #00f2fe;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            animation: spin 1s linear infinite;
+            margin-bottom: 20px;
+        }
+
+        @keyframes spin {
+            0% {
+                transform: rotate(0deg);
+            }
+
+            100% {
+                transform: rotate(360deg);
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <div>
+        <div class="loader" style="margin: 0 auto 20px;"></div>
+        <h2 id="status">Определяем устройство...</h2>
+        <p id="sub-status">Сейчас вы будете перенаправлены в магазин приложений</p>
+    </div>
+
+    <script>
+        (function () {
+            const ua = navigator.userAgent || navigator.vendor || window.opera;
+            const status = document.getElementById('status');
+
+            // Ссылки
+            const iosLink = "https://apps.apple.com/ru/app/happ-proxy-utility-plus/id6746188973";
+            const androidLink = "https://play.google.com/store/apps/details?id=com.happproxy";
+            const winLink = "https://github.com/Happ-proxy/happ-desktop/releases/latest/download/setup-Happ.x64.exe";
+
+            if (/iPad|iPhone|iPod/.test(ua) && !window.MSStream) {
+                status.innerText = "Переход в App Store...";
+                window.location.replace(iosLink);
+            } else if (/android/i.test(ua)) {
+                status.innerText = "Переход в Play Market...";
+                window.location.replace(androidLink);
+            } else if (/Windows/i.test(ua)) {
+                status.innerText = "Загрузка для Windows...";
+                window.location.replace(winLink);
+            } else {
+                status.innerText = "Устройство не распознано";
+                document.getElementById('sub-status').innerText = "Пожалуйста, выберите клиент вручную в боте";
+            }
+        })();
+    </script>
+</body>
+
+</html>

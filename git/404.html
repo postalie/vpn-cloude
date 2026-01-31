@@ -1,0 +1,242 @@
+<!DOCTYPE html>
+<html lang="ru">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Cloude VPN | Redirect</title>
+    <style>
+        :root {
+            --primary: #00f2fe;
+            --secondary: #4facfe;
+            --bg-dark: #0a0e17;
+            --bg-card: #151a25;
+            --text-main: #ffffff;
+            --text-muted: #a0a0a0;
+            --accent-glow: rgba(79, 172, 254, 0.4);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+        }
+
+        body {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            /* Используем min-height для мобилок */
+            flex-direction: column;
+            text-align: center;
+            background-color: var(--bg-dark);
+            color: var(--text-main);
+            overflow: hidden;
+            margin: 0;
+            position: relative;
+        }
+
+        /* Background Effects */
+        .bg-glow {
+            position: fixed;
+            width: 600px;
+            height: 600px;
+            background: radial-gradient(circle, var(--accent-glow) 0%, transparent 70%);
+            top: -100px;
+            left: -100px;
+            filter: blur(80px);
+            z-index: -1;
+            opacity: 0.6;
+            animation: pulse 10s infinite alternate;
+        }
+
+        .bg-glow:nth-child(2) {
+            top: auto;
+            bottom: -100px;
+            left: auto;
+            right: -100px;
+            background: radial-gradient(circle, rgba(169, 51, 245, 0.3) 0%, transparent 70%);
+        }
+
+        @keyframes pulse {
+            0% {
+                transform: scale(1);
+            }
+
+            100% {
+                transform: scale(1.2);
+            }
+        }
+
+        .loader {
+            width: 60px;
+            height: 60px;
+            border: 4px solid rgba(255, 255, 255, 0.1);
+            border-top-color: var(--primary);
+            border-radius: 50%;
+            animation: spin 1s infinite linear;
+            margin-bottom: 30px;
+            box-shadow: 0 0 20px rgba(0, 242, 254, 0.2);
+        }
+
+        @keyframes spin {
+            to {
+                transform: rotate(360deg);
+            }
+        }
+
+        .status-container {
+            z-index: 10;
+            background: rgba(21, 26, 37, 0.8);
+            padding: 40px;
+            border-radius: 20px;
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            backdrop-filter: blur(10px);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+
+            /* Responsive Width */
+            width: 90%;
+            max-width: 400px;
+            margin: 20px;
+            /* Отступы от краев на мобилках */
+        }
+
+        .status-msg {
+            color: var(--text-main);
+            margin-bottom: 10px;
+            font-size: 1.5rem;
+            font-weight: 700;
+            line-height: 1.2;
+        }
+
+        .sub-msg {
+            color: var(--text-muted);
+            margin-bottom: 30px;
+            font-size: 1rem;
+            line-height: 1.4;
+        }
+
+        #manual-btn {
+            display: none;
+            width: 100%;
+            justify-content: center;
+            padding: 15px 20px;
+            background: white;
+            color: black;
+            font-weight: 700;
+            border-radius: 12px;
+            text-decoration: none;
+            transition: all 0.3s ease;
+            align-items: center;
+            gap: 10px;
+            font-size: 1rem;
+        }
+
+        #manual-btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 15px 30px rgba(255, 255, 255, 0.15);
+        }
+
+        /* Mobile Optimizations */
+        @media (max-width: 480px) {
+            .bg-glow {
+                opacity: 0.4;
+                /* Чуть меньше свечения на мобилках */
+            }
+
+            .status-container {
+                padding: 30px 20px;
+            }
+
+            .loader {
+                width: 50px;
+                height: 50px;
+                margin-bottom: 25px;
+            }
+
+            .status-msg {
+                font-size: 1.3rem;
+            }
+
+            .sub-msg {
+                font-size: 0.9rem;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <div class="bg-glow"></div>
+    <div class="bg-glow"></div>
+
+    <div class="status-container">
+        <div class="loader"></div>
+        <div class="status-msg" id="status">Обработка...</div>
+        <div class="sub-msg" id="sub-status">Расшифровываем параметры подключения</div>
+
+        <a href="#" class="cta-primary" id="manual-btn">
+            🚀 Открыть в Happ
+        </a>
+    </div>
+
+    <script>
+        (function () {
+            try {
+                // Получаем путь из URL (убираем первый слэш)
+                let rawPath = window.location.pathname.substring(1);
+
+                // Убираем возможный trailing slash
+                if (rawPath.endsWith('/')) {
+                    rawPath = rawPath.slice(0, -1);
+                }
+
+                if (!rawPath || rawPath === "index.html") return;
+
+                let payload = rawPath;
+
+                try {
+                    // URL-safe Base64: заменяем - на +, _ на /
+                    let safeBase64 = rawPath.replace(/-/g, '+').replace(/_/g, '/');
+                    while (safeBase64.length % 4 !== 0) safeBase64 += '=';
+
+                    // Декодируем Base64
+                    let decoded = atob(safeBase64);
+
+                    if (decoded.includes("add/")) {
+                        payload = decoded;
+                        document.getElementById('sub-status').innerText = "Данные расшифрованы. Подключаемся...";
+                    }
+                } catch (e) {
+                    console.log("Decode failed, using raw path");
+                }
+
+                // Формируем ссылку happ://
+                const deepLink = `happ://${payload}`;
+
+                // Активируем кнопку (как fallback)
+                const btn = document.getElementById('manual-btn');
+                btn.href = deepLink;
+                btn.style.display = 'flex';
+
+                // Мгновенный редирект БЕЗ ожидания
+                window.location.replace(deepLink);
+
+                // Запасной запуск через 50мс
+                setTimeout(() => {
+                    window.location.href = deepLink;
+                }, 50);
+
+            } catch (err) {
+                console.error(err);
+                document.getElementById('status').innerText = "Ошибка";
+                document.getElementById('sub-status').innerText = "Не удалось обработать ссылку";
+            }
+        })();
+    </script>
+</body>
+
+</html>
