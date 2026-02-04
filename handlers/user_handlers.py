@@ -127,7 +127,7 @@ async def show_help_callback(callback: types.CallbackQuery):
         "1. Пополните баланс в Профиле -> Пополнить баланс.\n"
         "2. Нажмите «⚡️ Купить VPN».\n"
         "3. Следуйте инструкциям по подключению.\n\n"
-        "🆘 <b>Поддержка:</b> Если возникли вопросы, обращайтесь к @singlevoid."
+        "🆘 <b>Поддержка:</b> Если возникли вопросы, обращайтесь к @soldenchain."
     )
     from aiogram.types import InlineKeyboardMarkup, InlineKeyboardButton
     kb = InlineKeyboardMarkup(inline_keyboard=[[InlineKeyboardButton(text="« Назад", callback_data="back_to_main")]])
