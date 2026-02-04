@@ -135,11 +135,22 @@ async def create_tables():
         # Таблица уникальных устройств для подписок
         await db.execute('''
             CREATE TABLE IF NOT EXISTS devices (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
                 sub_uuid TEXT,
                 device_hash TEXT,
+                device_name TEXT,
+                last_seen DATETIME DEFAULT CURRENT_TIMESTAMP,
                 UNIQUE(sub_uuid, device_hash)
             )
         ''')
+
+        async with db.execute('PRAGMA table_info(devices)') as cursor:
+            device_columns = [row[1] for row in await cursor.fetchall()]
+        
+        if 'device_name' not in device_columns:
+            await db.execute('ALTER TABLE devices ADD COLUMN device_name TEXT')
+        if 'last_seen' not in device_columns:
+            await db.execute('ALTER TABLE devices ADD COLUMN last_seen DATETIME DEFAULT CURRENT_TIMESTAMP')
 
         await db.commit()
 
@@ -226,7 +237,7 @@ async def get_subscription(user_id):
 
 async def get_subscription_by_uuid(sub_uuid):
     async with aiosqlite.connect(DB_NAME) as db:
-        async with db.execute('SELECT user_id, expires_at, is_active FROM subscriptions WHERE sub_uuid = ?', (sub_uuid,)) as cursor:
+        async with db.execute('SELECT user_id, expires_at, is_active, device_limit FROM subscriptions WHERE sub_uuid = ?', (sub_uuid,)) as cursor:
             return await cursor.fetchone()
 
 async def extend_subscription(user_id, days=30):
@@ -473,6 +484,9 @@ async def register_device(sub_uuid, device_hash):
         # Проверяем, зарегистрировано ли уже это устройство
         async with db.execute('SELECT 1 FROM devices WHERE sub_uuid = ? AND device_hash = ?', (sub_uuid, device_hash)) as cursor:
             if await cursor.fetchone():
+                # Обновляем время активности
+                await db.execute('UPDATE devices SET last_seen = CURRENT_TIMESTAMP WHERE sub_uuid = ? AND device_hash = ?', (sub_uuid, device_hash))
+                await db.commit()
                 # Уже есть, получаем общее кол-во
                 async with db.execute('SELECT COUNT(*) FROM devices WHERE sub_uuid = ?', (sub_uuid,)) as cursor:
                     count = (await cursor.fetchone())[0]
@@ -486,7 +500,7 @@ async def register_device(sub_uuid, device_hash):
             return False, current_count, limit, user_id, False
 
         # Регистрируем
-        await db.execute('INSERT INTO devices (sub_uuid, device_hash) VALUES (?, ?)', (sub_uuid, device_hash))
+        await db.execute('INSERT INTO devices (sub_uuid, device_hash, device_name) VALUES (?, ?, ?)', (sub_uuid, device_hash, "Новое устройство"))
         await db.commit()
         return True, current_count + 1, limit, user_id, True # is_new = True
 
@@ -499,16 +513,38 @@ async def clear_devices_by_uuid(sub_uuid):
 async def get_device_count(user_id):
     """Возвращает текущее количество привязанных устройств пользователя"""
     async with aiosqlite.connect(DB_NAME) as db:
-        # Сначала получаем UUID подписки
         async with db.execute('SELECT sub_uuid FROM subscriptions WHERE user_id = ?', (user_id,)) as cursor:
             row = await cursor.fetchone()
             if not row or not row[0]:
                 return 0
             sub_uuid = row[0]
         
-        # Считаем устройства
         async with db.execute('SELECT COUNT(*) FROM devices WHERE sub_uuid = ?', (sub_uuid,)) as cursor:
             return (await cursor.fetchone())[0]
+
+async def get_user_devices(user_id):
+    """Возвращает список всех устройств пользователя"""
+    async with aiosqlite.connect(DB_NAME) as db:
+        async with db.execute('SELECT sub_uuid FROM subscriptions WHERE user_id = ?', (user_id,)) as cursor:
+            row = await cursor.fetchone()
+            if not row or not row[0]:
+                return []
+            sub_uuid = row[0]
+            
+        async with db.execute('SELECT id, device_hash, device_name, last_seen FROM devices WHERE sub_uuid = ?', (sub_uuid,)) as cursor:
+            return await cursor.fetchall()
+
+async def rename_device(device_id, new_name):
+    """Переименовывает устройство"""
+    async with aiosqlite.connect(DB_NAME) as db:
+        await db.execute('UPDATE devices SET device_name = ? WHERE id = ?', (new_name, device_id))
+        await db.commit()
+
+async def delete_device(device_id):
+    """Удаляет устройство"""
+    async with aiosqlite.connect(DB_NAME) as db:
+        await db.execute('DELETE FROM devices WHERE id = ?', (device_id,))
+        await db.commit()
 
 # --- РЕФЕРАЛЬНАЯ СИСТЕМА ---
 

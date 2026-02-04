@@ -271,38 +271,61 @@ async def admin_clear_nodes_confirm(callback: types.CallbackQuery):
     await callback.answer()
 
 @router.callback_query(F.data == "admin_list_nodes")
+@router.callback_query(F.data.startswith("nodes_page_"))
 async def admin_list_nodes_handler(callback: types.CallbackQuery):
     if not is_admin(callback.from_user.id): return
+    
+    page = 0
+    if callback.data.startswith("nodes_page_"):
+        page = int(callback.data.split("_")[-1])
+        
     nodes = await get_all_server_nodes_admin()
     if not nodes:
         await callback.message.edit_text("❌ В пуле пока нет серверов.", reply_markup=admin_servers_kb)
         return
     
-    await callback.message.edit_text("🖥 <b>Управление серверами</b>\n\nНажмите на кнопку с названием, чтобы включить/выключить сервер. Выключенные серверы не попадают в подписку.", 
-                                     reply_markup=get_nodes_management_kb(nodes), parse_mode="HTML")
+    # Расчет общего кол-ва страниц
+    total_pages = (len(nodes) + 9) // 10
+    
+    text = (
+        f"🖥 <b>Управление серверами</b> (Стр. {page+1}/{total_pages})\n\n"
+        "Нажмите на кнопку с названием, чтобы включить/выключить сервер. Выключенные серверы не попадают в подписку."
+    )
+    
+    await callback.message.edit_text(text, 
+                                     reply_markup=get_nodes_management_kb(nodes, page=page), parse_mode="HTML")
     await callback.answer()
 
 @router.callback_query(F.data.startswith("node_toggle_"))
 async def admin_toggle_node(callback: types.CallbackQuery):
     if not is_admin(callback.from_user.id): return
-    node_id = int(callback.data.split("_")[-1])
+    parts = callback.data.split("_")
+    node_id = int(parts[2])
+    page = int(parts[3]) if len(parts) > 3 else 0
+    
     await toggle_node_status(node_id)
     
     nodes = await get_all_server_nodes_admin()
-    await callback.message.edit_reply_markup(reply_markup=get_nodes_management_kb(nodes))
+    await callback.message.edit_reply_markup(reply_markup=get_nodes_management_kb(nodes, page=page))
     await callback.answer("Статус изменен")
 
 @router.callback_query(F.data.startswith("node_delete_"))
 async def admin_delete_node(callback: types.CallbackQuery):
     if not is_admin(callback.from_user.id): return
-    node_id = int(callback.data.split("_")[-1])
+    parts = callback.data.split("_")
+    node_id = int(parts[2])
+    page = int(parts[3]) if len(parts) > 3 else 0
+    
     await delete_node_by_id(node_id)
     
     nodes = await get_all_server_nodes_admin()
     if not nodes:
         await callback.message.edit_text("❌ В пуле пока нет серверов.", reply_markup=admin_servers_kb)
     else:
-        await callback.message.edit_reply_markup(reply_markup=get_nodes_management_kb(nodes))
+        # Проверка если страница стала пустой после удаления
+        if page > 0 and page * 10 >= len(nodes):
+            page -= 1
+        await callback.message.edit_reply_markup(reply_markup=get_nodes_management_kb(nodes, page=page))
     await callback.answer("Сервер удален")
 
 @router.callback_query(F.data.startswith("node_rename_"))

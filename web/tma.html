@@ -1,0 +1,603 @@
+<!DOCTYPE html>
+<html lang="ru">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+    <title>Cloude VPN | Dashboard</title>
+    <script src="https://telegram.org/js/telegram-web-app.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg-color: #0b0e14;
+            --card-bg: rgba(255, 255, 255, 0.05);
+            --accent-primary: #3498db;
+            --accent-secondary: #2ecc71;
+            --text-main: #ffffff;
+            --text-dim: #a0a0a0;
+            --danger: #e74c3c;
+            --glass-border: rgba(255, 255, 255, 0.1);
+        }
+
+        * {
+            box-sizing: border-box;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        body {
+            background-color: var(--bg-color);
+            color: var(--text-main);
+            font-family: 'Outfit', sans-serif;
+            margin: 0;
+            padding: 0;
+            overflow-x: hidden;
+            background-image: radial-gradient(circle at 50% -20%, #1a2a44 0%, var(--bg-color) 70%);
+            min-height: 100vh;
+        }
+
+        .container {
+            padding: 20px;
+            max-width: 500px;
+            margin: 0 auto;
+        }
+
+        header {
+            text-align: center;
+            margin-bottom: 30px;
+            animation: fadeInDown 0.8s ease-out;
+        }
+
+        h1 {
+            font-weight: 600;
+            margin: 0;
+            font-size: 28px;
+            letter-spacing: -0.5px;
+            background: linear-gradient(135deg, #fff 0%, #a5c0ff 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .balance-card {
+            background: var(--card-bg);
+            border: 1px solid var(--glass-border);
+            border-radius: 20px;
+            padding: 20px;
+            margin-bottom: 20px;
+            backdrop-filter: blur(10px);
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+            animation: fadeInUp 0.6s ease-out;
+        }
+
+        .balance-label {
+            color: var(--text-dim);
+            font-size: 14px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .balance-value {
+            font-size: 32px;
+            font-weight: 600;
+            margin: 5px 0;
+        }
+
+        .sub-status {
+            display: inline-block;
+            padding: 6px 14px;
+            border-radius: 50px;
+            font-size: 13px;
+            font-weight: 600;
+            margin-top: 10px;
+        }
+
+        .status-active {
+            background: rgba(46, 204, 113, 0.2);
+            color: #2ecc71;
+            border: 1px solid rgba(46, 204, 113, 0.3);
+        }
+
+        .status-expired {
+            background: rgba(231, 76, 60, 0.2);
+            color: #e74c3c;
+            border: 1px solid rgba(231, 76, 60, 0.3);
+        }
+
+        .tabs {
+            display: flex;
+            background: rgba(0, 0, 0, 0.3);
+            border-radius: 12px;
+            padding: 4px;
+            margin-bottom: 25px;
+            border: 1px solid var(--glass-border);
+        }
+
+        .tab {
+            flex: 1;
+            padding: 10px;
+            text-align: center;
+            border-radius: 8px;
+            font-size: 14px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.3s;
+            color: var(--text-dim);
+        }
+
+        .tab.active {
+            background: var(--accent-primary);
+            color: white;
+            box-shadow: 0 4px 15px rgba(52, 152, 219, 0.3);
+        }
+
+        .content-section {
+            display: none;
+            animation: fadeIn 0.4s ease-out;
+        }
+
+        .content-section.active {
+            display: block;
+        }
+
+        .card {
+            background: var(--card-bg);
+            border: 1px solid var(--glass-border);
+            border-radius: 16px;
+            padding: 15px;
+            margin-bottom: 15px;
+            backdrop-filter: blur(5px);
+            transition: transform 0.2s;
+        }
+
+        .card:active {
+            transform: scale(0.98);
+        }
+
+        .device-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .device-info h3 {
+            margin: 0;
+            font-size: 16px;
+            font-weight: 600;
+        }
+
+        .device-info p {
+            margin: 4px 0 0;
+            font-size: 12px;
+            color: var(--text-dim);
+        }
+
+        .device-actions {
+            display: flex;
+            gap: 10px;
+        }
+
+        .btn-icon {
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid var(--glass-border);
+            width: 36px;
+            height: 36px;
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .btn-icon:hover {
+            background: rgba(255, 255, 255, 0.1);
+        }
+
+        .btn-delete:hover {
+            border-color: var(--danger);
+            color: var(--danger);
+            box-shadow: 0 0 10px rgba(231, 76, 60, 0.2);
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #3498db 0%, #2980b9 100%);
+            color: white;
+            border: none;
+            padding: 15px;
+            border-radius: 14px;
+            width: 100%;
+            font-weight: 600;
+            font-size: 16px;
+            cursor: pointer;
+            margin-top: 10px;
+            box-shadow: 0 4px 15px rgba(52, 152, 219, 0.3);
+        }
+
+        .instruction-step {
+            display: flex;
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+
+        .step-num {
+            background: var(--accent-primary);
+            width: 28px;
+            height: 28px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+            font-weight: 600;
+            font-size: 14px;
+        }
+
+        .step-text h4 {
+            margin: 0 0 5px;
+            font-size: 15px;
+        }
+
+        .step-text p {
+            margin: 0;
+            font-size: 13px;
+            color: var(--text-dim);
+            line-height: 1.4;
+        }
+
+        /* Animations */
+        @keyframes fadeInDown {
+            from {
+                opacity: 0;
+                transform: translateY(-20px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+            }
+
+            to {
+                opacity: 1;
+            }
+        }
+
+        /* Modal placeholder */
+        #renameModal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.8);
+            backdrop-filter: blur(5px);
+            display: none;
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+            padding: 20px;
+        }
+
+        .modal-body {
+            background: #1a1e26;
+            border: 1px solid var(--glass-border);
+            border-radius: 20px;
+            padding: 25px;
+            width: 100%;
+            max-width: 400px;
+            animation: fadeInUp 0.3s ease-out;
+        }
+
+        .modal-body h2 {
+            margin: 0 0 15px;
+            font-size: 20px;
+        }
+
+        .modal-body input {
+            width: 100%;
+            background: rgba(0, 0, 0, 0.3);
+            border: 1px solid var(--glass-border);
+            padding: 12px;
+            border-radius: 10px;
+            color: white;
+            font-family: inherit;
+            margin-bottom: 20px;
+        }
+
+        .modal-btns {
+            display: flex;
+            gap: 10px;
+        }
+
+        .modal-btns button {
+            flex: 1;
+            padding: 12px;
+            border-radius: 10px;
+            cursor: pointer;
+            font-weight: 600;
+        }
+
+        .btn-cancel {
+            background: transparent;
+            border: 1px solid var(--glass-border);
+            color: var(--text-dim);
+        }
+
+        .btn-save {
+            background: var(--accent-primary);
+            border: none;
+            color: white;
+        }
+
+        #empty-devices {
+            text-align: center;
+            padding: 40px 20px;
+            color: var(--text-dim);
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+        <header>
+            <h1>☁️ CloudVPN Panel</h1>
+        </header>
+
+        <div class="balance-card">
+            <div class="balance-label">Ваш баланс</div>
+            <div class="balance-value" id="user-balance">... ₽</div>
+            <div id="sub-badge" class="sub-status">Загрузка...</div>
+        </div>
+
+        <div class="tabs">
+            <div class="tab active" onclick="switchSection('home')">Главная</div>
+            <div class="tab" onclick="switchSection('devices')">Устройства</div>
+            <div class="tab" onclick="switchSection('info')">Инфо</div>
+        </div>
+
+        <section id="home-section" class="content-section active">
+            <div class="card">
+                <p style="margin: 0; color: var(--text-dim); font-size: 13px;">Ваша ссылка для подключения:</p>
+                <div style="display: flex; gap: 10px; margin-top: 10px;">
+                    <input type="text" id="sub-url-input" readonly value="..."
+                        style="flex: 1; background: rgba(0,0,0,0.2); border: 1px solid rgba(255,255,255,0.1); border-radius: 8px; padding: 10px; color: #3498db; font-family: monospace; font-size: 13px;">
+                    <button onclick="copySubUrl()" class="btn-icon">📋</button>
+                </div>
+            </div>
+            <button class="btn-primary" onclick="openConnection()">🌐 Открыть в приложении</button>
+            <p style="text-align: center; font-size: 12px; color: var(--text-dim); margin-top: 20px;">
+                По всем вопросам: <a href="https://t.me/soldenchain"
+                    style="color: #3498db; text-decoration: none;">Техподдержка</a>
+            </p>
+        </section>
+
+        <section id="devices-section" class="content-section">
+            <div id="device-list">
+                <!-- Devices will be injected here -->
+                <div id="loading-devices" style="text-align: center; padding: 20px;">Загружаем список устройств...</div>
+            </div>
+            <p style="font-size: 12px; color: var(--text-dim); margin: 15px 10px; line-height: 1.4;">
+                * Если вы удалите текущее устройство, оно добавится снова при следующем использовании VPN.
+            </p>
+        </section>
+
+        <section id="info-section" class="content-section">
+            <div class="instruction-step">
+                <div class="step-num">1</div>
+                <div class="step-text">
+                    <h4>Скачайте приложение</h4>
+                    <p>Для iOS/Android мы рекомендуем <b>Happ</b>. Ссылка доступна по кнопке "Открыть" на главной.</p>
+                </div>
+            </div>
+            <div class="instruction-step">
+                <div class="step-num">2</div>
+                <div class="step-text">
+                    <h4>Импортируйте ссылку</h4>
+                    <p>Скопируйте вашу персональную ссылку и вставьте её в разделе подписок вашего приложения.</p>
+                </div>
+            </div>
+            <div class="instruction-step">
+                <div class="step-num">3</div>
+                <div class="step-text">
+                    <h4>Включите VPN</h4>
+                    <p>Выберите любой локальный сервер и нажмите на кнопку подключения. Наслаждайтесь свободой!</p>
+                </div>
+            </div>
+        </section>
+    </div>
+
+    <!-- Rename Modal -->
+    <div id="renameModal">
+        <div class="modal-body">
+            <h2>Переименовать</h2>
+            <input type="text" id="newDeviceName" placeholder="Напр. Мой iPhone">
+            <div class="modal-btns">
+                <button class="btn-cancel" onclick="closeRenameModal()">Отмена</button>
+                <button class="btn-save" onclick="saveDeviceName()">Сохранить</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const tg = window.Telegram.WebApp;
+        tg.expand();
+        tg.ready();
+
+        const API_BASE = window.location.origin + "/api";
+        const authData = tg.initData;
+
+        let currentUser = null;
+        let selectedDeviceId = null;
+
+        // Header color adjustment
+        tg.setHeaderColor('#0b0e14');
+
+        async function fetchMe() {
+            try {
+                const res = await fetch(`${API_BASE}/me`, {
+                    headers: { 'Authorization': authData }
+                });
+                const data = await res.json();
+                if (data.error) throw new Error(data.error);
+
+                currentUser = data;
+                updateUserInfo();
+            } catch (e) {
+                console.error(e);
+                tg.showAlert("Ошибка авторизации. Перезайдите в приложение.");
+            }
+        }
+
+        function updateUserInfo() {
+            document.getElementById('user-balance').innerText = `${currentUser.balance} ₽`;
+
+            const badge = document.getElementById('sub-badge');
+            const sub = currentUser.subscription;
+
+            if (sub && sub.is_active) {
+                badge.innerText = "Подписка активна";
+                badge.className = "sub-status status-active";
+
+                const subUrl = `https://cloudevpn.cfd/${currentUser.user_id}/${sub.uuid}`;
+                document.getElementById('sub-url-input').value = subUrl;
+            } else {
+                badge.innerText = "Подписка истекла";
+                badge.className = "sub-status status-expired";
+                document.getElementById('sub-url-input').value = "Нет активной подписки";
+            }
+        }
+
+        async function fetchDevices() {
+            const listDiv = document.getElementById('device-list');
+            try {
+                const res = await fetch(`${API_BASE}/list_devices`, {
+                    headers: { 'Authorization': authData }
+                });
+                const devices = await res.json();
+
+                if (devices.length === 0) {
+                    listDiv.innerHTML = '<div id="empty-devices">Нет подключенных устройств</div>';
+                    return;
+                }
+
+                listDiv.innerHTML = '';
+                devices.forEach(d => {
+                    const card = document.createElement('div');
+                    card.className = 'card device-item';
+                    card.innerHTML = `
+                        <div class="device-info">
+                            <h3>${d.name}</h3>
+                            <p>${d.hash.substring(0, 8)}... | ${new Date(d.last_seen).toLocaleDateString()}</p>
+                        </div>
+                        <div class="device-actions">
+                            <button onclick="openRenameModal(${d.id}, '${d.name}')" class="btn-icon">✏️</button>
+                            <button onclick="confirmDelete(${d.id})" class="btn-icon btn-delete">🗑</button>
+                        </div>
+                    `;
+                    listDiv.appendChild(card);
+                });
+            } catch (e) {
+                listDiv.innerHTML = '<div style="color: #e74c3c">Ошибка загрузки устройств</div>';
+            }
+        }
+
+        function switchSection(section) {
+            document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+            document.querySelectorAll('.content-section').forEach(s => s.classList.remove('active'));
+
+            event.target.classList.add('active');
+            document.getElementById(`${section}-section`).classList.add('active');
+
+            if (section === 'devices') fetchDevices();
+            if (section === 'home') fetchMe();
+        }
+
+        function copySubUrl() {
+            const input = document.getElementById('sub-url-input');
+            if (input.value.startsWith('http')) {
+                input.select();
+                document.execCommand('copy');
+                tg.showScanQrPopup({ text: "Ссылка скопирована!" });
+                setTimeout(() => tg.closeScanQrPopup(), 1000);
+            }
+        }
+
+        function openConnection() {
+            const url = document.getElementById('sub-url-input').value;
+            if (url.startsWith('http')) {
+                const deepLink = `happ://add/${url}`;
+                tg.openLink(deepLink);
+            } else {
+                tg.showAlert("У вас нет активной подписки.");
+            }
+        }
+
+        // Device Management
+        function openRenameModal(id, name) {
+            selectedDeviceId = id;
+            document.getElementById('newDeviceName').value = name;
+            document.getElementById('renameModal').style.display = 'flex';
+        }
+
+        function closeRenameModal() {
+            document.getElementById('renameModal').style.display = 'none';
+        }
+
+        async function saveDeviceName() {
+            const newName = document.getElementById('newDeviceName').value;
+            if (!newName) return;
+
+            try {
+                await fetch(`${API_BASE}/rename_device`, {
+                    method: 'POST',
+                    headers: { 'Authorization': authData, 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ id: selectedDeviceId, name: newName })
+                });
+                closeRenameModal();
+                fetchDevices();
+            } catch (e) {
+                tg.showAlert("Не удалось переименовать");
+            }
+        }
+
+        function confirmDelete(id) {
+            tg.showConfirm("Вы уверены, что хотите удалить это устройство?", async (ok) => {
+                if (ok) {
+                    try {
+                        await fetch(`${API_BASE}/delete_device`, {
+                            method: 'POST',
+                            headers: { 'Authorization': authData, 'Content-Type': 'application/json' },
+                            body: JSON.stringify({ id })
+                        });
+                        fetchDevices();
+                    } catch (e) {
+                        tg.showAlert("Ошибка при удалении");
+                    }
+                }
+            });
+        }
+
+        // Init
+        fetchMe();
+    </script>
+</body>
+
+</html>

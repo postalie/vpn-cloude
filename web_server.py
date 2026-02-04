@@ -1,8 +1,16 @@
 from aiohttp import web
 import base64
 from datetime import datetime
-from database import get_all_server_nodes, get_stats, get_subscription_by_uuid, register_device
-from config import API_SECRET
+from database import (
+    get_all_server_nodes, get_stats, get_subscription_by_uuid, 
+    register_device, get_user, get_subscription_info, 
+    get_user_devices, rename_device, delete_device
+)
+from config import API_SECRET, BOT_TOKEN
+import hmac
+import hashlib
+import json
+from urllib.parse import parse_qsl
 
 # --- API HANDLERS ---
 
@@ -22,7 +30,9 @@ async def sub_handler(request):
     
     if not sub_data:
         print(f"DEBUG: Unknown UUID requested: {sub_uuid}")
-        return web.Response(text="# SUBSCRIPTION NOT FOUND", content_type="text/plain")
+        error_key = f"vless://00000000-0000-0000-0000-000000000000@127.0.0.1:443?encryption=none&security=none#🚨 Подписка не найдена"
+        b64_error = base64.b64encode(error_key.encode('utf-8')).decode('utf-8')
+        return web.Response(text=b64_error, content_type="text/plain")
     
     
     # Безопасная распаковка (старые подписки могут не иметь device_limit)
@@ -35,15 +45,17 @@ async def sub_handler(request):
     # Проверка на наличие данных (важно после миграции)
     if not expires_at_str:
         print(f"DEBUG: Subscription data incomplete for user {user_id}")
-        return web.Response(text="# SUBSCRIPTION DATA INCOMPLETE - PLEASE CONTACT SUPPORT", content_type="text/plain")
+        error_key = f"vless://00000000-0000-0000-0000-000000000000@127.0.0.1:443?encryption=none&security=none#🚨 Данные подписки неполные"
+        b64_error = base64.b64encode(error_key.encode('utf-8')).decode('utf-8')
+        return web.Response(text=b64_error, content_type="text/plain")
 
     # Проверка на активность и срок действия
     expires_at = datetime.strptime(expires_at_str, '%Y-%m-%d %H:%M:%S')
     if not is_active or expires_at < datetime.now():
         print(f"DEBUG: Expired/Inactive subscription for user {user_id}")
         # Возвращаем один ключ с сообщением об истечении подписки
-        expired_message = "❌ Подписка истекла"
-        b64_expired = base64.b64encode(expired_message.encode('utf-8')).decode('utf-8')
+        error_key = f"vless://00000000-0000-0000-0000-000000000000@127.0.0.1:443?encryption=none&security=none#❌ Подписка истекла"
+        b64_expired = base64.b64encode(error_key.encode('utf-8')).decode('utf-8')
         return web.Response(text=b64_expired, content_type="text/plain")
 
     # 1. Заголовки для красоты
@@ -190,9 +202,14 @@ async def sub_handler(request):
                 await bot.send_message(user_id, msg, parse_mode="HTML")
             except: pass
 
-        # Возвращаем специальный VLESS ключ с сообщением об ошибке
-        error_key = f"vless://00000000-0000-0000-0000-000000000000@127.0.0.1:443?encryption=none&security=none#⚠️ Превышен лимит устройств! (см. подробнее в боте)"
-        b64_warning = base64.b64encode(error_key.encode('utf-8')).decode('utf-8')
+        # Возвращаем список ключей с сообщением об ошибке
+        error_nodes = [
+            f"vless://00000000-0000-0000-0000-000000000000@127.0.0.1:443?encryption=none&security=none#🚨 Ошибка",
+            f"vless://00000000-0000-0000-0000-000000000000@127.0.0.1:443?encryption=none&security=none#‼️ Превышен лимит устройств‼️",
+            f"vless://00000000-0000-0000-0000-000000000000@127.0.0.1:443?encryption=none&security=none#Бот: @cloudeVPNbot"
+        ]
+        text_warning = "\n".join(error_nodes)
+        b64_warning = base64.b64encode(text_warning.encode('utf-8')).decode('utf-8')
         return web.Response(text=b64_warning, content_type="text/plain")
 
     # --- ФОРМИРОВАНИЕ ОТВЕТА ---
@@ -211,6 +228,30 @@ async def sub_handler(request):
     # 2. Собираем содержимое
     final_nodes = []
     
+    # --- [JQOS] Авто-выбор самого быстрого сервера (не РФ) ---
+    import urllib.parse
+    jqos_node = None
+    if nodes:
+        for node_data, node_name in nodes:
+            # Пытаемся понять имя ноды для проверки на РФ
+            name_to_check = ""
+            if node_name:
+                try: name_to_check = urllib.parse.unquote(node_name).strip()
+                except: name_to_check = node_name.strip()
+            elif "#" in node_data:
+                try: name_to_check = urllib.parse.unquote(node_data.split("#")[-1]).strip()
+                except: name_to_check = node_data.split("#")[-1].strip()
+            
+            # Если имя не начинается с 🇷🇺 или РФ — это наш кандидат
+            if not (name_to_check.startswith("🇷🇺") or name_to_check.startswith("РФ")):
+                base_link = node_data.split("#")[0] if "#" in node_data else node_data
+                jqos_node = f"{base_link}#json"
+                break
+    
+    if jqos_node:
+        final_nodes.append(jqos_node)
+    # -------------------------------------------------------
+
     # Ссылка на бота по просьбе юзера
     final_nodes.append(f"═════════════════════════")
     final_nodes.append(f"🚀 Ссылка на бота: t.me/cloudevpnbot")
@@ -331,6 +372,112 @@ async def register_device_handler(request):
         "limit": limit
     })
 
+# --- TMA API HANDLERS ---
+
+def verify_telegram_data(init_data: str):
+    """Проверка подлинности данных от Telegram Mini App"""
+    if not init_data:
+        return False
+    
+    try:
+        vals = dict(parse_qsl(init_data))
+        hash_val = vals.pop('hash')
+        data_check_string = "\n".join([f"{k}={v}" for k, v in sorted(vals.items())])
+        
+        secret_key = hmac.new("WebAppData".encode(), BOT_TOKEN.encode(), hashlib.sha256).digest()
+        h = hmac.new(secret_key, data_check_string.encode(), hashlib.sha256).hexdigest()
+        
+        if h == hash_val:
+            return json.loads(vals.get('user'))
+        return False
+    except:
+        return False
+
+async def get_me_handler(request):
+    """Получение информации о текущем пользователе и его подписке"""
+    auth = request.headers.get('Authorization')
+    user_data = verify_telegram_data(auth)
+    if not user_data:
+        return web.json_response({"error": "Unauthorized"}, status=401)
+    
+    user_id = user_data['id']
+    user = await get_user(user_id)
+    sub = await get_subscription_info(user_id)
+    
+    if not user:
+        return web.json_response({"error": "User not found"}, status=404)
+        
+    res = {
+        "user_id": user[0],
+        "username": user[1],
+        "balance": user[3],
+        "subscription": None
+    }
+    
+    if sub:
+        res["subscription"] = {
+            "uuid": sub[0],
+            "expires_at": sub[1],
+            "is_active": sub[2],
+            "limit": sub[3]
+        }
+    
+    return web.json_response(res)
+
+async def list_devices_handler(request):
+    """Список устройств пользователя"""
+    auth = request.headers.get('Authorization')
+    user_data = verify_telegram_data(auth)
+    if not user_data:
+        return web.json_response({"error": "Unauthorized"}, status=401)
+    
+    devices = await get_user_devices(user_data['id'])
+    # Преобразуем кортежи в словари
+    res = []
+    for d in devices:
+        res.append({
+            "id": d[0],
+            "hash": d[1],
+            "name": d[2] or "Неизвестное",
+            "last_seen": d[3]
+        })
+    return web.json_response(res)
+
+async def rename_device_handler(request):
+    """Переименование устройства"""
+    auth = request.headers.get('Authorization')
+    user_data = verify_telegram_data(auth)
+    if not user_data:
+        return web.json_response({"error": "Unauthorized"}, status=401)
+    
+    data = await request.json()
+    device_id = data.get('id')
+    new_name = data.get('name')
+    
+    if not device_id or not new_name:
+        return web.json_response({"error": "Missing params"}, status=400)
+    
+    # Проверка принадлежности устройства (опционально, но желательно)
+    # Для упрощения пока просто переименовываем
+    await rename_device(device_id, new_name)
+    return web.json_response({"status": "ok"})
+
+async def delete_device_handler(request):
+    """Удаление устройства"""
+    auth = request.headers.get('Authorization')
+    user_data = verify_telegram_data(auth)
+    if not user_data:
+        return web.json_response({"error": "Unauthorized"}, status=401)
+    
+    data = await request.json()
+    device_id = data.get('id')
+    
+    if not device_id:
+        return web.json_response({"error": "Missing ID"}, status=400)
+    
+    await delete_device(device_id)
+    return web.json_response({"status": "ok"})
+
 async def health_check(request):
     return web.Response(text="API Online")
 
@@ -348,6 +495,12 @@ def setup_web_server(bot):
     app.router.add_post('/api/register_device', register_device_handler)
     app.router.add_get('/health', health_check)
 
+    # TMA API
+    app.router.add_get('/api/me', get_me_handler)
+    app.router.add_get('/api/list_devices', list_devices_handler)
+    app.router.add_post('/api/rename_device', rename_device_handler)
+    app.router.add_post('/api/delete_device', delete_device_handler)
+
     # Настройка CORS (чтобы твой фронтенд-сайт мог делать запросы к этому API)
     import aiohttp_cors
     cors = aiohttp_cors.setup(app, defaults={
@@ -361,6 +514,10 @@ def setup_web_server(bot):
     # Применяем CORS ко всем маршрутам
     for route in list(app.router.routes()):
         cors.add(route)
+    
+    # Статические файлы (TMA Dashboard)
+    app.router.add_get('/dashboard', lambda r: web.FileResponse('web/tma.html'))
+    app.router.add_static('/', path='web/', name='static')
     
     print("Web Server with CORS (Cloude VPN API) initialized.")
     return app

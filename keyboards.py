@@ -1,9 +1,10 @@
-from aiogram.types import ReplyKeyboardMarkup, KeyboardButton, InlineKeyboardMarkup, InlineKeyboardButton
+from aiogram.types import ReplyKeyboardMarkup, KeyboardButton, InlineKeyboardMarkup, InlineKeyboardButton, WebAppInfo
 
 # Главное меню (Сверхпростое)
 main_menu = InlineKeyboardMarkup(
     inline_keyboard=[
         [InlineKeyboardButton(text="🚀 Подключить / Купить VPN", callback_data="connection")],
+        [InlineKeyboardButton(text="🖥 Личный кабинет (TMA)", web_app=WebAppInfo(url="https://vpn-cloude-production.up.railway.app/dashboard"))],
         [InlineKeyboardButton(text="👤 Мой аккаунт", callback_data="profile"), InlineKeyboardButton(text="🎁 Бонусы", callback_data="promo")]
     ]
 )
@@ -124,10 +125,16 @@ admin_servers_kb = InlineKeyboardMarkup(
     ]
 )
 
-def get_nodes_management_kb(nodes):
+def get_nodes_management_kb(nodes, page=0):
     import urllib.parse
     keyboard = []
-    for node_id, node_data, is_active, node_name in nodes:
+    page_size = 10
+    start = page * page_size
+    end = start + page_size
+    
+    current_nodes = nodes[start:end]
+    
+    for node_id, node_data, is_active, node_name in current_nodes:
         # Приоритет имени из БД, иначе из ключа
         display_name = node_name if node_name else (node_data.split("#")[-1] if "#" in node_data else f"ID: {node_id}")
         
@@ -140,13 +147,23 @@ def get_nodes_management_kb(nodes):
         status_emoji = "✅" if is_active else "❌"
         
         keyboard.append([
-            InlineKeyboardButton(text=f"{status_emoji} {display_name[:20]}", callback_data=f"node_toggle_{node_id}")
+            InlineKeyboardButton(text=f"{status_emoji} {display_name[:20]}", callback_data=f"node_toggle_{node_id}_{page}")
         ])
         keyboard.append([
             InlineKeyboardButton(text="✏️ Изм имя", callback_data=f"node_rename_{node_id}"),
             InlineKeyboardButton(text="🔑 Изм ключ", callback_data=f"node_editkey_{node_id}"),
-            InlineKeyboardButton(text="🗑 Удалить", callback_data=f"node_delete_{node_id}")
+            InlineKeyboardButton(text="🗑 Удалить", callback_data=f"node_delete_{node_id}_{page}")
         ])
+    
+    # Кнопки навигации
+    nav_row = []
+    if page > 0:
+        nav_row.append(InlineKeyboardButton(text="⬅️ Пред.", callback_data=f"nodes_page_{page-1}"))
+    if end < len(nodes):
+        nav_row.append(InlineKeyboardButton(text="След. ➡️", callback_data=f"nodes_page_{page+1}"))
+    
+    if nav_row:
+        keyboard.append(nav_row)
     
     keyboard.append([InlineKeyboardButton(text="« Назад", callback_data="adm_nodes_cat")])
     return InlineKeyboardMarkup(inline_keyboard=keyboard)
@@ -246,6 +263,10 @@ def get_clients_kb():
 # Меню подписки
 def get_subscription_menu_kb(short_link=None):
     btns = []
+    
+    # Кнопка для открытия TMA
+    btns.append([InlineKeyboardButton(text="⚙️ Управление устройствами (TMA)", web_app=WebAppInfo(url="https://vpn-cloude-production.up.railway.app/dashboard"))])
+    
     if short_link:
         btns.append([InlineKeyboardButton(text="🚀 Подключить в Happ", url=short_link)])
     
