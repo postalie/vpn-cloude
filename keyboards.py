@@ -219,13 +219,11 @@ def get_captcha_kb(random_code):
 
 # Меню активной подписки
 def get_active_sub_kb(happ_link=None):
-    return InlineKeyboardMarkup(
-        inline_keyboard=[
-            [
-                InlineKeyboardButton(text="🔗 Настройка подключения", callback_data="connection")
-            ]
-        ]
-    )
+    buttons = []
+    if happ_link:
+        buttons.append([InlineKeyboardButton(text="🚀 Подключить в Happ", url=happ_link)])
+    buttons.append([InlineKeyboardButton(text="🔗 Настройка подключения", callback_data="connection")])
+    return InlineKeyboardMarkup(inline_keyboard=buttons)
 
 
 # Меню устройств

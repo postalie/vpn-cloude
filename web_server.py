@@ -6,7 +6,8 @@ from database import (
     register_device, get_user, get_subscription_info, 
     get_user_devices, rename_device, delete_device
 )
-from config import API_SECRET, BOT_TOKEN
+from config import API_SECRET, BOT_TOKEN, BASE_URL
+from utils import shorten_url, get_happ_github_link
 import hmac
 import hashlib
 import json
@@ -415,11 +416,16 @@ async def get_me_handler(request):
     }
     
     if sub:
+        domain_clean = BASE_URL.replace("https://", "").replace("http://", "")
+        gh_link = get_happ_github_link(user_id, sub[0], domain_clean)
+        encrypted_link = shorten_url(gh_link)
+        
         res["subscription"] = {
             "uuid": sub[0],
             "expires_at": sub[1],
             "is_active": sub[2],
-            "limit": sub[3]
+            "limit": sub[3],
+            "encrypted_link": encrypted_link
         }
     
     return web.json_response(res)

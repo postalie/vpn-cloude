@@ -150,7 +150,8 @@ async def create_tables():
         if 'device_name' not in device_columns:
             await db.execute('ALTER TABLE devices ADD COLUMN device_name TEXT')
         if 'last_seen' not in device_columns:
-            await db.execute('ALTER TABLE devices ADD COLUMN last_seen DATETIME DEFAULT CURRENT_TIMESTAMP')
+            await db.execute('ALTER TABLE devices ADD COLUMN last_seen DATETIME')
+            await db.execute('UPDATE devices SET last_seen = CURRENT_TIMESTAMP')
 
         await db.commit()
 
@@ -500,7 +501,7 @@ async def register_device(sub_uuid, device_hash):
             return False, current_count, limit, user_id, False
 
         # Регистрируем
-        await db.execute('INSERT INTO devices (sub_uuid, device_hash, device_name) VALUES (?, ?, ?)', (sub_uuid, device_hash, "Новое устройство"))
+        await db.execute('INSERT INTO devices (sub_uuid, device_hash, device_name, last_seen) VALUES (?, ?, ?, CURRENT_TIMESTAMP)', (sub_uuid, device_hash, "Новое устройство"))
         await db.commit()
         return True, current_count + 1, limit, user_id, True # is_new = True
 

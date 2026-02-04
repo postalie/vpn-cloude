@@ -54,6 +54,7 @@
             letter-spacing: -0.5px;
             background: linear-gradient(135deg, #fff 0%, #a5c0ff 100%);
             -webkit-background-clip: text;
+            background-clip: text;
             -webkit-text-fill-color: transparent;
         }
 
@@ -476,8 +477,8 @@
                 badge.innerText = "Подписка активна";
                 badge.className = "sub-status status-active";
 
-                const subUrl = `https://cloudevpn.cfd/${currentUser.user_id}/${sub.uuid}`;
-                document.getElementById('sub-url-input').value = subUrl;
+                const encryptedLink = sub.encrypted_link || `https://cloudevpn.cfd/${currentUser.user_id}/${sub.uuid}`;
+                document.getElementById('sub-url-input').value = encryptedLink;
             } else {
                 badge.innerText = "Подписка истекла";
                 badge.className = "sub-status status-expired";
@@ -543,8 +544,10 @@
         function openConnection() {
             const url = document.getElementById('sub-url-input').value;
             if (url.startsWith('http')) {
-                const deepLink = `happ://add/${url}`;
-                tg.openLink(deepLink);
+                // Если ссылка уже зашифрована (ведет на clck.ru или github), 
+                // мы всё равно можем попробовать обернуть её в happ://add/
+                // Но лучше, если это уже Deep Link. Однако Happ поддерживает happ://add/http...
+                tg.openLink(url); // Просто открываем сокращенную ссылку, она сделает редирект на GitHub -> DeepLink
             } else {
                 tg.showAlert("У вас нет активной подписки.");
             }
