@@ -153,6 +153,16 @@ async def create_tables():
             await db.execute('ALTER TABLE devices ADD COLUMN last_seen DATETIME')
             await db.execute('UPDATE devices SET last_seen = CURRENT_TIMESTAMP')
 
+        # Таблица обработанных счетов
+        await db.execute('''
+            CREATE TABLE IF NOT EXISTS processed_invoices (
+                invoice_id TEXT PRIMARY KEY,
+                user_id INTEGER,
+                amount INTEGER,
+                created_at DATETIME DEFAULT CURRENT_TIMESTAMP
+            )
+        ''')
+
         await db.commit()
 
 async def add_user(user_id, username):

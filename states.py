@@ -13,7 +13,6 @@ class AdminStates(StatesGroup):
     waiting_for_node_name = State() # Новое имя для сервера
     waiting_for_node_data = State() # Новый ключ для сервера
     waiting_for_user_limit = State() # Лимит устройств для юзера
-    waiting_for_user_limit = State() # Лимит устройств для юзера
     waiting_for_user_balance = State() # Баланс для юзера
     waiting_for_broadcast_text = State() # Текст рассылки
     waiting_for_broadcast_confirm = State() # Подтверждение рассылки

@@ -1,10 +1,11 @@
 from aiogram.types import ReplyKeyboardMarkup, KeyboardButton, InlineKeyboardMarkup, InlineKeyboardButton, WebAppInfo
+from config import BASE_URL
 
 # Главное меню (Сверхпростое)
 main_menu = InlineKeyboardMarkup(
     inline_keyboard=[
         [InlineKeyboardButton(text="🚀 Подключить / Купить VPN", callback_data="connection")],
-        [InlineKeyboardButton(text="🖥 Личный кабинет (TMA)", web_app=WebAppInfo(url="https://vpn-cloude-production.up.railway.app/dashboard"))],
+        [InlineKeyboardButton(text="🖥 Личный кабинет (TMA)", web_app=WebAppInfo(url=f"{BASE_URL}/dashboard"))],
         [InlineKeyboardButton(text="👤 Мой аккаунт", callback_data="profile"), InlineKeyboardButton(text="🎁 Бонусы", callback_data="promo")]
     ]
 )
@@ -263,7 +264,7 @@ def get_subscription_menu_kb(short_link=None):
     btns = []
     
     # Кнопка для открытия TMA
-    btns.append([InlineKeyboardButton(text="⚙️ Управление устройствами (TMA)", web_app=WebAppInfo(url="https://vpn-cloude-production.up.railway.app/dashboard"))])
+    btns.append([InlineKeyboardButton(text="⚙️ Управление устройствами (TMA)", web_app=WebAppInfo(url=f"{BASE_URL}/dashboard"))])
     
     if short_link:
         btns.append([InlineKeyboardButton(text="🚀 Подключить в Happ", url=short_link)])
