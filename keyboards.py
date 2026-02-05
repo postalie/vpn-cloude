@@ -6,7 +6,7 @@ def get_main_menu():
  return InlineKeyboardMarkup(
     inline_keyboard=[
         [InlineKeyboardButton(text="🚀 Подключить / Купить VPN", callback_data="connection")],
-        [InlineKeyboardButton(text="🖥 Личный кабинет (TMA)", web_app=WebAppInfo(url=f"{BASE_URL}/dashboard"))],
+        [InlineKeyboardButton(text="🖥 Личный кабинет (TMA)", web_app=WebAppInfo(url=f"https://vpn-cloude-production.up.railway.app/dashboard"))],
         [InlineKeyboardButton(text="👤 Мой аккаунт", callback_data="profile"), InlineKeyboardButton(text="🎁 Бонусы", callback_data="promo")]
     ]
 )
@@ -267,7 +267,7 @@ async def get_subscription_menu_kb(user_id, short_link=None):
     btns = []
     
     # Кнопка для открытия TMA
-    btns.append([InlineKeyboardButton(text="⚙️ Управление устройствами (TMA)", web_app=WebAppInfo(url=f"{BASE_URL}/dashboard"))])
+    btns.append([InlineKeyboardButton(text="⚙️ Управление устройствами (TMA)", web_app=WebAppInfo(url=f"https://vpn-cloude-production.up.railway.app/dashboard"))])
     
     if short_link:
         btns.append([InlineKeyboardButton(text="🚀 Подключить в Happ", url=short_link)])
