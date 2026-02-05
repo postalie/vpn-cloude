@@ -163,6 +163,15 @@ async def create_tables():
             )
         ''')
 
+        # Таблица временных токенов для входа на сайт
+        await db.execute('''
+            CREATE TABLE IF NOT EXISTS web_tokens (
+                token TEXT PRIMARY KEY,
+                user_id INTEGER,
+                created_at DATETIME DEFAULT CURRENT_TIMESTAMP
+            )
+        ''')
+
         await db.commit()
 
 async def add_user(user_id, username):
@@ -593,3 +602,33 @@ async def add_referral_activation(user_id, code):
         await db.execute('UPDATE referral_links SET uses = uses + 1 WHERE code = ?', (code,))
         await db.commit()
         return True
+        
+# --- WEB AUTH TOKENS ---
+
+async def create_web_token(user_id):
+    """Создает новый токен для входа на сайт (удаляет старые токены этого юзера)"""
+    import secrets
+    token = secrets.token_urlsafe(32)
+    async with aiosqlite.connect(DB_NAME) as db:
+        # Опционально: удаляем старые токены юзера, чтобы работал только последний
+        await db.execute('DELETE FROM web_tokens WHERE user_id = ?', (user_id,))
+        await db.execute('INSERT INTO web_tokens (token, user_id) VALUES (?, ?)', (token, user_id))
+        await db.commit()
+    return token
+
+async def get_user_by_token(token):
+    """Возвращает user_id по токену и удаляет его (одноразовость) или проверяет по времени"""
+    async with aiosqlite.connect(DB_NAME) as db:
+        # Проверяем токен (токен живет 24 часа)
+        async with db.execute('''
+            SELECT user_id FROM web_tokens 
+            WHERE token = ? AND created_at > datetime('now', '-1 day')
+        ''', (token,)) as cursor:
+            row = await cursor.fetchone()
+            if row:
+                user_id = row[0]
+                # Если хотим именно ОДНОРАЗОВЫЙ - удаляем. 
+                # Но для удобства входа лучше оставить или удалять после обмена на сессию.
+                # Оставим пока 24-часовой многоразовый для простоты.
+                return user_id
+            return None

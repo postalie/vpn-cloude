@@ -4,9 +4,11 @@ from datetime import datetime
 from database import (
     get_all_server_nodes, get_stats, get_subscription_by_uuid, 
     register_device, get_user, get_subscription_info, 
-    get_user_devices, rename_device, delete_device
+    get_user_devices, rename_device, delete_device,
+    get_user_by_token, activate_promo, extend_subscription,
+    add_subscription, get_discount, use_discount
 )
-from config import API_SECRET, BOT_TOKEN, BASE_URL
+from config import API_SECRET, BOT_TOKEN, BASE_URL, VPN_PRICE
 from utils import shorten_url, get_happ_github_link
 import hmac
 import hashlib
@@ -394,14 +396,27 @@ def verify_telegram_data(init_data: str):
     except:
         return False
 
+async def authenticate_user(request):
+    """Универсальная аутентификация: Telegram InitData или Token"""
+    auth = request.headers.get('Authorization')
+    if not auth:
+        return None
+    
+    # 1. Пробуем как Telegram InitData
+    user_data = verify_telegram_data(auth)
+    if user_data:
+        return user_data.get('id')
+    
+    # 2. Пробуем как наш Token
+    user_id = await get_user_by_token(auth)
+    return user_id
+
 async def get_me_handler(request):
     """Получение информации о текущем пользователе и его подписке"""
-    auth = request.headers.get('Authorization')
-    user_data = verify_telegram_data(auth)
-    if not user_data:
+    user_id = await authenticate_user(request)
+    if not user_id:
         return web.json_response({"error": "Unauthorized"}, status=401)
     
-    user_id = user_data['id']
     user = await get_user(user_id)
     sub = await get_subscription_info(user_id)
     
@@ -432,12 +447,11 @@ async def get_me_handler(request):
 
 async def list_devices_handler(request):
     """Список устройств пользователя"""
-    auth = request.headers.get('Authorization')
-    user_data = verify_telegram_data(auth)
-    if not user_data:
+    user_id = await authenticate_user(request)
+    if not user_id:
         return web.json_response({"error": "Unauthorized"}, status=401)
     
-    devices = await get_user_devices(user_data['id'])
+    devices = await get_user_devices(user_id)
     # Преобразуем кортежи в словари
     res = []
     for d in devices:
@@ -451,9 +465,8 @@ async def list_devices_handler(request):
 
 async def rename_device_handler(request):
     """Переименование устройства"""
-    auth = request.headers.get('Authorization')
-    user_data = verify_telegram_data(auth)
-    if not user_data:
+    user_id = await authenticate_user(request)
+    if not user_id:
         return web.json_response({"error": "Unauthorized"}, status=401)
     
     data = await request.json()
@@ -470,9 +483,8 @@ async def rename_device_handler(request):
 
 async def delete_device_handler(request):
     """Удаление устройства"""
-    auth = request.headers.get('Authorization')
-    user_data = verify_telegram_data(auth)
-    if not user_data:
+    user_id = await authenticate_user(request)
+    if not user_id:
         return web.json_response({"error": "Unauthorized"}, status=401)
     
     data = await request.json()
@@ -483,6 +495,64 @@ async def delete_device_handler(request):
     
     await delete_device(device_id)
     return web.json_response({"status": "ok"})
+
+async def buy_subscription_handler(request):
+    """Покупка или продление подписки через TMA"""
+    user_id = await authenticate_user(request)
+    if not user_id:
+        return web.json_response({"error": "Unauthorized"}, status=401)
+    
+    from database import decrease_balance
+    
+    data = await request.json()
+    coupon_code = data.get('coupon')
+    
+    price = VPN_PRICE
+    if coupon_code:
+        discount = await get_discount(coupon_code)
+        if discount and discount[1] > 0:
+            percent = discount[0]
+            price = int(VPN_PRICE * (1 - percent / 100))
+    
+    success = await decrease_balance(user_id, price)
+    if not success:
+        return web.json_response({"error": "Недостаточно средств"}, status=400)
+    
+    if coupon_code:
+        await use_discount(coupon_code)
+        
+    existing = await get_subscription_info(user_id)
+    if existing:
+        await extend_subscription(user_id, days=3650)
+    else:
+        import uuid
+        sub_uuid = str(uuid.uuid4())
+        await add_subscription(user_id, sub_uuid, days=3650)
+        
+    return web.json_response({"status": "ok", "message": "Подписка успешно оформлена"})
+
+async def activate_coupon_handler(request):
+    """Активация промокода на баланс"""
+    user_id = await authenticate_user(request)
+    if not user_id:
+        return web.json_response({"error": "Unauthorized"}, status=401)
+    
+    data = await request.json()
+    code = data.get('code')
+    
+    if not code:
+        return web.json_response({"error": "Введите код"}, status=400)
+        
+    result = await activate_promo(user_id, code)
+    
+    if result == "not_found":
+        return web.json_response({"error": "Промокод не найден"}, status=404)
+    if result == "ended":
+        return web.json_response({"error": "Промокод закончился"}, status=400)
+    if result == "already_activated":
+        return web.json_response({"error": "Вы уже активировали этот промокод"}, status=400)
+        
+    return web.json_response({"status": "ok", "amount": result})
 
 async def health_check(request):
     return web.Response(text="API Online")
@@ -506,6 +576,8 @@ def setup_web_server(bot):
     app.router.add_get('/api/list_devices', list_devices_handler)
     app.router.add_post('/api/rename_device', rename_device_handler)
     app.router.add_post('/api/delete_device', delete_device_handler)
+    app.router.add_post('/api/buy_subscription', buy_subscription_handler)
+    app.router.add_post('/api/activate_coupon', activate_coupon_handler)
 
     # Настройка CORS (чтобы твой фронтенд-сайт мог делать запросы к этому API)
     import aiohttp_cors

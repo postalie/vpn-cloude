@@ -2,7 +2,7 @@ from aiogram import Router, F, types
 from aiogram.filters import Command, CommandObject
 from aiogram.fsm.context import FSMContext
 from database import add_user, get_user, verify_user, add_referral_activation, get_referral_link, add_balance, get_device_count
-from keyboards import main_menu, get_captcha_kb
+from keyboards import get_main_menu, get_captcha_kb
 from config import ADMIN_IDS
 from aiogram.types import ReplyKeyboardRemove
 
@@ -20,7 +20,7 @@ async def handle_old_keyboard(message: types.Message):
     )
     msg = await message.answer("🛠", reply_markup=ReplyKeyboardRemove())
     await msg.delete()
-    await message.answer(welcome_text, parse_mode="HTML", reply_markup=main_menu)
+    await message.answer(welcome_text, parse_mode="HTML", reply_markup=await get_main_menu(message.from_user.id))
 
 @router.message(Command("start"))
 async def cmd_start(message: types.Message, command: CommandObject):
@@ -70,7 +70,7 @@ async def cmd_start(message: types.Message, command: CommandObject):
             f"👋 <b>Рады видеть тебя, {message.from_user.full_name}!</b>\n\n"
             "Чтобы подключить VPN или пополнить баланс, используй меню ниже 👇"
         )
-        await message.answer(welcome_text, parse_mode="HTML", reply_markup=main_menu)
+        await message.answer(welcome_text, parse_mode="HTML", reply_markup=await get_main_menu(message.from_user.id))
 
 @router.callback_query(F.data.startswith("captcha_"))
 async def captcha_solved(callback: types.CallbackQuery, state: FSMContext):
@@ -80,7 +80,7 @@ async def captcha_solved(callback: types.CallbackQuery, state: FSMContext):
     msg = await callback.message.answer("✅ Подключено", reply_markup=ReplyKeyboardRemove())
     await msg.delete()
     # И сразу следом главное меню
-    await callback.message.answer("Загружаем меню...", reply_markup=main_menu)
+    await callback.message.answer("Загружаем меню...", reply_markup=await get_main_menu(callback.from_user.id))
 
 @router.callback_query(F.data == "profile")
 async def show_profile_callback(callback: types.CallbackQuery):
@@ -156,6 +156,6 @@ async def back_to_main_menu(callback: types.CallbackQuery, state: FSMContext):
         "Чтобы подключить VPN или пополнить баланс, используй меню ниже 👇"
     )
     # Отправляем НОВОЕ сообщение вместо редактирования
-    await callback.message.answer(text, parse_mode="HTML", reply_markup=main_menu)
+    await callback.message.answer(text, parse_mode="HTML", reply_markup=await get_main_menu(callback.from_user.id))
     await callback.answer()
 

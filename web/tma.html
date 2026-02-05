@@ -105,6 +105,12 @@
             border: 1px solid rgba(231, 76, 60, 0.3);
         }
 
+        .status-warning {
+            background: rgba(241, 196, 15, 0.2);
+            color: #f1c40f;
+            border: 1px solid rgba(241, 196, 15, 0.3);
+        }
+
         .tabs {
             display: flex;
             background: rgba(0, 0, 0, 0.3);
@@ -369,9 +375,10 @@
         </div>
 
         <div class="tabs">
-            <div class="tab active" onclick="switchSection('home')">Главная</div>
-            <div class="tab" onclick="switchSection('devices')">Устройства</div>
-            <div class="tab" onclick="switchSection('info')">Инфо</div>
+            <div class="tab active" data-section="home" onclick="switchSection('home')">Главная</div>
+            <div class="tab" data-section="store" onclick="switchSection('store')">Магазин</div>
+            <div class="tab" data-section="devices" onclick="switchSection('devices')">Устройства</div>
+            <div class="tab" data-section="info" onclick="switchSection('info')">Инфо</div>
         </div>
 
         <section id="home-section" class="content-section active">
@@ -383,11 +390,39 @@
                     <button onclick="copySubUrl()" class="btn-icon">📋</button>
                 </div>
             </div>
-            <button class="btn-primary" onclick="openConnection()">🌐 Открыть в приложении</button>
+            <button class="btn-primary" onclick="openConnection()">🚀 Подключить VPN</button>
+            <p id="sub-details" style="text-align: center; font-size: 13px; color: var(--text-dim); margin-top: 15px;">
+            </p>
+
             <p style="text-align: center; font-size: 12px; color: var(--text-dim); margin-top: 20px;">
                 По всем вопросам: <a href="https://t.me/soldenchain"
                     style="color: #3498db; text-decoration: none;">Техподдержка</a>
             </p>
+        </section>
+
+        <section id="store-section" class="content-section">
+            <div class="card">
+                <h3 style="margin-top: 0;">💎 Продлить подписку</h3>
+                <p style="color: var(--text-dim); font-size: 14px; line-height: 1.5;">
+                    Подписка дает безлимитный доступ ко всем серверам на 10 лет.
+                </p>
+                <div style="margin-top: 20px;">
+                    <button class="btn-primary" onclick="buySubscription()" id="buy-btn">Оформить за 300 ₽</button>
+                </div>
+            </div>
+
+            <div class="card">
+                <h3 style="margin-top: 0;">🏷 Промокод</h3>
+                <p style="color: var(--text-dim); font-size: 14px; margin-bottom: 15px;">Активируйте код для пополнения
+                    баланса или получения скидки.</p>
+                <div style="display: flex; gap: 10px;">
+                    <input type="text" id="coupon-input" placeholder="Введите код..."
+                        style="flex: 1; background: rgba(0,0,0,0.2); border: 1px solid rgba(255,255,255,0.1); border-radius: 10px; padding: 12px; color: white; outline: none;">
+                    <button onclick="activateCoupon()" class="btn-icon"
+                        style="width: auto; padding: 0 15px;">🚀</button>
+                </div>
+                <p id="coupon-result" style="font-size: 12px; margin: 10px 0 0; display: none;"></p>
+            </div>
         </section>
 
         <section id="devices-section" class="content-section">
@@ -443,7 +478,11 @@
         tg.ready();
 
         const API_BASE = window.location.origin + "/api";
-        const authData = tg.initData;
+
+        // Получаем токен из URL или initData
+        const urlParams = new URLSearchParams(window.location.search);
+        const token = urlParams.get('token');
+        const authData = token || tg.initData;
 
         let currentUser = null;
         let selectedDeviceId = null;
@@ -471,6 +510,7 @@
             document.getElementById('user-balance').innerText = `${currentUser.balance} ₽`;
 
             const badge = document.getElementById('sub-badge');
+            const details = document.getElementById('sub-details');
             const sub = currentUser.subscription;
 
             if (sub && sub.is_active) {
@@ -479,10 +519,13 @@
 
                 const encryptedLink = sub.encrypted_link || `https://cloudevpn.cfd/${currentUser.user_id}/${sub.uuid}`;
                 document.getElementById('sub-url-input').value = encryptedLink;
+
+                details.innerHTML = `Лимит устройств: <b>${sub.limit}</b><br>Срок: <b>Безлимитно</b>`;
             } else {
-                badge.innerText = "Подписка истекла";
+                badge.innerText = "Подписка не активна";
                 badge.className = "sub-status status-expired";
-                document.getElementById('sub-url-input').value = "Нет активной подписки";
+                document.getElementById('sub-url-input').value = "Требуется подписка";
+                details.innerText = "Оформите подписку в разделе Магазин";
             }
         }
 
@@ -503,28 +546,51 @@
                 devices.forEach(d => {
                     const card = document.createElement('div');
                     card.className = 'card device-item';
+
+                    const lastSeen = new Date(d.last_seen);
+                    const isOnline = (new Date() - lastSeen) < (5 * 60 * 1000); // 5 минут
+
                     card.innerHTML = `
                         <div class="device-info">
-                            <h3>${d.name}</h3>
-                            <p>${d.hash.substring(0, 8)}... | ${new Date(d.last_seen).toLocaleDateString()}</p>
+                            <div style="display: flex; align-items: center; gap: 8px;">
+                                <h3>${escapeHtml(d.name)}</h3>
+                                ${isOnline ? '<span style="width: 8px; height: 8px; background: #2ecc71; border-radius: 50%; display: inline-block;"></span>' : ''}
+                            </div>
+                            <p>${d.hash.substring(0, 8).toUpperCase()} | Был в сети: ${formatDate(lastSeen)}</p>
                         </div>
                         <div class="device-actions">
-                            <button onclick="openRenameModal(${d.id}, '${d.name}')" class="btn-icon">✏️</button>
+                            <button onclick="openRenameModal(${d.id}, '${escapeHtml(d.name)}')" class="btn-icon">✏️</button>
                             <button onclick="confirmDelete(${d.id})" class="btn-icon btn-delete">🗑</button>
                         </div>
                     `;
                     listDiv.appendChild(card);
                 });
             } catch (e) {
-                listDiv.innerHTML = '<div style="color: #e74c3c">Ошибка загрузки устройств</div>';
+                listDiv.innerHTML = '<div style="color: #e74c3c; text-align: center;">Ошибка загрузки устройств</div>';
             }
         }
 
+        function escapeHtml(text) {
+            const div = document.createElement('div');
+            div.textContent = text;
+            return div.innerHTML;
+        }
+
+        function formatDate(date) {
+            const now = new Date();
+            const diff = now - date;
+            if (diff < 60000) return 'Только что';
+            if (diff < 3600000) return Math.floor(diff / 60000) + ' мин. назад';
+            return date.toLocaleString('ru-RU', { day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' });
+        }
+
         function switchSection(section) {
-            document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+            document.querySelectorAll('.tab').forEach(t => {
+                t.classList.remove('active');
+                if (t.dataset.section === section) t.classList.add('active');
+            });
             document.querySelectorAll('.content-section').forEach(s => s.classList.remove('active'));
 
-            event.target.classList.add('active');
             document.getElementById(`${section}-section`).classList.add('active');
 
             if (section === 'devices') fetchDevices();
@@ -596,6 +662,59 @@
                     }
                 }
             });
+        }
+
+        async function buySubscription() {
+            try {
+                const res = await fetch(`${API_BASE}/buy_subscription`, {
+                    method: 'POST',
+                    headers: { 'Authorization': authData, 'Content-Type': 'application/json' },
+                    body: JSON.stringify({})
+                });
+                const data = await res.json();
+                if (data.error) {
+                    tg.showAlert(data.error);
+                } else {
+                    tg.showPopup({
+                        title: "Успешно!",
+                        message: "Подписка оформлена. Теперь вы можете подключить VPN на главной.",
+                        buttons: [{ type: "ok" }]
+                    });
+                    fetchMe();
+                    switchSection('home');
+                }
+            } catch (e) {
+                tg.showAlert("Ошибка при покупке.");
+            }
+        }
+
+        async function activateCoupon() {
+            const input = document.getElementById('coupon-input');
+            const resultP = document.getElementById('coupon-result');
+            const code = input.value.trim();
+            if (!code) return;
+
+            try {
+                const res = await fetch(`${API_BASE}/activate_coupon`, {
+                    method: 'POST',
+                    headers: { 'Authorization': authData, 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ code })
+                });
+                const data = await res.json();
+
+                resultP.style.display = 'block';
+                if (data.error) {
+                    resultP.style.color = '#e74c3c';
+                    resultP.innerText = data.error;
+                } else {
+                    resultP.style.color = '#2ecc71';
+                    resultP.innerText = `Успешно! Начислено ${data.amount} ₽`;
+                    input.value = '';
+                    fetchMe();
+                }
+            } catch (e) {
+                tg.showAlert("Ошибка при активации купона.");
+            }
         }
 
         // Init

@@ -99,7 +99,7 @@ async def show_connection_menu(callback: types.CallbackQuery, state: FSMContext)
             f"3️⃣ Включите VPN главным тумблером\n\n"
             f"<i>💡 Для стабильной работы сайта требуется отключить VPN сервисы!</i>\n",
             parse_mode="HTML",
-            reply_markup=get_subscription_menu_kb(short_link)
+            reply_markup=await get_subscription_menu_kb(callback.from_user.id, short_link)
         )
         
         # Сохраняем новые ID
