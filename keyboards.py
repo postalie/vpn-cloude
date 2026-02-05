@@ -263,7 +263,7 @@ def get_subscription_menu_kb(short_link=None):
     btns = []
     
     # Кнопка для открытия TMA
-    btns.append([InlineKeyboardButton(text="⚙️ Управление устройствами", web_app=WebAppInfo(url=f"http://vpn-cloude-production.up.railway.app/dashboard"))])
+    btns.append([InlineKeyboardButton(text="⚙️ Управление устройствами", web_app=WebAppInfo(url=f"https://vpn-cloude-production.up.railway.app/dashboard"))])
     
     if short_link:
         btns.append([InlineKeyboardButton(text="🚀 Подключить в Happ", url=short_link)])
