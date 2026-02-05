@@ -2,7 +2,8 @@ from aiogram.types import ReplyKeyboardMarkup, KeyboardButton, InlineKeyboardMar
 from config import BASE_URL
 
 # Главное меню (Сверхпростое)
-main_menu = InlineKeyboardMarkup(
+def get_main_menu():
+ return InlineKeyboardMarkup(
     inline_keyboard=[
         [InlineKeyboardButton(text="🚀 Подключить / Купить VPN", callback_data="connection")],
         [InlineKeyboardButton(text="🖥 Личный кабинет (TMA)", web_app=WebAppInfo(url=f"{BASE_URL}/dashboard"))],
