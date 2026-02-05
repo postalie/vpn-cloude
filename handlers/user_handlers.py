@@ -20,7 +20,7 @@ async def handle_old_keyboard(message: types.Message):
     )
     msg = await message.answer("🛠", reply_markup=ReplyKeyboardRemove())
     await msg.delete()
-    await message.answer(welcome_text, parse_mode="HTML", reply_markup=await get_main_menu(message.from_user.id))
+    await message.answer(welcome_text, parse_mode="HTML", reply_markup=get_main_menu(message.from_user.id))
 
 @router.message(Command("start"))
 async def cmd_start(message: types.Message, command: CommandObject):
@@ -70,7 +70,7 @@ async def cmd_start(message: types.Message, command: CommandObject):
             f"👋 <b>Рады видеть тебя, {message.from_user.full_name}!</b>\n\n"
             "Чтобы подключить VPN или пополнить баланс, используй меню ниже 👇"
         )
-        await message.answer(welcome_text, parse_mode="HTML", reply_markup=await get_main_menu(message.from_user.id))
+        await message.answer(welcome_text, parse_mode="HTML", reply_markup=get_main_menu(message.from_user.id))
 
 @router.callback_query(F.data.startswith("captcha_"))
 async def captcha_solved(callback: types.CallbackQuery, state: FSMContext):
