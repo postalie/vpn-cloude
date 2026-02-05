@@ -2,16 +2,13 @@ from aiogram.types import ReplyKeyboardMarkup, KeyboardButton, InlineKeyboardMar
 from config import BASE_URL
 
 # Главное меню (Сверхпростое)
-async def get_main_menu(user_id):
-    from database import create_web_token
-    token = await create_web_token(user_id)
-    return InlineKeyboardMarkup(
-        inline_keyboard=[
-            [InlineKeyboardButton(text="🚀 Подключить / Купить VPN", callback_data="connection")],
-            [InlineKeyboardButton(text="🖥 Личный кабинет (TMA)", web_app=WebAppInfo(url=f"{BASE_URL}/dashboard?token={token}"))],
-            [InlineKeyboardButton(text="👤 Мой аккаунт", callback_data="profile"), InlineKeyboardButton(text="🎁 Бонусы", callback_data="promo")]
-        ]
-    )
+main_menu = InlineKeyboardMarkup(
+    inline_keyboard=[
+        [InlineKeyboardButton(text="🚀 Подключить / Купить VPN", callback_data="connection")],
+        [InlineKeyboardButton(text="🖥 Личный кабинет (TMA)", web_app=WebAppInfo(url=f"{BASE_URL}/dashboard"))],
+        [InlineKeyboardButton(text="👤 Мой аккаунт", callback_data="profile"), InlineKeyboardButton(text="🎁 Бонусы", callback_data="promo")]
+    ]
+)
 
 # Меню выбора метода пополнения
 def get_payment_methods_kb():
@@ -269,7 +266,7 @@ async def get_subscription_menu_kb(user_id, short_link=None):
     btns = []
     
     # Кнопка для открытия TMA
-    btns.append([InlineKeyboardButton(text="⚙️ Управление устройствами (TMA)", web_app=WebAppInfo(url=f"{BASE_URL}/dashboard?token={token}"))])
+    btns.append([InlineKeyboardButton(text="⚙️ Управление устройствами (TMA)", web_app=WebAppInfo(url=f"{BASE_URL}/dashboard"))])
     
     if short_link:
         btns.append([InlineKeyboardButton(text="🚀 Подключить в Happ", url=short_link)])
