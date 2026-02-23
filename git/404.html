@@ -207,16 +207,39 @@
                     // Декодируем Base64
                     let decoded = atob(safeBase64);
 
-                    if (decoded.includes("add/")) {
+                    // Проверяем что это
+                    if (decoded.startsWith('happ://crypt')) {
+                        // Это уже готовая happ:// ссылка (crypt5/crypt3)
+                        payload = decoded.replace('happ://', '');
+                        document.getElementById('sub-status').innerText = "Зашифрованные данные. Открываем Happ...";
+                    } else if (decoded.startsWith('crypt')) {
+                        // Это crypt5/... или crypt3/... без префикса happ://
+                        payload = decoded;
+                        document.getElementById('sub-status').innerText = "Зашифрованные данные. Открываем Happ...";
+                    } else if (decoded.includes("add/")) {
+                        // Это прямой URL, создаём happ://add/...
                         payload = decoded;
                         document.getElementById('sub-status').innerText = "Данные расшифрованы. Подключаемся...";
+                    } else {
+                        // Неизвестный формат, предполагаем что это crypt5 данные
+                        payload = decoded;
+                        document.getElementById('sub-status').innerText = "Зашифрованные данные. Открываем Happ...";
                     }
                 } catch (e) {
                     console.log("Decode failed, using raw path");
                 }
 
                 // Формируем ссылку happ://
-                const deepLink = `happ://${payload}`;
+                // Проверяем, начинается ли payload с crypt
+                let deepLink;
+                if (payload.startsWith('crypt')) {
+                    deepLink = `happ://${payload}`;
+                } else if (payload.includes('add/')) {
+                    deepLink = `happ://${payload}`;
+                } else {
+                    // Предполагаем что это crypt5 данные
+                    deepLink = `happ://crypt5/${payload}`;
+                }
 
                 // Активируем кнопку (как fallback)
                 const btn = document.getElementById('manual-btn');

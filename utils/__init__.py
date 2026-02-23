@@ -44,7 +44,7 @@ def shorten_url(long_url):
 def encrypt_subscription_happ(subscription_url):
     """
     Шифрует подписку через crypto.happ.su (наш собственный сервис)
-    Возвращает зашифрованную строку для deep link
+    Возвращает зашифрованную строку для deep link (в формате crypt5/...)
     """
     try:
         # Используем наш собственный сервис на основе crypto.happ.su

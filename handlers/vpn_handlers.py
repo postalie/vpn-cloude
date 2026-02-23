@@ -56,9 +56,10 @@ async def show_connection_menu(callback: types.CallbackQuery, state: FSMContext)
         # Достаем зашифрованные данные снова (или пробрасываем из функции)
         subscription_url = f"https://{domain_clean}/add/{callback.from_user.id}/{sub_uuid}"
         encrypted_data = encrypt_subscription_happ(subscription_url)
-        
+
         if encrypted_data:
-            deep_link_native = f"happ://crypt3/{encrypted_data}"
+            # encrypted_data уже в формате crypt5/... или crypt3/...
+            deep_link_native = f"happ://{encrypted_data}"
         else:
             # Fallback если шифрование не сработало
             deep_link_native = short_link

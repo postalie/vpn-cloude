@@ -41,17 +41,24 @@ def get_dl_link(url: str) -> str:
 def encrypt_link(url: str) -> str:
     """
     Шифрует ссылку через crypto.happ.su
-    Возвращает зашифрованную ссылку
+    Возвращает зашифрованную ссылку (без happ://crypt5/)
     """
     dl_link = get_dl_link(url)
-    
+
     if dl_link:
-        # Извлекаем зашифрованную часть из ссылки
-        # Обычно формат: https://crypto.happ.su/dl#<encrypted_data>
-        if '#' in dl_link:
+        # Формат: happ://crypt5/<encrypted_data>
+        if dl_link.startswith('happ://crypt5/'):
+            encrypted = dl_link.replace('happ://crypt5/', '')
+            return encrypted
+        # Формат: happ://crypt3/<encrypted_data>
+        elif dl_link.startswith('happ://crypt3/'):
+            encrypted = dl_link.replace('happ://crypt3/', '')
+            return encrypted
+        # Формат: https://crypto.happ.su/dl#<encrypted_data>
+        elif '#' in dl_link:
             encrypted = dl_link.split('#', 1)[1]
             return encrypted
-    
+
     return None
 
 
@@ -76,8 +83,11 @@ def create_encrypted_happ_link(user_id: int, sub_uuid: str, domain: str) -> str:
     encrypted = encrypt_link(subscription_url)
 
     if encrypted:
+        # Добавляем префикс crypt5/ для Happ
+        encrypted_with_prefix = f"crypt5/{encrypted}"
+        
         # Кодируем в URL-safe base64 для GitHub Pages
-        safe_encrypted = base64.urlsafe_b64encode(encrypted.encode()).decode().rstrip('=')
+        safe_encrypted = base64.urlsafe_b64encode(encrypted_with_prefix.encode()).decode().rstrip('=')
         return f"{GITHUB_PAGE_URL}/{safe_encrypted}"
 
     # Fallback: просто кодируем subscription_url в base64
