@@ -146,7 +146,30 @@ async def create_tables():
 
         async with db.execute('PRAGMA table_info(devices)') as cursor:
             device_columns = [row[1] for row in await cursor.fetchall()]
-        
+
+        # Проверка на наличие id (для старых баз)
+        if 'id' not in device_columns:
+            print("DB MIGRATION: Recreating 'devices' table with 'id' column")
+            await db.execute('''
+                CREATE TABLE IF NOT EXISTS devices_new (
+                    id INTEGER PRIMARY KEY AUTOINCREMENT,
+                    sub_uuid TEXT,
+                    device_hash TEXT,
+                    device_name TEXT,
+                    last_seen DATETIME DEFAULT CURRENT_TIMESTAMP,
+                    UNIQUE(sub_uuid, device_hash)
+                )
+            ''')
+            # Копируем данные если есть
+            try:
+                await db.execute('''
+                    INSERT INTO devices_new (sub_uuid, device_hash, device_name, last_seen)
+                    SELECT sub_uuid, device_hash, device_name, last_seen FROM devices
+                ''')
+            except: pass
+            await db.execute('DROP TABLE IF EXISTS devices')
+            await db.execute('ALTER TABLE devices_new RENAME TO devices')
+
         if 'device_name' not in device_columns:
             await db.execute('ALTER TABLE devices ADD COLUMN device_name TEXT')
         if 'last_seen' not in device_columns:
@@ -536,16 +559,16 @@ async def cleanup_duplicate_devices(sub_uuid, device_hash):
     async with aiosqlite.connect(DB_NAME) as db:
         # Находим все устройства с таким device_hash для данного sub_uuid
         async with db.execute('''
-            SELECT id FROM devices 
+            SELECT rowid FROM devices
             WHERE sub_uuid = ? AND device_hash = ?
             ORDER BY last_seen DESC
         ''', (sub_uuid, device_hash)) as cursor:
             rows = await cursor.fetchall()
-        
+
         # Если больше одного устройства - удаляем дубликаты (оставляем первое)
         if len(rows) > 1:
             for row in rows[1:]:
-                await db.execute('DELETE FROM devices WHERE id = ?', (row[0],))
+                await db.execute('DELETE FROM devices WHERE rowid = ?', (row[0],))
             await db.commit()
             print(f"DEBUG DB: Cleaned up {len(rows) - 1} duplicate devices for {sub_uuid}")
 
