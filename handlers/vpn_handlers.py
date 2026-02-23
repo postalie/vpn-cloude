@@ -51,10 +51,10 @@ async def show_connection_menu(callback: types.CallbackQuery, state: FSMContext)
         subscription_url = f"https://{domain_clean}/add/{callback.from_user.id}/{sub_uuid}"
         
         # Ссылка для кнопки: GitHub Pages с key параметром
-        github_redirect = f" https://lalalula96.github.io/v2raytun-redirect/?key=happ://add/https://{subscription_url}"
+        github_redirect = f" https://lalalula96.github.io/v2raytun-redirect/?key=happ://add/{subscription_url}"
         
         # Сокращаем через clck.ru
-        short_link = github_redirect
+        short_link = shorten_url(github_redirect)
 
         # QR код ведет на прямую ссылку
         encoded_qr_data = urllib.parse.quote(subscription_url)
