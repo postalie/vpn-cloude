@@ -46,26 +46,18 @@ async def show_connection_menu(callback: types.CallbackQuery, state: FSMContext)
             )
         
         domain_clean = BASE_URL.replace("https://", "").replace("http://", "")
-        
-        # Ссылка через GitHub (которую мы настроили на быстрый редирект)
-        github_link = get_happ_github_link(callback.from_user.id, sub_uuid, domain_clean)
-        # Сокращаем через clck.ru
-        short_link = shorten_url(github_link)
-        
-        # Для QR-кода используем прямой deep link happ://
-        # Достаем зашифрованные данные снова (или пробрасываем из функции)
+
+        # Прямая ссылка на подписку
         subscription_url = f"https://{domain_clean}/add/{callback.from_user.id}/{sub_uuid}"
-        encrypted_data = encrypt_subscription_happ(subscription_url)
+        
+        # Ссылка для кнопки: GitHub Pages с key параметром
+        github_redirect = f" https://lalalula96.github.io/v2raytun-redirect/?key=happ://add/{subscription_url}"
+        
+        # Сокращаем через clck.ru
+        short_link = shorten_url(github_redirect)
 
-        if encrypted_data:
-            # encrypted_data уже в формате crypt5/... или crypt3/...
-            deep_link_native = f"happ://{encrypted_data}"
-        else:
-            # Fallback если шифрование не сработало
-            deep_link_native = short_link
-
-        # QR код теперь ведет на happ://crypt3/...
-        encoded_qr_data = urllib.parse.quote(deep_link_native)
+        # QR код ведет на прямую ссылку
+        encoded_qr_data = urllib.parse.quote(subscription_url)
         qr_url = f"https://api.qrserver.com/v1/create-qr-code/?size=300x300&data={encoded_qr_data}"
         
         await loading_msg.delete()

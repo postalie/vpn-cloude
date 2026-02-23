@@ -46,11 +46,11 @@ def encrypt_link(url: str) -> str:
     dl_link = get_dl_link(url)
 
     if dl_link:
-        # Формат: happ://crypt5/<encrypted_data>
+        # Формат: happ://crypt5/<encrypted_data> (URL-encoded)
         if dl_link.startswith('happ://crypt5/'):
             encrypted = dl_link.replace('happ://crypt5/', '')
             return encrypted
-        # Формат: happ://crypt3/<encrypted_data>
+        # Формат: happ://crypt3/<encrypted_data> (URL-encoded)
         elif dl_link.startswith('happ://crypt3/'):
             encrypted = dl_link.replace('happ://crypt3/', '')
             return encrypted

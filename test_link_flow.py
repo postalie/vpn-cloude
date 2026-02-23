@@ -42,22 +42,27 @@ try:
     
     if link and 'href' in link.attrs:
         dl_link = link['href']
-        print(f"    DL ссылка: {dl_link}")
-        
-        # Извлекаем зашифрованную часть
+        print(f"    DL ssylka (do decode): {dl_link[:100]}...")
+
+        # Dekodiruem URL
+        import urllib.parse
+        dl_link = urllib.parse.unquote(dl_link)
+        print(f"    DL ssylka (posle decode): {dl_link[:100]}...")
+
+        # Izvlekaem zashifrovannuyu chast
         encrypted = None
         if dl_link.startswith('happ://crypt5/'):
             encrypted = dl_link.replace('happ://crypt5/', '')
-            print(f"    Формат: happ://crypt5/...")
+            print(f"    Format: happ://crypt5/...")
         elif dl_link.startswith('happ://crypt3/'):
             encrypted = dl_link.replace('happ://crypt3/', '')
-            print(f"    Формат: happ://crypt3/...")
+            print(f"    Format: happ://crypt3/...")
         elif '#' in dl_link:
             encrypted = dl_link.split('#', 1)[1]
-            print(f"    Формат: #...")
-        
+            print(f"    Format: #...")
+
         if encrypted:
-            print(f"    [3] ЗАШИФРОВАННЫЕ ДАННЫЕ (без префикса):")
+            print(f"    [3] ZASHIFROVANNYE DANNYE (bez prefiksa):")
             print(f"        {encrypted[:100]}...")
             
             # 4. Добавляем префикс crypt5/
@@ -96,14 +101,14 @@ try:
             print(f"\n[7] ИТОГ:")
             print(f"    Пользователь получает: {short_link}")
             print(f"\n[8] ЧТО ПРОИСХОДИТ ПРИ КЛИКЕ:")
-            print(f"    1. clck.ru редиректит на GitHub")
-            print(f"    2. GitHub (404.html) декодирует base64 → 'crypt5/{encrypted[:50]}...'")
-            print(f"    3. GitHub создаёт happ://crypt5/{encrypted[:50]}...")
-            print(f"    4. Happ расшифровывает и подключается")
+            print(f"    1. clck.ru redirect na GitHub")
+            print(f"    2. GitHub (404.html) decodes base64 -> 'crypt5/{encrypted[:50]}...'")
+            print(f"    3. GitHub sozdaet happ://crypt5/{encrypted[:50]}...")
+            print(f"    4. Happ rasshifrovyvaet i podklyuchaetsya")
             
             # 9. Проверка 404.html логики
-            print(f"\n[9] ПРОВЕРКА 404.html ЛОГИКИ:")
-            print(f"    Входной path: /{safe_encrypted}")
+            print(f"\n[9] PROVERKA 404.html LOGIKI:")
+            print(f"    VHODNOY path: /{safe_encrypted[:80]}...")
             
             # Декодируем обратно
             padded = safe_encrypted
@@ -111,27 +116,27 @@ try:
                 padded += '='
             
             decoded = base64.urlsafe_b64decode(padded).decode()
-            print(f"    После декодирования: {decoded[:100]}...")
+            print(f"    Posle dekodirovaniya: {decoded[:80]}...")
             
-            if decoded.startswith('crypt5/'):
-                print(f"    ✓ Это crypt5 данные")
-                print(f"    404.html создаст: happ://{decoded[:50]}...")
+            if decoded.startswith('crypt5/'):   
+                print(f"    OK - Eto crypt5 dannye")
+                print(f"    404.html sozdast: happ://{decoded[:50]}...")
             elif decoded.startswith("happ://crypt"):
-                print(f"    ✓ Это happ://crypt ссылка")
-                print(f"    404.html создаст: happ://{decoded.replace('happ://', '')[:50]}...")
+                print(f"    OK - Eto happ://crypt ssylka")
+                print(f"    404.html sozdast: happ://{decoded.replace('happ://', '')[:50]}...")
             elif "add/" in decoded:
-                print(f"    ✓ Это прямой add/ URL")
-                print(f"    404.html создаст: happ://{decoded[:50]}...")
+                print(f"    OK - Eto pryamoy add/ URL")
+                print(f"    404.html sozdast: happ://{decoded[:50]}...")
             else:
-                print(f"    ⚠ Неизвестный формат")
+                print(f"    WARNING - Neizvestnyy format")
             
         else:
-            print(f"    ❌ В ссылке нет # с зашифрованными данными")
+            print(f"    ERROR: V ssylke net # s zashifrovannymi dannymi")
     else:
-        print(f"    ❌ Не найдено ссылки с id='dl'")
-        print(f"    HTML ответ: {response.text[:500]}")
+        print(f"    ERROR: Ne naydeno ssylki s id='dl'")
+        print(f"    HTML otvet: {response.text[:500]}")
         
 except Exception as e:
-    print(f"    ❌ Ошибка: {e}")
+    print(f"    ERROR: {e}")
 
 print("\n" + "=" * 60)
