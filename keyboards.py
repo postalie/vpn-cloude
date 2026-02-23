@@ -6,7 +6,6 @@ def get_main_menu():
  return InlineKeyboardMarkup(
     inline_keyboard=[
         [InlineKeyboardButton(text="🚀 Подключить / Купить VPN", callback_data="connection")],
-        [InlineKeyboardButton(text="🖥 Личный кабинет (TMA)", web_app=WebAppInfo(url=f"https://vpn-cloude-production.up.railway.app/dashboard"))],
         [InlineKeyboardButton(text="👤 Мой аккаунт", callback_data="profile"), InlineKeyboardButton(text="🎁 Бонусы", callback_data="promo")]
     ]
 )

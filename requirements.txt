@@ -4,3 +4,4 @@ aiohttp-cors
 aiosqlite
 python-dotenv
 requests
+beautifulsoup4

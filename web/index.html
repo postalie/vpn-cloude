@@ -178,7 +178,7 @@
 
         async function fetchStats() {
             try {
-                const response = await fetch(`${API_URL}/api/status`, {
+                const response = await fetch(`${API_BASE}/status`, {
                     headers: {
                         "X-API-Key": API_KEY
                     }

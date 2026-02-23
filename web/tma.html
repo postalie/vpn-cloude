@@ -31,14 +31,17 @@
             margin: 0;
             padding: 0;
             overflow-x: hidden;
+            overflow-y: auto;
             background-image: radial-gradient(circle at 50% -20%, #1a2a44 0%, var(--bg-color) 70%);
             min-height: 100vh;
+            -webkit-overflow-scrolling: touch;
         }
 
         .container {
             padding: 20px;
             max-width: 500px;
             margin: 0 auto;
+            padding-bottom: 40px;
         }
 
         header {
@@ -163,14 +166,21 @@
 
         .device-item {
             display: flex;
-            justify-content: space-between;
-            align-items: center;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .device-info {
+            width: 100%;
         }
 
         .device-info h3 {
             margin: 0;
-            font-size: 16px;
+            font-size: 15px;
             font-weight: 600;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
         }
 
         .device-info p {
@@ -182,6 +192,7 @@
         .device-actions {
             display: flex;
             gap: 10px;
+            justify-content: flex-end;
         }
 
         .btn-icon {
@@ -195,15 +206,23 @@
             justify-content: center;
             cursor: pointer;
             transition: all 0.2s;
+            font-size: 16px;
+            padding: 0;
         }
 
-        .btn-icon:hover {
-            background: rgba(255, 255, 255, 0.1);
+        .btn-icon:active {
+            transform: scale(0.9);
+        }
+
+        .btn-rename:hover {
+            background: rgba(52, 152, 219, 0.2);
+            border-color: var(--accent-primary);
         }
 
         .btn-delete:hover {
             border-color: var(--danger);
             color: var(--danger);
+            background: rgba(231, 76, 60, 0.1);
             box-shadow: 0 0 10px rgba(231, 76, 60, 0.2);
         }
 
@@ -301,6 +320,7 @@
             align-items: center;
             z-index: 1000;
             padding: 20px;
+            animation: fadeIn 0.2s ease-out;
         }
 
         .modal-body {
@@ -309,24 +329,33 @@
             border-radius: 20px;
             padding: 25px;
             width: 100%;
-            max-width: 400px;
+            max-width: 340px;
             animation: fadeInUp 0.3s ease-out;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.5);
         }
 
         .modal-body h2 {
             margin: 0 0 15px;
             font-size: 20px;
+            text-align: center;
         }
 
         .modal-body input {
             width: 100%;
             background: rgba(0, 0, 0, 0.3);
             border: 1px solid var(--glass-border);
-            padding: 12px;
-            border-radius: 10px;
+            padding: 14px;
+            border-radius: 12px;
             color: white;
             font-family: inherit;
+            font-size: 15px;
             margin-bottom: 20px;
+            outline: none;
+            transition: border-color 0.2s;
+        }
+
+        .modal-body input:focus {
+            border-color: var(--accent-primary);
         }
 
         .modal-btns {
@@ -336,22 +365,37 @@
 
         .modal-btns button {
             flex: 1;
-            padding: 12px;
-            border-radius: 10px;
+            padding: 14px;
+            border-radius: 12px;
             cursor: pointer;
             font-weight: 600;
+            font-size: 15px;
+            transition: all 0.2s;
+            border: none;
+        }
+
+        .modal-btns button:active {
+            transform: scale(0.96);
         }
 
         .btn-cancel {
-            background: transparent;
+            background: rgba(255, 255, 255, 0.05);
             border: 1px solid var(--glass-border);
             color: var(--text-dim);
         }
 
+        .btn-cancel:active {
+            background: rgba(255, 255, 255, 0.1);
+        }
+
         .btn-save {
             background: var(--accent-primary);
-            border: none;
             color: white;
+            box-shadow: 0 4px 15px rgba(52, 152, 219, 0.3);
+        }
+
+        .btn-save:active {
+            opacity: 0.9;
         }
 
         #empty-devices {
@@ -359,11 +403,154 @@
             padding: 40px 20px;
             color: var(--text-dim);
         }
+
+        /* Экран загрузки/авторизации */
+        #auth-screen {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: var(--bg-color);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            z-index: 2000;
+            padding: 20px;
+            animation: fadeIn 0.3s ease-out;
+        }
+
+        #auth-screen.hidden {
+            display: none;
+        }
+
+        .auth-loader {
+            width: 60px;
+            height: 60px;
+            border: 4px solid rgba(52, 152, 219, 0.2);
+            border-top-color: var(--accent-primary);
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin-bottom: 20px;
+        }
+
+        @keyframes spin {
+            to {
+                transform: rotate(360deg);
+            }
+        }
+
+        .auth-title {
+            font-size: 20px;
+            font-weight: 600;
+            margin-bottom: 10px;
+            text-align: center;
+        }
+
+        .auth-subtitle {
+            font-size: 14px;
+            color: var(--text-dim);
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+        .auth-error {
+            background: rgba(231, 76, 60, 0.1);
+            border: 1px solid rgba(231, 76, 60, 0.3);
+            border-radius: 16px;
+            padding: 20px;
+            text-align: center;
+            max-width: 340px;
+        }
+
+        .auth-error-icon {
+            font-size: 48px;
+            margin-bottom: 15px;
+        }
+
+        .auth-error-title {
+            font-size: 18px;
+            font-weight: 600;
+            margin-bottom: 10px;
+            color: var(--danger);
+        }
+
+        .auth-error-text {
+            font-size: 14px;
+            color: var(--text-dim);
+            margin-bottom: 20px;
+            line-height: 1.5;
+        }
+
+        .btn-telegram {
+            background: linear-gradient(135deg, #2AABEE 0%, #229ED9 100%);
+            color: white;
+            border: none;
+            padding: 14px 28px;
+            border-radius: 12px;
+            font-weight: 600;
+            font-size: 15px;
+            cursor: pointer;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 10px;
+            transition: all 0.2s;
+            box-shadow: 0 4px 15px rgba(42, 171, 238, 0.3);
+        }
+
+        .btn-telegram:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(42, 171, 238, 0.4);
+        }
+
+        .btn-telegram:active {
+            transform: translateY(0);
+        }
+
+        .btn-telegram svg {
+            width: 20px;
+            height: 20px;
+            fill: currentColor;
+        }
+
+        /* Адаптивность для мобильных */
+        @media (max-width: 380px) {
+            .container {
+                padding: 15px;
+            }
+
+            h1 {
+                font-size: 24px;
+            }
+
+            .balance-value {
+                font-size: 28px;
+            }
+
+            .device-info h3 {
+                font-size: 14px;
+            }
+
+            .btn-icon {
+                width: 34px;
+                height: 34px;
+                font-size: 14px;
+            }
+        }
     </style>
 </head>
 
 <body>
-    <div class="container">
+    <!-- Экран авторизации -->
+    <div id="auth-screen">
+        <div class="auth-loader"></div>
+        <div class="auth-title">Авторизация...</div>
+        <div class="auth-subtitle">Проверяем ваши данные</div>
+    </div>
+
+    <div class="container" id="main-container" style="display: none;">
         <header>
             <h1>☁️ CloudVPN Panel</h1>
         </header>
@@ -376,7 +563,6 @@
 
         <div class="tabs">
             <div class="tab active" data-section="home" onclick="switchSection('home')">Главная</div>
-            <div class="tab" data-section="store" onclick="switchSection('store')">Магазин</div>
             <div class="tab" data-section="devices" onclick="switchSection('devices')">Устройства</div>
             <div class="tab" data-section="info" onclick="switchSection('info')">Инфо</div>
         </div>
@@ -400,30 +586,7 @@
             </p>
         </section>
 
-        <section id="store-section" class="content-section">
-            <div class="card">
-                <h3 style="margin-top: 0;">💎 Продлить подписку</h3>
-                <p style="color: var(--text-dim); font-size: 14px; line-height: 1.5;">
-                    Подписка дает безлимитный доступ ко всем серверам на 10 лет.
-                </p>
-                <div style="margin-top: 20px;">
-                    <button class="btn-primary" onclick="buySubscription()" id="buy-btn">Оформить за 300 ₽</button>
-                </div>
-            </div>
-
-            <div class="card">
-                <h3 style="margin-top: 0;">🏷 Промокод</h3>
-                <p style="color: var(--text-dim); font-size: 14px; margin-bottom: 15px;">Активируйте код для пополнения
-                    баланса или получения скидки.</p>
-                <div style="display: flex; gap: 10px;">
-                    <input type="text" id="coupon-input" placeholder="Введите код..."
-                        style="flex: 1; background: rgba(0,0,0,0.2); border: 1px solid rgba(255,255,255,0.1); border-radius: 10px; padding: 12px; color: white; outline: none;">
-                    <button onclick="activateCoupon()" class="btn-icon"
-                        style="width: auto; padding: 0 15px;">🚀</button>
-                </div>
-                <p id="coupon-result" style="font-size: 12px; margin: 10px 0 0; display: none;"></p>
-            </div>
-        </section>
+        <!-- Store removed by admin request: users should purchase via bot -->
 
         <section id="devices-section" class="content-section">
             <div id="device-list">
@@ -477,6 +640,16 @@
         tg.expand();
         tg.ready();
 
+        // Настраиваем цвета под тему Telegram
+        const theme = tg.themeParams;
+        if (theme) {
+            document.documentElement.style.setProperty('--bg-color', theme.bg_color || '#0b0e14');
+            document.documentElement.style.setProperty('--card-bg', 'rgba(255, 255, 255, 0.05)');
+            document.documentElement.style.setProperty('--text-main', theme.text_color || '#ffffff');
+            document.documentElement.style.setProperty('--text-dim', theme.hint_color || '#a0a0a0');
+            document.documentElement.style.setProperty('--accent-primary', theme.button_color || '#3498db');
+        }
+
         const API_BASE = window.location.origin + "/api";
 
         // Получаем токен из URL или initData
@@ -489,22 +662,68 @@
 
         // Header color adjustment
         tg.setHeaderColor('#0b0e14');
+        tg.enableClosingConfirmation();
 
-        async function fetchMe() {
+        // Элементы экрана авторизации
+        const authScreen = document.getElementById('auth-screen');
+        const mainContainer = document.getElementById('main-container');
+
+        // Показываем экран ошибки авторизации
+        function showAuthError() {
+            authScreen.innerHTML = `
+                <div class="auth-error">
+                    <div class="auth-error-icon">🔒</div>
+                    <div class="auth-error-title">Ошибка авторизации</div>
+                    <div class="auth-error-text">
+                        Для доступа к панели управления, пожалуйста, войдите через бота
+                    </div>
+                    <a href="https://t.me/cloudevpnbot" class="btn-telegram" target="_blank">
+                        <svg viewBox="0 0 24 24">
+                            <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm4.64 6.8c-.15 1.58-.8 5.42-1.13 7.19-.14.75-.42 1-.68 1.03-.58.05-1.02-.38-1.58-.75-.88-.58-1.38-.94-2.23-1.5-.99-.65-.35-1.01.22-1.59.15-.15 2.71-2.48 2.76-2.69.01-.03.01-.17-.07-.24-.08-.07-.19-.05-.29-.03-.12.03-2.03 1.29-5.73 3.78-.54.37-1.03.55-1.47.54-.48-.01-1.41-.27-2.11-.5-.85-.28-1.53-.43-1.47-.91.03-.25.38-.51 1.04-.77 4.09-1.78 6.83-2.97 8.21-3.56 3.91-1.66 4.72-1.96 5.25-1.97.12 0 .38.03.55.17.14.12.18.28.2.45-.01.07-.01.14-.02.21z"/>
+                        </svg>
+                        Открыть бота
+                    </a>
+                </div>
+            `;
+        }
+
+        // Инициализация приложения
+        async function initApp() {
+            // Проверяем, есть ли данные для авторизации
+            if (!authData || authData === 'null') {
+                showAuthError();
+                return;
+            }
+
             try {
                 const res = await fetch(`${API_BASE}/me`, {
                     headers: { 'Authorization': authData }
                 });
+                
+                if (!res.ok) {
+                    throw new Error('Authorization failed');
+                }
+                
                 const data = await res.json();
-                if (data.error) throw new Error(data.error);
+                if (data.error) {
+                    throw new Error(data.error);
+                }
 
                 currentUser = data;
+                
+                // Скрываем экран авторизации и показываем основной интерфейс
+                authScreen.classList.add('hidden');
+                mainContainer.style.display = 'block';
+                
                 updateUserInfo();
             } catch (e) {
-                console.error(e);
-                tg.showAlert("Ошибка авторизации. Перезайдите в приложение.");
+                console.error('Auth error:', e);
+                showAuthError();
             }
         }
+
+        // Запускаем инициализацию
+        initApp();
 
         function updateUserInfo() {
             document.getElementById('user-balance').innerText = `${currentUser.balance} ₽`;
@@ -525,7 +744,7 @@
                 badge.innerText = "Подписка не активна";
                 badge.className = "sub-status status-expired";
                 document.getElementById('sub-url-input').value = "Требуется подписка";
-                details.innerText = "Оформите подписку в разделе Магазин";
+                details.innerText = "Оформите подписку через бота";
             }
         }
 
@@ -552,20 +771,42 @@
 
                     card.innerHTML = `
                         <div class="device-info">
-                            <div style="display: flex; align-items: center; gap: 8px;">
-                                <h3>${escapeHtml(d.name)}</h3>
-                                ${isOnline ? '<span style="width: 8px; height: 8px; background: #2ecc71; border-radius: 50%; display: inline-block;"></span>' : ''}
+                            <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 8px;">
+                                <div style="display: flex; align-items: center; gap: 8px; flex: 1; min-width: 0;">
+                                    <span style="font-size: 18px;">📱</span>
+                                    <h3 style="flex: 1; min-width: 0;">${escapeHtml(d.name)}</h3>
+                                    ${isOnline ? '<span style="width: 8px; height: 8px; background: #2ecc71; border-radius: 50%; display: inline-block; box-shadow: 0 0 8px rgba(46, 204, 113, 0.6);"></span>' : ''}
+                                </div>
                             </div>
-                            <p>${d.hash.substring(0, 8).toUpperCase()} | Был в сети: ${formatDate(lastSeen)}</p>
+                            <p style="display: flex; align-items: center; gap: 6px; flex-wrap: wrap;">
+                                <span style="background: rgba(255,255,255,0.08); padding: 2px 8px; border-radius: 6px; font-size: 11px;">${escapeHtml(d.hash.substring(0, 8).toUpperCase())}</span>
+                                <span style="opacity: 0.6;">•</span>
+                                <span>${formatDate(lastSeen)}</span>
+                                ${isOnline ? '<span style="color: #2ecc71; margin-left: auto;">Онлайн</span>' : ''}
+                            </p>
                         </div>
                         <div class="device-actions">
-                            <button onclick="openRenameModal(${d.id}, '${escapeHtml(d.name)}')" class="btn-icon">✏️</button>
-                            <button onclick="confirmDelete(${d.id})" class="btn-icon btn-delete">🗑</button>
+                            <button data-id="${d.id}" data-name="${escapeHtml(d.name)}" class="btn-icon btn-rename" title="Переименовать">✏️</button>
+                            <button data-id="${d.id}" class="btn-icon btn-delete" title="Удалить">🗑</button>
                         </div>
                     `;
                     listDiv.appendChild(card);
                 });
+
+                // Навешиваем обработчики после рендера
+                document.querySelectorAll('.btn-rename').forEach(btn => {
+                    btn.addEventListener('click', () => {
+                        openRenameModal(parseInt(btn.dataset.id), btn.dataset.name);
+                    });
+                });
+
+                document.querySelectorAll('.btn-delete').forEach(btn => {
+                    btn.addEventListener('click', () => {
+                        confirmDelete(parseInt(btn.dataset.id));
+                    });
+                });
             } catch (e) {
+                console.error(e);
                 listDiv.innerHTML = '<div style="color: #e74c3c; text-align: center;">Ошибка загрузки устройств</div>';
             }
         }
@@ -594,7 +835,6 @@
             document.getElementById(`${section}-section`).classList.add('active');
 
             if (section === 'devices') fetchDevices();
-            if (section === 'home') fetchMe();
         }
 
         function copySubUrl() {
@@ -622,44 +862,60 @@
         // Device Management
         function openRenameModal(id, name) {
             selectedDeviceId = id;
-            document.getElementById('newDeviceName').value = name;
+            document.getElementById('newDeviceName').value = name || '';
             document.getElementById('renameModal').style.display = 'flex';
         }
 
         function closeRenameModal() {
             document.getElementById('renameModal').style.display = 'none';
+            selectedDeviceId = null;
         }
 
         async function saveDeviceName() {
-            const newName = document.getElementById('newDeviceName').value;
-            if (!newName) return;
+            const newName = document.getElementById('newDeviceName').value.trim();
+            if (!newName || !selectedDeviceId) return;
 
             try {
-                await fetch(`${API_BASE}/rename_device`, {
+                const res = await fetch(`${API_BASE}/rename_device`, {
                     method: 'POST',
-                    headers: { 'Authorization': authData, 'Content-Type': 'application/json' },
+                    headers: { 
+                        'Authorization': authData, 
+                        'Content-Type': 'application/json' 
+                    },
                     body: JSON.stringify({ id: selectedDeviceId, name: newName })
                 });
-                closeRenameModal();
-                fetchDevices();
+                if (res.ok) {
+                    closeRenameModal();
+                    fetchDevices();
+                } else {
+                    tg.showAlert("Не удалось переименовать");
+                }
             } catch (e) {
+                console.error(e);
                 tg.showAlert("Не удалось переименовать");
             }
         }
 
         function confirmDelete(id) {
             tg.showConfirm("Вы уверены, что хотите удалить это устройство?", async (ok) => {
-                if (ok) {
-                    try {
-                        await fetch(`${API_BASE}/delete_device`, {
-                            method: 'POST',
-                            headers: { 'Authorization': authData, 'Content-Type': 'application/json' },
-                            body: JSON.stringify({ id })
-                        });
+                if (!ok) return;
+                try {
+                    const res = await fetch(`${API_BASE}/delete_device`, {
+                        method: 'POST',
+                        headers: { 
+                            'Authorization': authData, 
+                            'Content-Type': 'application/json' 
+                        },
+                        body: JSON.stringify({ id })
+                    });
+                    if (res.ok) {
                         fetchDevices();
-                    } catch (e) {
+                    } else {
                         tg.showAlert("Ошибка при удалении");
                     }
+                } catch (e) {
+                    console.error(e);
+                    tg.showAlert("Ошибка при удалении");
                 }
             });
         }
@@ -710,15 +966,11 @@
                     resultP.style.color = '#2ecc71';
                     resultP.innerText = `Успешно! Начислено ${data.amount} ₽`;
                     input.value = '';
-                    fetchMe();
                 }
             } catch (e) {
                 tg.showAlert("Ошибка при активации купона.");
             }
         }
-
-        // Init
-        fetchMe();
     </script>
 </body>
 

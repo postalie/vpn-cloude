@@ -153,6 +153,10 @@ async def create_tables():
             await db.execute('ALTER TABLE devices ADD COLUMN last_seen DATETIME')
             await db.execute('UPDATE devices SET last_seen = CURRENT_TIMESTAMP')
 
+        # Индекс для ускорения поиска дубликатов
+        await db.execute('CREATE INDEX IF NOT EXISTS idx_devices_sub_uuid ON devices(sub_uuid)')
+        await db.execute('CREATE INDEX IF NOT EXISTS idx_devices_hash ON devices(device_hash)')
+
         # Таблица обработанных счетов
         await db.execute('''
             CREATE TABLE IF NOT EXISTS processed_invoices (
@@ -487,8 +491,8 @@ async def reset_subscription_uuid(user_id):
 
 async def register_device(sub_uuid, device_hash):
     """
-    Регистрирует новое устройство для UUID. 
-    Возвращает: (success, current_count, limit, user_id)
+    Регистрирует новое устройство для UUID.
+    Возвращает: (success, current_count, limit, user_id, is_new)
     """
     async with aiosqlite.connect(DB_NAME) as db:
         # Получаем лимит и user_id
@@ -497,7 +501,7 @@ async def register_device(sub_uuid, device_hash):
             if not sub:
                 print(f"DEBUG DB: No subscription found for UUID {sub_uuid}")
                 return False, 0, 0, None
-            
+
             user_id, limit = sub
             print(f"DEBUG DB: Found sub for User {user_id}, Limit {limit}")
 
@@ -515,7 +519,7 @@ async def register_device(sub_uuid, device_hash):
         # Новое устройство, проверяем лимит
         async with db.execute('SELECT COUNT(*) FROM devices WHERE sub_uuid = ?', (sub_uuid,)) as cursor:
             current_count = (await cursor.fetchone())[0]
-            
+
         if current_count >= limit:
             return False, current_count, limit, user_id, False
 
@@ -523,6 +527,27 @@ async def register_device(sub_uuid, device_hash):
         await db.execute('INSERT INTO devices (sub_uuid, device_hash, device_name, last_seen) VALUES (?, ?, ?, CURRENT_TIMESTAMP)', (sub_uuid, device_hash, "Новое устройство"))
         await db.commit()
         return True, current_count + 1, limit, user_id, True # is_new = True
+
+async def cleanup_duplicate_devices(sub_uuid, device_hash):
+    """
+    Очищает дубликаты устройств для одного UUID.
+    Оставляет только одно устройство с данным device_hash (последнее по last_seen).
+    """
+    async with aiosqlite.connect(DB_NAME) as db:
+        # Находим все устройства с таким device_hash для данного sub_uuid
+        async with db.execute('''
+            SELECT id FROM devices 
+            WHERE sub_uuid = ? AND device_hash = ?
+            ORDER BY last_seen DESC
+        ''', (sub_uuid, device_hash)) as cursor:
+            rows = await cursor.fetchall()
+        
+        # Если больше одного устройства - удаляем дубликаты (оставляем первое)
+        if len(rows) > 1:
+            for row in rows[1:]:
+                await db.execute('DELETE FROM devices WHERE id = ?', (row[0],))
+            await db.commit()
+            print(f"DEBUG DB: Cleaned up {len(rows) - 1} duplicate devices for {sub_uuid}")
 
 async def clear_devices_by_uuid(sub_uuid):
     """Очищает список устройств для UUID"""

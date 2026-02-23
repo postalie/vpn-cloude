@@ -80,7 +80,7 @@ async def captcha_solved(callback: types.CallbackQuery, state: FSMContext):
     msg = await callback.message.answer("✅ Подключено", reply_markup=ReplyKeyboardRemove())
     await msg.delete()
     # И сразу следом главное меню
-    await callback.message.answer("Загружаем меню...", reply_markup=await get_main_menu(callback.from_user.id))
+    await callback.message.answer("Загружаем меню...", reply_markup=get_main_menu())
 
 @router.callback_query(F.data == "profile")
 async def show_profile_callback(callback: types.CallbackQuery):
@@ -156,6 +156,6 @@ async def back_to_main_menu(callback: types.CallbackQuery, state: FSMContext):
         "Чтобы подключить VPN или пополнить баланс, используй меню ниже 👇"
     )
     # Отправляем НОВОЕ сообщение вместо редактирования
-    await callback.message.answer(text, parse_mode="HTML", reply_markup=await get_main_menu())
+    await callback.message.answer(text, parse_mode="HTML", reply_markup=get_main_menu())
     await callback.answer()
 

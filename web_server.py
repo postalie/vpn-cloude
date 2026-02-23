@@ -2,11 +2,12 @@ from aiohttp import web
 import base64
 from datetime import datetime
 from database import (
-    get_all_server_nodes, get_stats, get_subscription_by_uuid, 
-    register_device, get_user, get_subscription_info, 
+    get_all_server_nodes, get_stats, get_subscription_by_uuid,
+    register_device, get_user, get_subscription_info,
     get_user_devices, rename_device, delete_device,
     get_user_by_token, activate_promo, extend_subscription,
-    add_subscription, get_discount, use_discount
+    add_subscription, get_discount, use_discount,
+    cleanup_duplicate_devices
 )
 from config import API_SECRET, BOT_TOKEN, BASE_URL, VPN_PRICE
 from utils import shorten_url, get_happ_github_link
@@ -71,11 +72,58 @@ async def sub_handler(request):
 
     # --- ПРОВЕРКА ЛИМИТА УСТРОЙСТВ (АВТОМАТИЧЕСКАЯ) ---
     ua = request.headers.get('User-Agent', 'unknown')
-    
+
     # --- УЛУЧШЕННЫЙ ПАРСИНГ USER-AGENT ---
     import re
     ua_lower = ua.lower()
+
+    # === ФИЛЬТРАЦИЯ БРАУЗЕРНЫХ USER-AGENT ===
+    # Если это браузер (Chrome, Safari, Firefox, Edge и т.д.) - блокируем
+    browser_patterns = [
+        r"mozilla/5\.0.*chrome/\d+",
+        r"mozilla/5\.0.*safari/\d+",
+        r"mozilla/5\.0.*firefox/\d+",
+        r"mozilla/5\.0.*edg/\d+",
+        r"mozilla/5\.0.*msie\s+\d+",
+        r"mozilla/5\.0.*trident/",
+        r"mozilla/5\.0.*opera/",
+        r"mozilla/5\.0.*opr/",
+        r"mozilla/5\.0.*ucbrowser/",
+    ]
     
+    is_browser = False
+    for pattern in browser_patterns:
+        if re.search(pattern, ua_lower):
+            is_browser = True
+            break
+    
+    # Если это браузер - возвращаем ошибку лимита
+    if is_browser:
+        bot = request.app['bot']
+        # Пытаемся получить user_id для уведомления
+        sub_data_check = await get_subscription_by_uuid(sub_uuid)
+        if sub_data_check:
+            user_id_notify = sub_data_check[0]
+            try:
+                msg = (
+                    "⚠️ <b>Обнаружен браузерный запрос!</b>\n\n"
+                    "Ваша подписка была запрошена через браузер (Chrome/Safari/и т.д.).\n"
+                    "Это не является VPN-приложением и не будет учитываться как устройство.\n\n"
+                    "<i>Используйте специальные приложения (Happ, V2Ray, Shadowrocket) для подключения.</i>"
+                )
+                await bot.send_message(user_id_notify, msg, parse_mode="HTML")
+            except: pass
+        # Возвращаем список ключей с сообщением об ошибке
+        error_nodes = [
+            f"vless://00000000-0000-0000-0000-000000000000@127.0.0.1:443?encryption=none&security=none#🚨 Ошибка",
+            f"vless://00000000-0000-0000-0000-000000000000@127.0.0.1:443?encryption=none&security=none#‼️ Браузеры не поддерживаются‼️",
+            f"vless://00000000-0000-0000-0000-000000000000@127.0.0.1:443?encryption=none&security=none#Бот: @cloudeVPNbot"
+        ]
+        text_warning = "\n".join(error_nodes)
+        b64_warning = base64.b64encode(text_warning.encode('utf-8')).decode('utf-8')
+        return web.Response(text=b64_warning, content_type="text/plain")
+    # =========================================
+
     model = "Unknown Device"
     platform = "Unknown"
     app_info = "Generic Client"
@@ -88,18 +136,18 @@ async def sub_handler(request):
             app_info = f"{app_parts[0]} / {app_parts[1]}"
         else:
             app_info = app_parts[0]
-    
+
     # 2. Определяем платформу и версию
     # Сначала проверяем специальные заголовки от приложений (X-Device-Os, X-Ver-Os)
     os_header = request.headers.get('X-Device-Os')
     os_ver_header = request.headers.get('X-Ver-Os')
-    
+
     if os_header:
         if os_ver_header:
             platform = f"{os_header} / {os_ver_header}"
         else:
             platform = os_header
-    
+
     if platform == "Unknown":
         # Если заголовков нет, парсим User-Agent
         if "android" in ua_lower:
@@ -140,7 +188,7 @@ async def sub_handler(request):
                 m_match = re.search(r"Android\s+[\d.]+;\s*([^;)]+)", ua)
                 if m_match:
                     model = m_match.group(1).split("Build/")[0].strip()
-        
+
         elif "iOS" in platform:
             if "iPhone" in ua: model = "iPhone"
             elif "iPad" in ua: model = "iPad"
@@ -150,13 +198,19 @@ async def sub_handler(request):
         elif "Happ" in app_info: model = "Mobile Device"
 
     import hashlib
-    # Привязка теперь ТОЛЬКО по User-Agent (без IP как просили)
-    # Используем MD5 от UA как HWID
-    device_hash = hashlib.md5(ua.encode()).hexdigest().upper()[:16]
+    # Привязка по модели устройства + платформе (БЕЗ версии приложения!)
+    # Формируем ключ из модели и платформы, чтобы разные версии одного приложения
+    # считались одним устройством
+    device_key = f"{model}|{platform.split('/')[0].strip()}"  # Берём только базовую платформу без версии
+    device_hash = hashlib.md5(device_key.encode()).hexdigest().upper()[:16]
 
     # Пытаемся зарегистировать устройство
     success, current_count, limit, user_id, is_new = await register_device(sub_uuid, device_hash)
-    
+
+    # Автоочистка дубликатов (на случай если они были созданы ранее)
+    from database import cleanup_duplicate_devices
+    await cleanup_duplicate_devices(sub_uuid, device_hash)
+
     bot = request.app['bot']
 
     if is_new and user_id:
@@ -255,12 +309,6 @@ async def sub_handler(request):
         final_nodes.append(jqos_node)
     # -------------------------------------------------------
 
-    # Ссылка на бота по просьбе юзера
-    final_nodes.append(f"═════════════════════════")
-    final_nodes.append(f"🚀 Ссылка на бота: t.me/cloudevpnbot")
-    final_nodes.append(f"Лимит устройств: {limit}")
-    final_nodes.append(f"═════════════════════════")
-
     if nodes:
         import urllib.parse
         for node_data, node_name in nodes:
@@ -346,7 +394,10 @@ async def register_device_handler(request):
 
     success, current_count, limit, user_id, is_new = await register_device(sub_uuid, device_hash)
     print(f"DEBUG: register_device result - Success: {success}, Count: {current_count}, Limit: {limit}, User: {user_id}")
-    
+
+    # Автоочистка дубликатов
+    await cleanup_duplicate_devices(sub_uuid, device_hash)
+
     bot = request.app['bot']
 
     if not success:
@@ -501,26 +552,26 @@ async def buy_subscription_handler(request):
     user_id = await authenticate_user(request)
     if not user_id:
         return web.json_response({"error": "Unauthorized"}, status=401)
-    
+
     from database import decrease_balance
-    
+
     data = await request.json()
     coupon_code = data.get('coupon')
-    
-    price = VPN_PRICE
+
+    price = 100  # Фиксированная цена подписки
     if coupon_code:
         discount = await get_discount(coupon_code)
         if discount and discount[1] > 0:
             percent = discount[0]
-            price = int(VPN_PRICE * (1 - percent / 100))
-    
+            price = int(100 * (1 - percent / 100))
+
     success = await decrease_balance(user_id, price)
     if not success:
         return web.json_response({"error": "Недостаточно средств"}, status=400)
-    
+
     if coupon_code:
         await use_discount(coupon_code)
-        
+
     existing = await get_subscription_info(user_id)
     if existing:
         await extend_subscription(user_id, days=3650)
@@ -528,7 +579,7 @@ async def buy_subscription_handler(request):
         import uuid
         sub_uuid = str(uuid.uuid4())
         await add_subscription(user_id, sub_uuid, days=3650)
-        
+
     return web.json_response({"status": "ok", "message": "Подписка успешно оформлена"})
 
 async def activate_coupon_handler(request):
@@ -560,9 +611,55 @@ async def health_check(request):
 
 # --- SERVER SETUP ---
 
+async def cleanup_all_duplicates():
+    """
+    Очищает все дубликаты устройств в базе данных при запуске сервера,
+    а также удаляет устройства, созданные из браузеров.
+    """
+    import aiosqlite
+    import hashlib
+    from config import DB_NAME
+
+    async with aiosqlite.connect(DB_NAME) as db:
+        # 1. Сначала удаляем устройства с браузерными хешами
+        # Это хеши, которые могли быть созданы до добавления фильтрации браузеров
+        browser_device_keys = [
+            "Chrome/Windows", "Safari/MacOS", "Firefox/Windows",
+            "Chrome/MacOS", "Chrome/Linux", "Edge/Windows",
+            "Chrome/Android", "Safari/iOS"
+        ]
+        
+        for browser_key in browser_device_keys:
+            browser_hash = hashlib.md5(browser_key.encode()).hexdigest().upper()[:16]
+            await db.execute('DELETE FROM devices WHERE device_hash = ?', (browser_hash,))
+        
+        await db.commit()
+        print("DEBUG: Removed browser-generated devices from database")
+        
+        # 2. Получаем все уникальные sub_uuid из таблицы devices
+        async with db.execute('SELECT DISTINCT sub_uuid FROM devices') as cursor:
+            sub_uuids = [row[0] for row in await cursor.fetchall()]
+
+        # 3. Для каждого UUID чистим дубликаты по всем device_hash
+        for sub_uuid in sub_uuids:
+            async with db.execute('SELECT DISTINCT device_hash FROM devices WHERE sub_uuid = ?', (sub_uuid,)) as cursor:
+                device_hashes = [row[0] for row in await cursor.fetchall()]
+
+            for device_hash in device_hashes:
+                await cleanup_duplicate_devices(sub_uuid, device_hash)
+
+    print("DEBUG: Completed startup cleanup of duplicate devices")
+
 def setup_web_server(bot):
     app = web.Application()
     app['bot'] = bot
+
+    # Запускаем автоочистку дубликатов при старте
+    from aiohttp import web
+    async def on_startup(app):
+        await cleanup_all_duplicates()
+    
+    app.on_startup.append(on_startup)
     
     # Регистрация маршрутов
     app.router.add_get('/sub/{uuid}', sub_handler)

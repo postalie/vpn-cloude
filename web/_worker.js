@@ -1,3 +1,8 @@
+// Хелпер — аналог питоновского b64()
+function b64(text) {
+    return "base64:" + btoa(String.fromCharCode(...new TextEncoder().encode(text)));
+}
+
 export default {
     async fetch(request, env) {
         try {
@@ -18,7 +23,6 @@ export default {
                     body: request.method !== 'GET' && request.method !== 'HEAD' ? await request.arrayBuffer() : null
                 });
 
-                // Возвращаем ответ от бэкенда с сохранением CORS
                 const responseHeaders = new Headers(apiResponse.headers);
                 responseHeaders.set("Access-Control-Allow-Origin", "*");
 
@@ -39,14 +43,12 @@ export default {
                 uuid = pathParts[1];
             }
 
-            // Если это не API и не подписка — отдаем файлы сайта (TMA)
             if (!uuid) {
                 return env.ASSETS.fetch(request);
             }
 
-            // ФУНКЦИЯ ДЛЯ ОТВЕТА С ОШИБКОЙ
             const sendErrorConfig = (message) => {
-                const fakeConfig = `vless://00000000-0000-0000-0000-000000000000@127.0.0.1:443?encryption=none&security=none#${message}`;
+                const fakeConfig = `vless://00000000-0000-0000-0000-000000000000@cloudevpn.cfd?encryption=none&security=none#${message}`;
                 const base64Config = btoa(String.fromCharCode(...new TextEncoder().encode(fakeConfig)));
 
                 return new Response(base64Config, {
@@ -58,12 +60,10 @@ export default {
                 });
             };
 
-            // ЗАПРОС К БЭКЕНДУ
             const railwayUrl = `https://vpn-cloude-production.up.railway.app/api/sub/${uuid}`;
             let response;
 
             try {
-                // Пакетная передача ВСЕХ заголовков (для передачи модели устройства)
                 const newHeaders = new Headers(request.headers);
                 newHeaders.set("X-API-Key", "CloudeVpnVOIDAPI_1488");
 
@@ -72,14 +72,12 @@ export default {
                 return sendErrorConfig("🚨 Ошибка сервера. Попробуйте позже");
             }
 
-            // Если UUID не найден на бэкенде
             if (response.status === 404 || !response.ok) {
                 return sendErrorConfig("🚨 Подписка недоступна");
             }
 
             const subInfo = response.headers.get("Subscription-Userinfo") || "";
 
-            // ПРОВЕРКА СРОКА ГОДНОСТИ
             if (subInfo.includes("expire=")) {
                 const expireMatch = subInfo.match(/expire=(\d+)/);
                 if (expireMatch) {
@@ -90,19 +88,22 @@ export default {
                 }
             }
 
-            // УСПЕШНЫЙ ОТВЕТ
             const data = await response.text();
 
             return new Response(data, {
                 headers: {
                     "Content-Type": "text/plain; charset=utf-8",
                     "Subscription-Userinfo": subInfo,
-                    "Profile-Title": "☁️ CloudVPN",
+                    "Profile-Title": b64("🌥 Cloud VPN"),
                     "Profile-Update-Interval": "1",
                     "Support-Url": "https://t.me/CloudeVPNbot",
                     "Profile-Web-Page-Url": "https://t.me/soldenchain",
-                    "announce": "ㅤㅤㅤㅤㅤНе работает VPN? нажми на 🔄 для обновленияㅤㅤㅤㅤㅤ📲 LTE обходы в конце списка",
-                    "Cache-Control": "no-cache"
+                    "announce": b64(
+                        "🌥 Облако свободного интернета без ограничений\n" +
+                        "Обходы в конце списка ⚠️"
+                    ),
+                    "Cache-Control": "no-cache",
+                    "hide-settings": "1"
                 }
             });
 
