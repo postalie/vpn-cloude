@@ -655,10 +655,9 @@ def setup_web_server(bot):
     app['bot'] = bot
 
     # Запускаем автоочистку дубликатов при старте
-    from aiohttp import web
     async def on_startup(app):
         await cleanup_all_duplicates()
-    
+
     app.on_startup.append(on_startup)
     
     # Регистрация маршрутов
