@@ -58,30 +58,32 @@ def encrypt_link(url: str) -> str:
 def create_encrypted_happ_link(user_id: int, sub_uuid: str, domain: str) -> str:
     """
     Создает зашифрованную ссылку для Happ через crypto.happ.su
-    
+
     Args:
         user_id: ID пользователя
         sub_uuid: UUID подписки
         domain: Домен сервиса (например, cloudevpn.cfd)
-    
+
     Returns:
         Зашифрованная ссылка для Happ
     """
     from config import GITHUB_PAGE_URL
-    
+
     # Создаем исходную ссылку
     subscription_url = f"https://{domain}/add/{user_id}/{sub_uuid}"
-    
+
     # Шифруем через наш сервис
     encrypted = encrypt_link(subscription_url)
-    
+
     if encrypted:
         # Кодируем в URL-safe base64 для GitHub Pages
         safe_encrypted = base64.urlsafe_b64encode(encrypted.encode()).decode().rstrip('=')
         return f"{GITHUB_PAGE_URL}/{safe_encrypted}"
-    
-    # Fallback: возвращаем обычную ссылку
-    return subscription_url
+
+    # Fallback: просто кодируем subscription_url в base64
+    # 404.html на GitHub сможет это расшифровать
+    safe_encrypted = base64.urlsafe_b64encode(subscription_url.encode()).decode().rstrip('=')
+    return f"{GITHUB_PAGE_URL}/{safe_encrypted}"
 
 
 def generate_short_hash(url: str, length: int = 8) -> str:

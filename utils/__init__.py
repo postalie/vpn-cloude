@@ -49,7 +49,11 @@ def encrypt_subscription_happ(subscription_url):
     try:
         # Используем наш собственный сервис на основе crypto.happ.su
         encrypted = encrypt_link(subscription_url)
-        return encrypted
+        if encrypted:
+            return encrypted
+        
+        # Fallback: кодируем саму ссылку в base64
+        return base64.urlsafe_b64encode(subscription_url.encode()).decode().rstrip('=')
     except Exception as e:
         print(f"Ошибка шифрования через crypto.happ.su: {e}")
         return None
