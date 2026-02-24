@@ -35,7 +35,7 @@ def get_dl_link(url: str) -> str:
             return link['href']
     except Exception as e:
         print(f"Ошибка получения dl ссылки: {e}")
-    
+    print(f"ссылка от крипто хапп {link}")
     return None
 
 
@@ -67,21 +67,19 @@ def create_encrypted_happ_link(user_id: int, sub_uuid: str, domain: str) -> str:
     from config import GITHUB_PAGE_URL
 
     subscription_url = f"https://{domain}/add/{user_id}/{sub_uuid}"
-    encrypted = encrypt_link(subscription_url)
+    encrypted = encrypt_link(subscription_url)  # возвращает URL-encoded строку
 
     if encrypted:
-        # encrypted уже URL-encoded строка вида: rZ.w%C3%B67'...
-        # Просто добавляем префикс и кодируем КАК СТРОКУ (не декодируя!)
+        # НЕ делаем unquote! encrypted — это уже готовая строка для happ://
         encrypted_with_prefix = f"crypt5/{encrypted}"
         
-        # Кодируем строку как есть в base64
+        # Кодируем строку как есть
         safe_encrypted = base64.urlsafe_b64encode(
             encrypted_with_prefix.encode('utf-8')
         ).decode().rstrip('=')
         
         return f"{GITHUB_PAGE_URL}/{safe_encrypted}"
 
-    # Fallback
     safe_encrypted = base64.urlsafe_b64encode(
         subscription_url.encode('utf-8')
     ).decode().rstrip('=')
