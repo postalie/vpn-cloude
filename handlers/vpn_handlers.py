@@ -58,7 +58,7 @@ async def show_connection_menu(callback: types.CallbackQuery, state: FSMContext)
         encrypted_data = encrypt_subscription_happ(subscription_url)
         
         if encrypted_data:
-            deep_link_native = f"happ://crypt3/{encrypted_data}"
+            deep_link_native = f"happ://crypt5/{encrypted_data}"
         else:
             # Fallback если шифрование не сработало
             deep_link_native = short_link
@@ -92,6 +92,8 @@ async def show_connection_menu(callback: types.CallbackQuery, state: FSMContext)
             parse_mode="HTML"
         )
         
+        from keyboards import get_active_sub_kb
+        
         msg_text = await callback.message.answer(
             f"🔗 <b>Способ 2 (быстрый переход):</b>\n"
             f"1️⃣ Нажмите кнопку <b>«Подключить в Happ»</b>\n"
@@ -99,7 +101,7 @@ async def show_connection_menu(callback: types.CallbackQuery, state: FSMContext)
             f"3️⃣ Включите VPN главным тумблером\n\n"
             f"<i>💡 Для стабильной работы сайта требуется отключить VPN сервисы!</i>\n",
             parse_mode="HTML",
-            reply_markup=(short_link)
+            reply_markup=get_active_sub_kb(short_link)
         )
         
         # Сохраняем новые ID
