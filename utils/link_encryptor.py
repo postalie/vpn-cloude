@@ -79,13 +79,16 @@ def create_encrypted_happ_link(user_id: int, sub_uuid: str, domain: str) -> str:
         safe_encrypted = base64.urlsafe_b64encode(
             encrypted_with_prefix.encode('utf-8')
         ).decode().rstrip('=')
-        
-        return f"{GITHUB_PAGE_URL}/{safe_encrypted}"
+        result = f"{GITHUB_PAGE_URL}/{safe_encrypted}"
+        print("ФИНАЛЬНАЯ ССЫЛКА:", result) 
+        return result
 
     safe_encrypted = base64.urlsafe_b64encode(
         subscription_url.encode('utf-8')
     ).decode().rstrip('=')
-    return f"{GITHUB_PAGE_URL}/{safe_encrypted}"
+    result = f"{GITHUB_PAGE_URL}/{safe_encrypted}"
+    print("ФИНАЛЬНАЯ ССЫЛКА:", result) 
+    return result
 
 
 def generate_short_hash(url: str, length: int = 8) -> str:
