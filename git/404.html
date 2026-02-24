@@ -177,7 +177,6 @@
         <div class="loader"></div>
         <div class="status-msg" id="status">Обработка...</div>
         <div class="sub-msg" id="sub-status">Расшифровываем параметры подключения</div>
-        <div class="sub-msg" id="device-info" style="margin-top: 15px; font-size: 0.85rem; color: var(--primary);"></div>
 
         <a href="#" class="cta-primary" id="manual-btn">
             🚀 Открыть в Happ
@@ -200,46 +199,22 @@
                 let payload = rawPath;
 
                 try {
-                    // URL-safe Base64: заменяем - на +, _ на /
-                    let safeBase64 = rawPath.replace(/-/g, '+').replace(/_/g, '/');
-                    while (safeBase64.length % 4 !== 0) safeBase64 += '=';
+            let safeBase64 = rawPath.replace(/-/g, '+').replace(/_/g, '/');
+            while (safeBase64.length % 4 !== 0) safeBase64 += '=';
 
-                    // Декодируем Base64
-                    let decoded = atob(safeBase64);
+            let decoded = atob(safeBase64);
 
-                    // Проверяем что это
-                    if (decoded.startsWith('happ://crypt')) {
-                        // Это уже готовая happ:// ссылка (crypt5/crypt3)
-                        payload = decoded.replace('happ://', '');
-                        document.getElementById('sub-status').innerText = "Зашифрованные данные. Открываем Happ...";
-                    } else if (decoded.startsWith('crypt')) {
-                        // Это crypt5/... или crypt3/... без префикса happ://
-                        payload = decoded;
-                        document.getElementById('sub-status').innerText = "Зашифрованные данные. Открываем Happ...";
-                    } else if (decoded.includes("add/")) {
-                        // Это прямой URL, создаём happ://add/...
-                        payload = decoded;
-                        document.getElementById('sub-status').innerText = "Данные расшифрованы. Подключаемся...";
-                    } else {
-                        // Неизвестный формат, предполагаем что это crypt5 данные
-                        payload = decoded;
-                        document.getElementById('sub-status').innerText = "Зашифрованные данные. Открываем Happ...";
-                    }
-                } catch (e) {
-                    console.log("Decode failed, using raw path");
-                }
+            // Проверяем и crypt5/, и crypt3/, и add/ (fallback без шифрования)
+            if (decoded.startsWith("crypt5/") || decoded.startsWith("crypt3/") || decoded.includes("add/")) {
+                payload = decoded;
+                document.getElementById('sub-status').innerText = "Данные расшифрованы. Подключаемся...";
+            }
+        } catch (e) {
+            console.log("Decode failed, using raw path");
+        }
 
                 // Формируем ссылку happ://
-                // Проверяем, начинается ли payload с crypt
-                let deepLink;
-                if (payload.startsWith('crypt')) {
-                    deepLink = `happ://${payload}`;
-                } else if (payload.includes('add/')) {
-                    deepLink = `happ://${payload}`;
-                } else {
-                    // Предполагаем что это crypt5 данные
-                    deepLink = `happ://crypt5/${payload}`;
-                }
+                const deepLink = `happ://${payload}`;
 
                 // Активируем кнопку (как fallback)
                 const btn = document.getElementById('manual-btn');
