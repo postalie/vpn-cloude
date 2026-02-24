@@ -64,38 +64,27 @@ def encrypt_link(url: str) -> str:
 
 
 def create_encrypted_happ_link(user_id: int, sub_uuid: str, domain: str) -> str:
-    """
-    Создает зашифрованную ссылку для Happ через crypto.happ.su
-
-    Args:
-        user_id: ID пользователя
-        sub_uuid: UUID подписки
-        domain: Домен сервиса (например, cloudevpn.cfd)
-
-    Returns:
-        Зашифрованная ссылка для Happ
-    """
     from config import GITHUB_PAGE_URL
 
-    # Создаем исходную ссылку
     subscription_url = f"https://{domain}/add/{user_id}/{sub_uuid}"
-
-    # Шифруем через наш сервис
     encrypted = encrypt_link(subscription_url)
 
     if encrypted:
-        # Добавляем префикс crypt5/ для Happ
+        # encrypted уже URL-encoded строка вида: rZ.w%C3%B67'...
+        # Просто добавляем префикс и кодируем КАК СТРОКУ (не декодируя!)
         encrypted_with_prefix = f"crypt5/{encrypted}"
-
-        # URL-декодируем если есть % (crypto.happ.su возвращает encoded)
-        decrypted_enc = urllib.parse.unquote(encrypted_with_prefix)
-
-        # Кодируем в base64 для GitHub Pages
-        safe_encrypted = base64.b64encode(decrypted_enc.encode()).decode().rstrip('=')
+        
+        # Кодируем строку как есть в base64
+        safe_encrypted = base64.urlsafe_b64encode(
+            encrypted_with_prefix.encode('utf-8')
+        ).decode().rstrip('=')
+        
         return f"{GITHUB_PAGE_URL}/{safe_encrypted}"
 
-    # Fallback: просто кодируем subscription_url в base64
-    safe_encrypted = base64.b64encode(subscription_url.encode()).decode().rstrip('=')
+    # Fallback
+    safe_encrypted = base64.urlsafe_b64encode(
+        subscription_url.encode('utf-8')
+    ).decode().rstrip('=')
     return f"{GITHUB_PAGE_URL}/{safe_encrypted}"
 
 
