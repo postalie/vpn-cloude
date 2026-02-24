@@ -67,13 +67,12 @@ def create_encrypted_happ_link(user_id: int, sub_uuid: str, domain: str) -> str:
     from config import GITHUB_PAGE_URL
 
     subscription_url = f"https://{domain}/add/{user_id}/{sub_uuid}"
-    encrypted = encrypt_link(subscription_url)  # возвращает URL-encoded строку
+    encrypted = encrypt_link(subscription_url)
 
     if encrypted:
-        # НЕ делаем unquote! encrypted — это уже готовая строка для happ://
         encrypted_with_prefix = f"crypt5/{encrypted}"
         
-        # Кодируем строку как есть
+        # БЕЗ unquote! Просто кодируем строку как есть
         safe_encrypted = base64.urlsafe_b64encode(
             encrypted_with_prefix.encode('utf-8')
         ).decode().rstrip('=')
@@ -92,3 +91,7 @@ def generate_short_hash(url: str, length: int = 8) -> str:
     """
     hash_object = hashlib.md5(url.encode())
     return hash_object.hexdigest()[:length]
+
+# subscription_url = f"https://cloudevpn.cfd/add/1699548539/68b678ad-52ed-4c48-a49c-b430235c6d2c"
+# dl_link = get_dl_link(subscription_url)
+# print(dl_link)
