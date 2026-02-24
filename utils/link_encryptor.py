@@ -45,19 +45,22 @@ def encrypt_link(url: str) -> str:
     Возвращает зашифрованную ссылку (без happ://crypt5/)
     """
     dl_link = get_dl_link(url)
-
+    print(dl_link)
     if dl_link:
         # Формат: happ://crypt5/<encrypted_data> (URL-encoded)
         if dl_link.startswith('happ://crypt5/'):
             encrypted = dl_link.replace('happ://crypt5/', '')
+            print("crypt5", encrypted)
             return encrypted
         # Формат: happ://crypt3/<encrypted_data> (URL-encoded)
         elif dl_link.startswith('happ://crypt3/'):
             encrypted = dl_link.replace('happ://crypt3/', '')
+            print("crypt3", encrypted)
             return encrypted
         # Формат: https://crypto.happ.su/dl#<encrypted_data>
         elif '#' in dl_link:
             encrypted = dl_link.split('#', 1)[1]
+            print("# в ссылке",encrypted)
             return encrypted
 
     return None
