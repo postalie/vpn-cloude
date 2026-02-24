@@ -1,0 +1,446 @@
+<!DOCTYPE html>
+<html lang="ru">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+    <title>Cloude VPN | Устройства - Preview</title>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;700&family=Fira+Code:wght@400;500;600&family=Nunito+Sans:wght@400;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            color-scheme: dark;
+            --bg-color: #0b1018;
+            --bg-2: #121a27;
+            --card-bg: rgba(24, 31, 45, 0.9);
+            --card-bg-2: rgba(31, 40, 57, 0.88);
+            --surface-3: #1c2635;
+            --border: rgba(143, 168, 206, 0.2);
+            --border-strong: rgba(143, 168, 206, 0.36);
+            --text-main: #f3f6fb;
+            --text-dim: #a5afc3;
+            --accent: #2f89ff;
+            --accent-2: #55b2ff;
+            --success: #79dea3;
+            --danger: #ff7b7b;
+            --radius: 16px;
+            --shadow: 0 10px 35px rgba(4, 8, 15, 0.38);
+        }
+
+        * {
+            box-sizing: border-box;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        body {
+            background:
+                radial-gradient(1200px 620px at -12% -20%, rgba(47, 137, 255, 0.19), transparent 65%),
+                radial-gradient(880px 460px at 112% 6%, rgba(38, 190, 177, 0.14), transparent 62%),
+                linear-gradient(165deg, var(--bg-color) 0%, var(--bg-2) 100%);
+            color: var(--text-main);
+            font-family: 'Nunito Sans', 'Segoe UI', sans-serif;
+            margin: 0;
+            padding: 20px;
+            min-height: 100vh;
+        }
+
+        .container {
+            max-width: 600px;
+            margin: 0 auto;
+        }
+
+        h2 {
+            font-size: 22px;
+            font-weight: 700;
+            margin: 0 0 20px;
+            background: linear-gradient(135deg, #fff 0%, #a5c0ff 100%);
+            -webkit-background-clip: text;
+            background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .devices-limit-card {
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            background: var(--card-bg-2);
+            padding: 14px;
+            margin-bottom: 14px;
+            box-shadow: var(--shadow);
+        }
+
+        .devices-limit-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 10px;
+        }
+
+        .devices-limit-title {
+            font-size: 14px;
+            font-weight: 700;
+            margin: 0;
+        }
+
+        .devices-limit-chip {
+            border: 1px solid var(--border);
+            border-radius: 999px;
+            padding: 4px 10px;
+            font-size: 11px;
+            background: var(--surface-3);
+            color: var(--text-dim);
+        }
+
+        .devices-limit-chip.warning {
+            border-color: rgba(217, 142, 43, 0.4);
+            background: rgba(120, 82, 42, 0.32);
+            color: #ffd8a8;
+        }
+
+        .devices-limit-chip.danger {
+            border-color: rgba(255, 123, 123, 0.38);
+            background: rgba(120, 42, 42, 0.32);
+            color: #ffc0c0;
+        }
+
+        .traffic-progress {
+            width: 100%;
+            height: 10px;
+            border: 1px solid var(--border);
+            border-radius: 999px;
+            background: var(--surface-3);
+            overflow: hidden;
+        }
+
+        .traffic-progress-bar {
+            height: 100%;
+            width: 40%;
+            background: linear-gradient(90deg, var(--accent), var(--accent-2));
+            transition: width 0.22s ease;
+        }
+
+        .device-list {
+            display: grid;
+            gap: 12px;
+        }
+
+        .device-item {
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            background: linear-gradient(125deg, rgba(36, 98, 190, 0.15), rgba(22, 31, 47, 0.95));
+            padding: 14px;
+            display: grid;
+            gap: 12px;
+            transition: border-color 0.15s ease, transform 0.14s ease;
+            box-shadow: var(--shadow);
+        }
+
+        .device-item:hover {
+            border-color: var(--border-strong);
+            transform: translateY(-1px);
+        }
+
+        .device-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 10px;
+        }
+
+        .device-icon-wrap {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            flex: 1;
+            min-width: 0;
+        }
+
+        .device-icon {
+            width: 42px;
+            height: 42px;
+            border-radius: 12px;
+            background: var(--surface-3);
+            border: 1px solid var(--border-strong);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 20px;
+            flex-shrink: 0;
+        }
+
+        .device-icon.android { background: linear-gradient(135deg, #3DDC84, #2A8C5C); }
+        .device-icon.ios { background: linear-gradient(135deg, #A2AAAD, #6B7280); }
+        .device-icon.windows { background: linear-gradient(135deg, #00A4EF, #0078D4); }
+        .device-icon.macos { background: linear-gradient(135deg, #FF6B6B, #EE5A5A); }
+        .device-icon.linux { background: linear-gradient(135deg, #FCC624, #D4A017); }
+        .device-icon.unknown { background: var(--surface-3); }
+
+        .device-meta {
+            flex: 1;
+            min-width: 0;
+        }
+
+        .device-title {
+            font-size: 15px;
+            font-weight: 700;
+            margin: 0;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .device-sub {
+            font-size: 11px;
+            color: var(--text-dim);
+            margin: 2px 0 0;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            flex-wrap: wrap;
+        }
+
+        .device-hash {
+            background: rgba(255, 255, 255, 0.08);
+            padding: 2px 8px;
+            border-radius: 6px;
+            font-size: 10px;
+            font-family: 'Fira Code', monospace;
+            color: #d7e8ff;
+        }
+
+        .device-status {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            font-size: 11px;
+        }
+
+        .status-dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: var(--text-dim);
+        }
+
+        .status-dot.online {
+            background: var(--success);
+            box-shadow: 0 0 8px rgba(121, 222, 163, 0.6);
+        }
+
+        .device-info-row {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+
+        .device-actions {
+            display: flex;
+            gap: 8px;
+            flex-wrap: wrap;
+        }
+
+        .btn-device {
+            height: 36px;
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            padding: 0 12px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 6px;
+            font-size: 11px;
+            font-family: 'Fira Code', monospace;
+            color: var(--text-main);
+            background: var(--card-bg-2);
+            cursor: pointer;
+            transition: all 0.15s ease;
+        }
+
+        .btn-device:hover {
+            border-color: var(--border-strong);
+            transform: translateY(-1px);
+        }
+
+        .btn-device:active {
+            transform: translateY(0);
+        }
+
+        .btn-device.btn-rename {
+            background: rgba(47, 137, 255, 0.15);
+            border-color: rgba(85, 178, 255, 0.4);
+        }
+
+        .btn-device.btn-rename:hover {
+            background: rgba(47, 137, 255, 0.25);
+        }
+
+        .btn-device.btn-disable {
+            background: rgba(217, 142, 43, 0.15);
+            border-color: rgba(217, 142, 43, 0.4);
+        }
+
+        .btn-device.btn-disable:hover {
+            background: rgba(217, 142, 43, 0.25);
+        }
+
+        .btn-device.btn-block {
+            background: rgba(255, 123, 123, 0.15);
+            border-color: rgba(255, 123, 123, 0.4);
+        }
+
+        .btn-device.btn-block:hover {
+            background: rgba(255, 123, 123, 0.25);
+        }
+
+        .devices-footer {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 10px;
+            margin-top: 14px;
+            flex-wrap: wrap;
+        }
+
+        .pager {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+        }
+
+        .pager .btn-device {
+            min-width: 72px;
+        }
+
+        .btn-unlink-all {
+            height: 40px;
+            border: 1px solid rgba(255, 123, 123, 0.45);
+            border-radius: 11px;
+            padding: 0 16px;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            font-size: 12px;
+            font-weight: 600;
+            color: var(--text-main);
+            background: rgba(118, 40, 40, 0.34);
+            cursor: pointer;
+            transition: all 0.15s ease;
+        }
+
+        .btn-unlink-all:hover {
+            border-color: rgba(255, 123, 123, 0.62);
+            background: rgba(118, 40, 40, 0.45);
+        }
+
+        @media (max-width: 380px) {
+            .device-actions {
+                flex-direction: row;
+            }
+
+            .device-actions .btn-device {
+                flex: 1;
+                min-width: 0;
+                padding: 0 8px;
+                font-size: 10px;
+            }
+
+            .devices-footer {
+                flex-direction: column;
+                align-items: stretch;
+            }
+
+            .pager {
+                order: 2;
+            }
+
+            .btn-unlink-all {
+                order: 1;
+                justify-content: center;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+        <h2>📱 Устройства</h2>
+
+        <div class="devices-limit-card">
+            <div class="devices-limit-header">
+                <h4 class="devices-limit-title">Устройства</h4>
+                <span class="devices-limit-chip">2 / 5</span>
+            </div>
+            <div class="traffic-progress">
+                <div class="traffic-progress-bar" style="width: 40%;"></div>
+            </div>
+        </div>
+
+        <div class="device-list">
+            <!-- Device 1 -->
+            <div class="device-item">
+                <div class="device-header">
+                    <div class="device-icon-wrap">
+                        <div class="device-icon android">🤖</div>
+                        <div class="device-meta">
+                            <h3 class="device-title">RMX3852</h3>
+                            <p class="device-sub">
+                                <span class="device-hash">4581A412</span>
+                                <span>Android / 16 · v2raytun</span>
+                            </p>
+                        </div>
+                    </div>
+                    <div class="device-status">
+                        <span class="status-dot online"></span>
+                        <span>Онлайн</span>
+                    </div>
+                </div>
+                <div class="device-info-row">
+                    <div class="device-actions">
+                        <button class="btn-device btn-rename">✏️ Переименовать</button>
+                        <button class="btn-device btn-disable">🚫 Отключить</button>
+                        <button class="btn-device btn-block">🔒 Заблокировать</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Device 2 -->
+            <div class="device-item">
+                <div class="device-header">
+                    <div class="device-icon-wrap">
+                        <div class="device-icon android">🤖</div>
+                        <div class="device-meta">
+                            <h3 class="device-title">RMX3852</h3>
+                            <p class="device-sub">
+                                <span class="device-hash">CBD0FE3E</span>
+                                <span>Android / 16 · Happ</span>
+                            </p>
+                        </div>
+                    </div>
+                    <div class="device-status">
+                        <span class="status-dot"></span>
+                        <span>15 мин. назад</span>
+                    </div>
+                </div>
+                <div class="device-info-row">
+                    <div class="device-actions">
+                        <button class="btn-device btn-rename">✏️ Переименовать</button>
+                        <button class="btn-device btn-disable">🚫 Отключить</button>
+                        <button class="btn-device btn-block">🔒 Заблокировать</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="devices-footer" style="display: flex;">
+            <button class="btn-unlink-all">⚠️ Отвязать все устройства</button>
+            <div class="pager">
+                <button class="btn-device" disabled>Назад</button>
+                <code style="color: var(--text-dim); font-size: 11px; font-family: 'Fira Code', monospace;">1 / 1</code>
+                <button class="btn-device">Вперед</button>
+            </div>
+        </div>
+    </div>
+</body>
+
+</html>

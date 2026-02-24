@@ -6,17 +6,25 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
     <title>Cloude VPN | Dashboard</title>
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;700&family=Fira+Code:wght@400;500;600&family=Nunito+Sans:wght@400;600;700&display=swap" rel="stylesheet">
     <style>
         :root {
-            --bg-color: #0b0e14;
-            --card-bg: rgba(255, 255, 255, 0.05);
-            --accent-primary: #3498db;
-            --accent-secondary: #2ecc71;
-            --text-main: #ffffff;
-            --text-dim: #a0a0a0;
-            --danger: #e74c3c;
-            --glass-border: rgba(255, 255, 255, 0.1);
+            color-scheme: dark;
+            --bg-color: #0b1018;
+            --bg-2: #121a27;
+            --card-bg: rgba(24, 31, 45, 0.9);
+            --card-bg-2: rgba(31, 40, 57, 0.88);
+            --surface-3: #1c2635;
+            --border: rgba(143, 168, 206, 0.2);
+            --border-strong: rgba(143, 168, 206, 0.36);
+            --text-main: #f3f6fb;
+            --text-dim: #a5afc3;
+            --accent: #2f89ff;
+            --accent-2: #55b2ff;
+            --success: #79dea3;
+            --danger: #ff7b7b;
+            --radius: 16px;
+            --shadow: 0 10px 35px rgba(4, 8, 15, 0.38);
         }
 
         * {
@@ -27,12 +35,15 @@
         body {
             background-color: var(--bg-color);
             color: var(--text-main);
-            font-family: 'Outfit', sans-serif;
+            font-family: 'Nunito Sans', 'Segoe UI', sans-serif;
             margin: 0;
             padding: 0;
             overflow-x: hidden;
             overflow-y: auto;
-            background-image: radial-gradient(circle at 50% -20%, #1a2a44 0%, var(--bg-color) 70%);
+            background:
+                radial-gradient(1200px 620px at -12% -20%, rgba(47, 137, 255, 0.19), transparent 65%),
+                radial-gradient(880px 460px at 112% 6%, rgba(38, 190, 177, 0.14), transparent 62%),
+                linear-gradient(165deg, var(--bg-color) 0%, var(--bg-2) 100%);
             min-height: 100vh;
             -webkit-overflow-scrolling: touch;
         }
@@ -62,9 +73,9 @@
         }
 
         .balance-card {
-            background: var(--card-bg);
-            border: 1px solid var(--glass-border);
-            border-radius: 20px;
+            background: linear-gradient(165deg, rgba(34, 44, 62, 0.94), rgba(21, 29, 42, 0.88));
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
             padding: 20px;
             margin-bottom: 20px;
             backdrop-filter: blur(10px);
@@ -72,6 +83,7 @@
             position: relative;
             overflow: hidden;
             animation: fadeInUp 0.6s ease-out;
+            box-shadow: var(--shadow);
         }
 
         .balance-label {
@@ -97,21 +109,21 @@
         }
 
         .status-active {
-            background: rgba(46, 204, 113, 0.2);
-            color: #2ecc71;
-            border: 1px solid rgba(46, 204, 113, 0.3);
+            border: 1px solid rgba(121, 222, 163, 0.42);
+            background: rgba(45, 120, 82, 0.32);
+            color: #b9f6d3;
         }
 
         .status-expired {
-            background: rgba(231, 76, 60, 0.2);
-            color: #e74c3c;
-            border: 1px solid rgba(231, 76, 60, 0.3);
+            border: 1px solid rgba(255, 123, 123, 0.38);
+            background: rgba(120, 42, 42, 0.32);
+            color: #ffc0c0;
         }
 
         .status-warning {
-            background: rgba(241, 196, 15, 0.2);
-            color: #f1c40f;
-            border: 1px solid rgba(241, 196, 15, 0.3);
+            border: 1px solid rgba(217, 142, 43, 0.4);
+            background: rgba(120, 82, 42, 0.32);
+            color: #ffd8a8;
         }
 
         .tabs {
@@ -120,25 +132,28 @@
             border-radius: 12px;
             padding: 4px;
             margin-bottom: 25px;
-            border: 1px solid var(--glass-border);
+            border: 1px solid var(--border);
+            position: relative;
         }
 
         .tab {
             flex: 1;
             padding: 10px;
             text-align: center;
-            border-radius: 8px;
-            font-size: 14px;
-            font-weight: 500;
+            border-radius: 12px;
+            font-size: 13px;
+            font-weight: 600;
             cursor: pointer;
-            transition: all 0.3s;
+            transition: all 0.22s ease;
             color: var(--text-dim);
+            position: relative;
+            z-index: 1;
         }
 
         .tab.active {
-            background: var(--accent-primary);
-            color: white;
-            box-shadow: 0 4px 15px rgba(52, 152, 219, 0.3);
+            color: var(--text-main);
+            background: rgba(47, 137, 255, 0.12);
+            border: 1px solid rgba(85, 178, 255, 0.6);
         }
 
         .content-section {
@@ -151,103 +166,382 @@
         }
 
         .card {
-            background: var(--card-bg);
-            border: 1px solid var(--glass-border);
-            border-radius: 16px;
-            padding: 15px;
-            margin-bottom: 15px;
+            background: linear-gradient(180deg, rgba(255, 255, 255, 0.02), transparent 55%), var(--card-bg);
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            padding: 14px;
+            margin-bottom: 14px;
             backdrop-filter: blur(5px);
-            transition: transform 0.2s;
+            transition: transform 0.2s, border-color 0.2s;
+            box-shadow: var(--shadow);
         }
 
         .card:active {
-            transform: scale(0.98);
+            transform: translateY(-1px);
         }
 
-        .device-item {
-            display: flex;
-            flex-direction: column;
+        .device-list {
+            display: grid;
             gap: 12px;
         }
 
-        .device-info {
-            width: 100%;
+        .device-item {
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            background: linear-gradient(125deg, rgba(36, 98, 190, 0.15), rgba(22, 31, 47, 0.95));
+            padding: 14px;
+            display: grid;
+            gap: 12px;
+            transition: border-color 0.15s ease, transform 0.14s ease;
+            box-shadow: var(--shadow);
         }
 
-        .device-info h3 {
-            margin: 0;
+        .device-item:hover {
+            border-color: var(--border-strong);
+            transform: translateY(-1px);
+        }
+
+        .device-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 10px;
+        }
+
+        .device-icon-wrap {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            flex: 1;
+            min-width: 0;
+        }
+
+        .device-icon {
+            width: 42px;
+            height: 42px;
+            border-radius: 12px;
+            background: var(--surface-3);
+            border: 1px solid var(--border-strong);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 20px;
+            flex-shrink: 0;
+        }
+
+        .device-icon.android { background: linear-gradient(135deg, #3DDC84, #2A8C5C); }
+        .device-icon.ios { background: linear-gradient(135deg, #A2AAAD, #6B7280); }
+        .device-icon.windows { background: linear-gradient(135deg, #00A4EF, #0078D4); }
+        .device-icon.macos { background: linear-gradient(135deg, #FF6B6B, #EE5A5A); }
+        .device-icon.linux { background: linear-gradient(135deg, #FCC624, #D4A017); }
+        .device-icon.unknown { background: var(--surface-3); }
+
+        .device-meta {
+            flex: 1;
+            min-width: 0;
+        }
+
+        .device-title {
             font-size: 15px;
-            font-weight: 600;
+            font-weight: 700;
+            margin: 0;
             white-space: nowrap;
             overflow: hidden;
             text-overflow: ellipsis;
         }
 
-        .device-info p {
-            margin: 4px 0 0;
-            font-size: 12px;
+        .device-sub {
+            font-size: 11px;
             color: var(--text-dim);
+            margin: 2px 0 0;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            flex-wrap: wrap;
+        }
+
+        .device-hash {
+            background: rgba(255, 255, 255, 0.08);
+            padding: 2px 8px;
+            border-radius: 6px;
+            font-size: 10px;
+            font-family: 'Fira Code', monospace;
+            color: #d7e8ff;
+        }
+
+        .device-status {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            font-size: 11px;
+        }
+
+        .status-dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: var(--text-dim);
+        }
+
+        .status-dot.online {
+            background: var(--success);
+            box-shadow: 0 0 8px rgba(121, 222, 163, 0.6);
+        }
+
+        .device-info-row {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 10px;
+            flex-wrap: wrap;
         }
 
         .device-actions {
             display: flex;
+            gap: 8px;
+            flex-wrap: wrap;
+        }
+
+        .btn-device {
+            height: 36px;
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            padding: 0 12px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 6px;
+            font-size: 11px;
+            font-family: 'Fira Code', monospace;
+            color: var(--text-main);
+            background: var(--card-bg-2);
+            cursor: pointer;
+            transition: all 0.15s ease;
+        }
+
+        .btn-device:hover {
+            border-color: var(--border-strong);
+            transform: translateY(-1px);
+        }
+
+        .btn-device:active {
+            transform: translateY(0);
+        }
+
+        .btn-device.btn-rename {
+            background: rgba(47, 137, 255, 0.15);
+            border-color: rgba(85, 178, 255, 0.4);
+        }
+
+        .btn-device.btn-rename:hover {
+            background: rgba(47, 137, 255, 0.25);
+        }
+
+        .btn-device.btn-disable {
+            background: rgba(217, 142, 43, 0.15);
+            border-color: rgba(217, 142, 43, 0.4);
+        }
+
+        .btn-device.btn-disable:hover {
+            background: rgba(217, 142, 43, 0.25);
+        }
+
+        .btn-device.btn-block {
+            background: rgba(255, 123, 123, 0.15);
+            border-color: rgba(255, 123, 123, 0.4);
+        }
+
+        .btn-device.btn-block:hover {
+            background: rgba(255, 123, 123, 0.25);
+        }
+
+        .devices-limit-card {
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            background: var(--card-bg-2);
+            padding: 14px;
+            margin-bottom: 14px;
+            box-shadow: var(--shadow);
+        }
+
+        .devices-limit-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 10px;
+        }
+
+        .devices-limit-title {
+            font-size: 14px;
+            font-weight: 700;
+            margin: 0;
+        }
+
+        .devices-limit-chip {
+            border: 1px solid var(--border);
+            border-radius: 999px;
+            padding: 4px 10px;
+            font-size: 11px;
+            background: var(--surface-3);
+            color: var(--text-dim);
+        }
+
+        .devices-limit-chip.warning {
+            border-color: rgba(217, 142, 43, 0.4);
+            background: rgba(120, 82, 42, 0.32);
+            color: #ffd8a8;
+        }
+
+        .devices-limit-chip.danger {
+            border-color: rgba(255, 123, 123, 0.38);
+            background: rgba(120, 42, 42, 0.32);
+            color: #ffc0c0;
+        }
+
+        .traffic-progress {
+            width: 100%;
+            height: 10px;
+            border: 1px solid var(--border);
+            border-radius: 999px;
+            background: var(--surface-3);
+            overflow: hidden;
+        }
+
+        .traffic-progress-bar {
+            height: 100%;
+            width: 0%;
+            background: linear-gradient(90deg, var(--accent), var(--accent-2));
+            transition: width 0.22s ease;
+        }
+
+        .traffic-progress-bar.warning {
+            background: linear-gradient(90deg, #d98e2b, #f3b14e);
+        }
+
+        .traffic-progress-bar.danger {
+            background: linear-gradient(90deg, #cf4a4a, #f67777);
+        }
+
+        .devices-footer {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
             gap: 10px;
-            justify-content: flex-end;
+            margin-top: 14px;
+            flex-wrap: wrap;
+        }
+
+        .pager {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+        }
+
+        .pager .btn-device {
+            min-width: 72px;
+        }
+
+        .btn-unlink-all {
+            height: 40px;
+            border: 1px solid rgba(255, 123, 123, 0.45);
+            border-radius: 11px;
+            padding: 0 16px;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            font-size: 12px;
+            font-weight: 600;
+            color: var(--text-main);
+            background: rgba(118, 40, 40, 0.34);
+            cursor: pointer;
+            transition: all 0.15s ease;
+        }
+
+        .btn-unlink-all:hover {
+            border-color: rgba(255, 123, 123, 0.62);
+            background: rgba(118, 40, 40, 0.45);
         }
 
         .btn-icon {
-            background: rgba(255, 255, 255, 0.05);
-            border: 1px solid var(--glass-border);
-            width: 36px;
-            height: 36px;
+            background: var(--card-bg-2);
+            border: 1px solid var(--border);
+            width: 38px;
+            height: 38px;
             border-radius: 10px;
             display: flex;
             align-items: center;
             justify-content: center;
             cursor: pointer;
-            transition: all 0.2s;
+            transition: all 0.15s;
             font-size: 16px;
             padding: 0;
+            flex-shrink: 0;
         }
 
         .btn-icon:active {
-            transform: scale(0.9);
+            transform: scale(0.95);
         }
 
-        .btn-rename:hover {
-            background: rgba(52, 152, 219, 0.2);
-            border-color: var(--accent-primary);
+        .btn-icon:hover {
+            border-color: var(--border-strong);
+            background: rgba(47, 137, 255, 0.12);
         }
 
-        .btn-delete:hover {
-            border-color: var(--danger);
-            color: var(--danger);
-            background: rgba(231, 76, 60, 0.1);
-            box-shadow: 0 0 10px rgba(231, 76, 60, 0.2);
+        .input-code {
+            background: rgba(17, 24, 35, 0.86);
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            padding: 12px;
+            color: var(--text-main);
+            font-family: 'Fira Code', monospace;
+            font-size: 13px;
+            outline: none;
+            transition: border-color 0.16s ease, box-shadow 0.16s ease;
+        }
+
+        .input-code:focus {
+            border-color: rgba(85, 178, 255, 0.72);
+            box-shadow: 0 0 0 3px rgba(47, 137, 255, 0.16);
         }
 
         .btn-primary {
-            background: linear-gradient(135deg, #3498db 0%, #2980b9 100%);
-            color: white;
-            border: none;
-            padding: 15px;
-            border-radius: 14px;
-            width: 100%;
+            height: 44px;
+            border: 1px solid rgba(80, 175, 255, 0.65);
+            border-radius: 12px;
+            padding: 0 16px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            font-size: 13px;
             font-weight: 600;
-            font-size: 16px;
+            color: #f6faff;
+            background: linear-gradient(135deg, var(--accent), var(--accent-2));
             cursor: pointer;
+            transition: all 0.15s ease;
+            box-shadow: 0 6px 16px rgba(47, 137, 255, 0.34);
+            width: 100%;
             margin-top: 10px;
-            box-shadow: 0 4px 15px rgba(52, 152, 219, 0.3);
+        }
+
+        .btn-primary:hover {
+            box-shadow: 0 8px 18px rgba(47, 137, 255, 0.4);
+            transform: translateY(-1px);
+        }
+
+        .btn-primary:active {
+            transform: translateY(0);
         }
 
         .instruction-step {
             display: flex;
-            gap: 15px;
-            margin-bottom: 20px;
+            gap: 12px;
+            margin-bottom: 16px;
         }
 
         .step-num {
-            background: var(--accent-primary);
+            background: linear-gradient(135deg, var(--accent), var(--accent-2));
             width: 28px;
             height: 28px;
             border-radius: 50%;
@@ -255,20 +549,21 @@
             align-items: center;
             justify-content: center;
             flex-shrink: 0;
-            font-weight: 600;
-            font-size: 14px;
+            font-weight: 700;
+            font-size: 13px;
         }
 
         .step-text h4 {
             margin: 0 0 5px;
-            font-size: 15px;
+            font-size: 14px;
+            font-weight: 600;
         }
 
         .step-text p {
             margin: 0;
-            font-size: 13px;
+            font-size: 12px;
             color: var(--text-dim);
-            line-height: 1.4;
+            line-height: 1.5;
         }
 
         /* Animations */
@@ -306,7 +601,6 @@
             }
         }
 
-        /* Modal placeholder */
         #renameModal {
             position: fixed;
             top: 0;
@@ -324,84 +618,93 @@
         }
 
         .modal-body {
-            background: #1a1e26;
-            border: 1px solid var(--glass-border);
-            border-radius: 20px;
-            padding: 25px;
+            background: linear-gradient(165deg, rgba(34, 44, 62, 0.94), rgba(21, 29, 42, 0.88));
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            padding: 20px;
             width: 100%;
             max-width: 340px;
             animation: fadeInUp 0.3s ease-out;
-            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.5);
+            box-shadow: var(--shadow);
         }
 
         .modal-body h2 {
             margin: 0 0 15px;
-            font-size: 20px;
+            font-size: 18px;
+            font-weight: 700;
             text-align: center;
         }
 
         .modal-body input {
             width: 100%;
-            background: rgba(0, 0, 0, 0.3);
-            border: 1px solid var(--glass-border);
-            padding: 14px;
-            border-radius: 12px;
-            color: white;
-            font-family: inherit;
-            font-size: 15px;
-            margin-bottom: 20px;
+            background: rgba(17, 24, 35, 0.86);
+            border: 1px solid var(--border);
+            padding: 12px;
+            border-radius: 10px;
+            color: var(--text-main);
+            font-family: 'Fira Code', monospace;
+            font-size: 13px;
+            margin-bottom: 16px;
             outline: none;
-            transition: border-color 0.2s;
+            transition: border-color 0.16s ease, box-shadow 0.16s ease;
         }
 
         .modal-body input:focus {
-            border-color: var(--accent-primary);
+            border-color: rgba(85, 178, 255, 0.72);
+            box-shadow: 0 0 0 3px rgba(47, 137, 255, 0.16);
         }
 
         .modal-btns {
-            display: flex;
+            display: grid;
+            grid-template-columns: 1fr 1fr;
             gap: 10px;
         }
 
         .modal-btns button {
-            flex: 1;
-            padding: 14px;
-            border-radius: 12px;
+            height: 40px;
+            border-radius: 11px;
             cursor: pointer;
             font-weight: 600;
-            font-size: 15px;
-            transition: all 0.2s;
-            border: none;
+            font-size: 12px;
+            transition: all 0.15s ease;
+            border: 1px solid var(--border);
         }
 
         .modal-btns button:active {
-            transform: scale(0.96);
+            transform: scale(0.97);
         }
 
         .btn-cancel {
-            background: rgba(255, 255, 255, 0.05);
-            border: 1px solid var(--glass-border);
-            color: var(--text-dim);
+            background: var(--card-bg-2);
+            color: var(--text-main);
         }
 
-        .btn-cancel:active {
-            background: rgba(255, 255, 255, 0.1);
+        .btn-cancel:hover {
+            border-color: var(--border-strong);
         }
 
         .btn-save {
-            background: var(--accent-primary);
-            color: white;
-            box-shadow: 0 4px 15px rgba(52, 152, 219, 0.3);
+            background: linear-gradient(135deg, var(--accent), var(--accent-2));
+            border-color: rgba(80, 175, 255, 0.65);
+            color: #f6faff;
+            box-shadow: 0 6px 16px rgba(47, 137, 255, 0.34);
         }
 
-        .btn-save:active {
-            opacity: 0.9;
+        .btn-save:hover {
+            box-shadow: 0 8px 18px rgba(47, 137, 255, 0.4);
         }
 
         #empty-devices {
             text-align: center;
             padding: 40px 20px;
             color: var(--text-dim);
+            font-size: 13px;
+        }
+
+        .empty-state-icon {
+            font-size: 48px;
+            margin-bottom: 12px;
+            opacity: 0.6;
         }
 
         /* Экран загрузки/авторизации */
@@ -411,7 +714,10 @@
             left: 0;
             right: 0;
             bottom: 0;
-            background: var(--bg-color);
+            background:
+                radial-gradient(1200px 620px at -12% -20%, rgba(47, 137, 255, 0.19), transparent 65%),
+                radial-gradient(880px 460px at 112% 6%, rgba(38, 190, 177, 0.14), transparent 62%),
+                linear-gradient(165deg, var(--bg-color) 0%, var(--bg-2) 100%);
             display: flex;
             flex-direction: column;
             align-items: center;
@@ -426,10 +732,10 @@
         }
 
         .auth-loader {
-            width: 60px;
-            height: 60px;
-            border: 4px solid rgba(52, 152, 219, 0.2);
-            border-top-color: var(--accent-primary);
+            width: 50px;
+            height: 50px;
+            border: 4px solid rgba(47, 137, 255, 0.2);
+            border-top-color: var(--accent);
             border-radius: 50%;
             animation: spin 1s linear infinite;
             margin-bottom: 20px;
@@ -442,67 +748,69 @@
         }
 
         .auth-title {
-            font-size: 20px;
-            font-weight: 600;
-            margin-bottom: 10px;
+            font-size: 18px;
+            font-weight: 700;
+            margin-bottom: 8px;
             text-align: center;
         }
 
         .auth-subtitle {
-            font-size: 14px;
+            font-size: 13px;
             color: var(--text-dim);
             text-align: center;
             margin-bottom: 30px;
         }
 
         .auth-error {
-            background: rgba(231, 76, 60, 0.1);
-            border: 1px solid rgba(231, 76, 60, 0.3);
-            border-radius: 16px;
+            background: linear-gradient(165deg, rgba(34, 44, 62, 0.94), rgba(21, 29, 42, 0.88));
+            border: 1px solid rgba(255, 123, 123, 0.42);
+            border-radius: var(--radius);
             padding: 20px;
             text-align: center;
             max-width: 340px;
+            box-shadow: var(--shadow);
         }
 
         .auth-error-icon {
-            font-size: 48px;
-            margin-bottom: 15px;
+            font-size: 42px;
+            margin-bottom: 12px;
         }
 
         .auth-error-title {
-            font-size: 18px;
-            font-weight: 600;
-            margin-bottom: 10px;
+            font-size: 16px;
+            font-weight: 700;
+            margin-bottom: 8px;
             color: var(--danger);
         }
 
         .auth-error-text {
-            font-size: 14px;
+            font-size: 12px;
             color: var(--text-dim);
-            margin-bottom: 20px;
+            margin-bottom: 16px;
             line-height: 1.5;
         }
 
         .btn-telegram {
+            height: 44px;
             background: linear-gradient(135deg, #2AABEE 0%, #229ED9 100%);
             color: white;
             border: none;
-            padding: 14px 28px;
+            padding: 0 24px;
             border-radius: 12px;
             font-weight: 600;
-            font-size: 15px;
+            font-size: 14px;
             cursor: pointer;
             text-decoration: none;
             display: inline-flex;
             align-items: center;
             gap: 10px;
             transition: all 0.2s;
-            box-shadow: 0 4px 15px rgba(42, 171, 238, 0.3);
+            box-shadow: 0 6px 20px rgba(42, 171, 238, 0.35);
         }
 
         .btn-telegram:hover {
             transform: translateY(-2px);
-            box-shadow: 0 6px 20px rgba(42, 171, 238, 0.4);
+            box-shadow: 0 8px 24px rgba(42, 171, 238, 0.45);
         }
 
         .btn-telegram:active {
@@ -518,25 +826,50 @@
         /* Адаптивность для мобильных */
         @media (max-width: 380px) {
             .container {
-                padding: 15px;
+                padding: 14px;
             }
 
             h1 {
-                font-size: 24px;
+                font-size: 22px;
             }
 
             .balance-value {
-                font-size: 28px;
+                font-size: 26px;
             }
 
-            .device-info h3 {
+            .device-icon {
+                width: 38px;
+                height: 38px;
+                font-size: 18px;
+            }
+
+            .device-title {
                 font-size: 14px;
             }
 
-            .btn-icon {
-                width: 34px;
-                height: 34px;
-                font-size: 14px;
+            .device-actions {
+                flex-direction: row;
+            }
+
+            .device-actions .btn-device {
+                flex: 1;
+                min-width: 0;
+                padding: 0 8px;
+                font-size: 10px;
+            }
+
+            .devices-footer {
+                flex-direction: column;
+                align-items: stretch;
+            }
+
+            .pager {
+                order: 2;
+            }
+
+            .btn-unlink-all {
+                order: 1;
+                justify-content: center;
             }
         }
     </style>
@@ -589,10 +922,30 @@
         <!-- Store removed by admin request: users should purchase via bot -->
 
         <section id="devices-section" class="content-section">
-            <div id="device-list">
-                <!-- Devices will be injected here -->
-                <div id="loading-devices" style="text-align: center; padding: 20px;">Загружаем список устройств...</div>
+            <div class="devices-limit-card">
+                <div class="devices-limit-header">
+                    <h4 class="devices-limit-title">Устройства</h4>
+                    <span class="devices-limit-chip" id="devices-limit-chip">0 / 0</span>
+                </div>
+                <div class="traffic-progress">
+                    <div class="traffic-progress-bar" id="devices-progress-bar"></div>
+                </div>
             </div>
+
+            <div class="device-list" id="device-list">
+                <!-- Devices will be injected here -->
+                <div id="loading-devices" style="text-align: center; padding: 20px; color: var(--text-dim);">Загружаем список устройств...</div>
+            </div>
+
+            <div class="devices-footer" id="devices-footer" style="display: none;">
+                <button class="btn-unlink-all" onclick="confirmUnlinkAll()">⚠️ Отвязать все устройства</button>
+                <div class="pager">
+                    <button class="btn-device" id="btn-prev-page" onclick="prevPage()" disabled>Назад</button>
+                    <code id="page-indicator" style="color: var(--text-dim); font-size: 11px; font-family: 'Fira Code', monospace;">1 / 1</code>
+                    <button class="btn-device" id="btn-next-page" onclick="nextPage()">Вперед</button>
+                </div>
+            </div>
+
             <p style="font-size: 12px; color: var(--text-dim); margin: 15px 10px; line-height: 1.4;">
                 * Если вы удалите текущее устройство, оно добавится снова при следующем использовании VPN.
             </p>
@@ -659,6 +1012,9 @@
 
         let currentUser = null;
         let selectedDeviceId = null;
+        let allDevices = [];
+        let currentPage = 1;
+        const devicesPerPage = 5;
 
         // Header color adjustment
         tg.setHeaderColor('#0b0e14');
@@ -750,64 +1106,146 @@
 
         async function fetchDevices() {
             const listDiv = document.getElementById('device-list');
+            const footer = document.getElementById('devices-footer');
+            const limitChip = document.getElementById('devices-limit-chip');
+            const progressBar = document.getElementById('devices-progress-bar');
+
             try {
                 const res = await fetch(`${API_BASE}/list_devices`, {
                     headers: { 'Authorization': authData }
                 });
                 const devices = await res.json();
+                allDevices = devices;
+
+                // Обновляем лимит устройств
+                const limit = currentUser?.subscription?.limit || 5;
+                const used = devices.length;
+                const percent = Math.min((used / limit) * 100, 100);
+
+                limitChip.innerText = `${used} / ${limit}`;
+                progressBar.style.width = `${percent}%`;
+
+                // Сбрасываем классы прогресс-бара
+                progressBar.classList.remove('warning', 'danger');
+                limitChip.classList.remove('warning', 'danger');
+
+                if (percent >= 100) {
+                    progressBar.classList.add('danger');
+                    limitChip.classList.add('danger');
+                } else if (percent >= 80) {
+                    progressBar.classList.add('warning');
+                    limitChip.classList.add('warning');
+                }
 
                 if (devices.length === 0) {
-                    listDiv.innerHTML = '<div id="empty-devices">Нет подключенных устройств</div>';
+                    listDiv.innerHTML = `
+                        <div id="empty-devices">
+                            <div class="empty-state-icon">📭</div>
+                            <div>Нет подключенных устройств</div>
+                        </div>
+                    `;
+                    footer.style.display = 'none';
                     return;
                 }
 
-                listDiv.innerHTML = '';
-                devices.forEach(d => {
-                    const card = document.createElement('div');
-                    card.className = 'card device-item';
+                footer.style.display = 'flex';
+                renderDevicesPage();
 
-                    const lastSeen = new Date(d.last_seen);
-                    const isOnline = (new Date() - lastSeen) < (5 * 60 * 1000); // 5 минут
-
-                    card.innerHTML = `
-                        <div class="device-info">
-                            <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 8px;">
-                                <div style="display: flex; align-items: center; gap: 8px; flex: 1; min-width: 0;">
-                                    <span style="font-size: 18px;">📱</span>
-                                    <h3 style="flex: 1; min-width: 0;">${escapeHtml(d.name)}</h3>
-                                    ${isOnline ? '<span style="width: 8px; height: 8px; background: #2ecc71; border-radius: 50%; display: inline-block; box-shadow: 0 0 8px rgba(46, 204, 113, 0.6);"></span>' : ''}
-                                </div>
-                            </div>
-                            <p style="display: flex; align-items: center; gap: 6px; flex-wrap: wrap;">
-                                <span style="background: rgba(255,255,255,0.08); padding: 2px 8px; border-radius: 6px; font-size: 11px;">${escapeHtml(d.hash.substring(0, 8).toUpperCase())}</span>
-                                <span style="opacity: 0.6;">•</span>
-                                <span>${formatDate(lastSeen)}</span>
-                                ${isOnline ? '<span style="color: #2ecc71; margin-left: auto;">Онлайн</span>' : ''}
-                            </p>
-                        </div>
-                        <div class="device-actions">
-                            <button data-id="${d.id}" data-name="${escapeHtml(d.name)}" class="btn-icon btn-rename" title="Переименовать">✏️</button>
-                            <button data-id="${d.id}" class="btn-icon btn-delete" title="Удалить">🗑</button>
-                        </div>
-                    `;
-                    listDiv.appendChild(card);
-                });
-
-                // Навешиваем обработчики после рендера
-                document.querySelectorAll('.btn-rename').forEach(btn => {
-                    btn.addEventListener('click', () => {
-                        openRenameModal(parseInt(btn.dataset.id), btn.dataset.name);
-                    });
-                });
-
-                document.querySelectorAll('.btn-delete').forEach(btn => {
-                    btn.addEventListener('click', () => {
-                        confirmDelete(parseInt(btn.dataset.id));
-                    });
-                });
             } catch (e) {
                 console.error(e);
-                listDiv.innerHTML = '<div style="color: #e74c3c; text-align: center;">Ошибка загрузки устройств</div>';
+                listDiv.innerHTML = '<div style="color: var(--danger); text-align: center; padding: 20px;">Ошибка загрузки устройств</div>';
+                footer.style.display = 'none';
+            }
+        }
+
+        function renderDevicesPage() {
+            const listDiv = document.getElementById('device-list');
+            const totalPages = Math.ceil(allDevices.length / devicesPerPage) || 1;
+            currentPage = Math.max(1, Math.min(currentPage, totalPages));
+
+            const start = (currentPage - 1) * devicesPerPage;
+            const pageDevices = allDevices.slice(start, start + devicesPerPage);
+
+            listDiv.innerHTML = '';
+
+            pageDevices.forEach(d => {
+                const card = document.createElement('div');
+                card.className = 'device-item';
+
+                const lastSeen = new Date(d.last_seen);
+                const isOnline = (new Date() - lastSeen) < (5 * 60 * 1000);
+
+                const platform = detectPlatform(d.name);
+                const platformIcon = getPlatformIcon(platform);
+
+                card.innerHTML = `
+                    <div class="device-header">
+                        <div class="device-icon-wrap">
+                            <div class="device-icon ${platform}">${platformIcon}</div>
+                            <div class="device-meta">
+                                <h3 class="device-title">${escapeHtml(d.name)}</h3>
+                                <p class="device-sub">
+                                    <span class="device-hash">${escapeHtml(d.hash.substring(0, 8).toUpperCase())}</span>
+                                    <span>${escapeHtml(d.client_type || 'v2raytun')}</span>
+                                </p>
+                            </div>
+                        </div>
+                        <div class="device-status">
+                            <span class="status-dot ${isOnline ? 'online' : ''}"></span>
+                            <span>${isOnline ? 'Онлайн' : formatDate(lastSeen)}</span>
+                        </div>
+                    </div>
+                    <div class="device-info-row">
+                        <div class="device-actions">
+                            <button data-id="${d.id}" data-name="${escapeHtml(d.name)}" class="btn-device btn-rename" onclick="openRenameModal(${d.id}, '${escapeHtml(d.name).replace(/'/g, "\\'")}')">✏️ Переименовать</button>
+                            <button data-id="${d.id}" class="btn-device btn-disable" onclick="confirmDisable(${d.id})">🚫 Отключить</button>
+                            <button data-id="${d.id}" class="btn-device btn-block" onclick="confirmBlock(${d.id})">🔒 Заблокировать</button>
+                        </div>
+                    </div>
+                `;
+                listDiv.appendChild(card);
+            });
+
+            // Обновляем пагинацию
+            document.getElementById('page-indicator').innerText = `${currentPage} / ${totalPages}`;
+            document.getElementById('btn-prev-page').disabled = currentPage === 1;
+            document.getElementById('btn-next-page').disabled = currentPage === totalPages;
+        }
+
+        function detectPlatform(name) {
+            const lower = name.toLowerCase();
+            if (lower.includes('iphone') || lower.includes('ipad') || lower.includes('ios')) return 'ios';
+            if (lower.includes('android')) return 'android';
+            if (lower.includes('windows')) return 'windows';
+            if (lower.includes('mac') || lower.includes('macos')) return 'macos';
+            if (lower.includes('linux')) return 'linux';
+            return 'unknown';
+        }
+
+        function getPlatformIcon(platform) {
+            const icons = {
+                android: '🤖',
+                ios: '🍎',
+                windows: '🪟',
+                macos: '💻',
+                linux: '🐧',
+                unknown: '📱'
+            };
+            return icons[platform] || '📱';
+        }
+
+        function prevPage() {
+            if (currentPage > 1) {
+                currentPage--;
+                renderDevicesPage();
+            }
+        }
+
+        function nextPage() {
+            const totalPages = Math.ceil(allDevices.length / devicesPerPage) || 1;
+            if (currentPage < totalPages) {
+                currentPage++;
+                renderDevicesPage();
             }
         }
 
@@ -834,7 +1272,10 @@
 
             document.getElementById(`${section}-section`).classList.add('active');
 
-            if (section === 'devices') fetchDevices();
+            if (section === 'devices') {
+                currentPage = 1;
+                fetchDevices();
+            }
         }
 
         function copySubUrl() {
@@ -902,9 +1343,9 @@
                 try {
                     const res = await fetch(`${API_BASE}/delete_device`, {
                         method: 'POST',
-                        headers: { 
-                            'Authorization': authData, 
-                            'Content-Type': 'application/json' 
+                        headers: {
+                            'Authorization': authData,
+                            'Content-Type': 'application/json'
                         },
                         body: JSON.stringify({ id })
                     });
@@ -916,6 +1357,80 @@
                 } catch (e) {
                     console.error(e);
                     tg.showAlert("Ошибка при удалении");
+                }
+            });
+        }
+
+        function confirmDisable(id) {
+            tg.showConfirm("Вы уверены, что хотите отключить это устройство? Оно перестанет работать до следующего подключения.", async (ok) => {
+                if (!ok) return;
+                try {
+                    const res = await fetch(`${API_BASE}/disable_device`, {
+                        method: 'POST',
+                        headers: {
+                            'Authorization': authData,
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify({ id })
+                    });
+                    if (res.ok) {
+                        tg.showAlert("Устройство отключено");
+                        fetchDevices();
+                    } else {
+                        tg.showAlert("Ошибка при отключении");
+                    }
+                } catch (e) {
+                    console.error(e);
+                    tg.showAlert("Ошибка при отключении");
+                }
+            });
+        }
+
+        function confirmBlock(id) {
+            tg.showConfirm("Вы уверены, что хотите заблокировать это устройство? Доступ будет полностью запрещён.", async (ok) => {
+                if (!ok) return;
+                try {
+                    const res = await fetch(`${API_BASE}/block_device`, {
+                        method: 'POST',
+                        headers: {
+                            'Authorization': authData,
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify({ id })
+                    });
+                    if (res.ok) {
+                        tg.showAlert("Устройство заблокировано");
+                        fetchDevices();
+                    } else {
+                        tg.showAlert("Ошибка при блокировке");
+                    }
+                } catch (e) {
+                    console.error(e);
+                    tg.showAlert("Ошибка при блокировке");
+                }
+            });
+        }
+
+        function confirmUnlinkAll() {
+            tg.showConfirm("Вы уверены, что хотите отвязать ВСЕ устройства? Это действие нельзя отменить.", async (ok) => {
+                if (!ok) return;
+                try {
+                    const res = await fetch(`${API_BASE}/unlink_all_devices`, {
+                        method: 'POST',
+                        headers: {
+                            'Authorization': authData,
+                            'Content-Type': 'application/json'
+                        }
+                    });
+                    if (res.ok) {
+                        tg.showAlert("Все устройства отвязаны");
+                        fetchDevices();
+                    } else {
+                        tg.showAlert("Ошибка при отвязке");
+                    }
+                } catch (e) {
+                    console.error(e);
+                    tg.showAlert("Ошибка при отвязке");
                 }
             });
         }
