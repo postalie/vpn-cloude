@@ -93,7 +93,7 @@ async def show_connection_menu(callback: types.CallbackQuery, state: FSMContext)
         )
         
         from keyboards import get_active_sub_kb
-        
+
         msg_text = await callback.message.answer(
             f"🔗 <b>Способ 2 (быстрый переход):</b>\n"
             f"1️⃣ Нажмите кнопку <b>«Подключить в Happ»</b>\n"

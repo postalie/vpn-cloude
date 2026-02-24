@@ -10,25 +10,15 @@ def shorten_url(long_url):
     Сокращает ссылку через clck.ru API
     """
     try:
-        # Формат который работает у пользователя: без https:// и без кодирования спецсимволов
-        clean_url = long_url.replace("https://", "").replace("http://", "")
-        api_url = f"https://clck.ru/--?url={clean_url}"
+        # Кодируем URL правильно для clck.ru
+        encoded_url = urllib.parse.quote(long_url, safe='')
+        api_url = f"https://clck.ru/--?url={encoded_url}"
 
         headers = {
             'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36'
         }
 
         response = requests.get(api_url, headers=headers, timeout=15)
-
-        if response.status_code == 200:
-            result = response.text.strip()
-            if result.startswith("http"):
-                return result
-
-        # Fallback: стандартный метод с кодированием всего URL
-        encoded_url = urllib.parse.quote(long_url)
-        api_url_fallback = f"https://clck.ru/--?url={encoded_url}"
-        response = requests.get(api_url_fallback, headers=headers, timeout=15)
 
         if response.status_code == 200:
             result = response.text.strip()

@@ -6,6 +6,7 @@ import requests
 from bs4 import BeautifulSoup
 import base64
 import hashlib
+import urllib.parse
 
 
 def get_dl_link(url: str) -> str:
@@ -85,14 +86,16 @@ def create_encrypted_happ_link(user_id: int, sub_uuid: str, domain: str) -> str:
     if encrypted:
         # Добавляем префикс crypt5/ для Happ
         encrypted_with_prefix = f"crypt5/{encrypted}"
-        
-        # Кодируем в URL-safe base64 для GitHub Pages
-        safe_encrypted = base64.urlsafe_b64encode(encrypted_with_prefix.encode()).decode().rstrip('=')
+
+        # URL-декодируем если есть % (crypto.happ.su возвращает encoded)
+        decrypted_enc = urllib.parse.unquote(encrypted_with_prefix)
+
+        # Кодируем в base64 для GitHub Pages
+        safe_encrypted = base64.b64encode(decrypted_enc.encode()).decode().rstrip('=')
         return f"{GITHUB_PAGE_URL}/{safe_encrypted}"
 
     # Fallback: просто кодируем subscription_url в base64
-    # 404.html на GitHub сможет это расшифровать
-    safe_encrypted = base64.urlsafe_b64encode(subscription_url.encode()).decode().rstrip('=')
+    safe_encrypted = base64.b64encode(subscription_url.encode()).decode().rstrip('=')
     return f"{GITHUB_PAGE_URL}/{safe_encrypted}"
 
 
