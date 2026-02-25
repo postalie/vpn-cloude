@@ -229,21 +229,33 @@ def get_active_sub_kb(happ_link=None):
 # Меню подписки
 async def get_subscription_menu_kb(short_link=None):
     btns = []
-    
+
     # Кнопка для открытия TMA (использует Telegram initData для аутентификации)
     btns.append([InlineKeyboardButton(text="⚙️ Управление устройствами", web_app=WebAppInfo(url="https://vpn-cloude-production.up.railway.app/dashboard"))])
-    
+
     if short_link:
         btns.append([InlineKeyboardButton(text="🚀 Подключить в Happ", url=short_link)])
-    
+
     btns.append([
         InlineKeyboardButton(text="📱 Клиенты", callback_data="show_clients"),
         InlineKeyboardButton(text="🆘 Помощь", callback_data="help_connection")
     ])
     btns.append([InlineKeyboardButton(text="🔄 Сбросить ссылку", callback_data="reset_link")])
     btns.append([InlineKeyboardButton(text="« Назад в меню", callback_data="back_to_main")])
-    
+
     return InlineKeyboardMarkup(inline_keyboard=btns)
+
+# Меню управления устройствами (кнопки под TMA)
+def get_device_action_kb():
+    return InlineKeyboardMarkup(
+        inline_keyboard=[
+            [InlineKeyboardButton(text="➕ Добавить устройство", web_app=WebAppInfo(url="https://vpn-cloude-production.up.railway.app/dashboard"))],
+            [InlineKeyboardButton(text="⚙️ Управление устройствами", web_app=WebAppInfo(url="https://vpn-cloude-production.up.railway.app/dashboard"))],
+            [InlineKeyboardButton(text="🔄 Сбросить ссылку", callback_data="reset_link")],
+            [InlineKeyboardButton(text="🆘 Помощь", callback_data="help_connection")],
+            [InlineKeyboardButton(text="« Назад", callback_data="connection")]
+        ]
+    )
 
 
 # Меню устройств

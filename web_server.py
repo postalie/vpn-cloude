@@ -104,15 +104,16 @@ async def sub_handler(request):
         r"mozilla/5\.0.*opera/",
         r"mozilla/5\.0.*opr/",
         r"mozilla/5\.0.*ucbrowser/",
+        r"telegrambot",  # Telegram Bot тоже блокируем
     ]
-    
+
     is_browser = False
     for pattern in browser_patterns:
         if re.search(pattern, ua_lower):
             is_browser = True
             break
-    
-    # Если это браузер - возвращаем ошибку лимита
+
+    # Если это браузер или TelegramBot - возвращаем ошибку лимита
     if is_browser:
         bot = request.app['bot']
         # Пытаемся получить user_id для уведомления
@@ -142,15 +143,20 @@ async def sub_handler(request):
     model = "Unknown Device"
     platform = "Unknown"
     app_info = "Generic Client"
+    client_type = "Unknown"
 
-    # 1. Определяем приложение (app_info)
+    # 1. Определяем приложение (app_info) и client_type
     if "/" in ua:
         # Для всех приложений с версией (Happ/3.9.1 -> Happ / 3.9.1)
         app_parts = ua.split()[0].split('/')
         if len(app_parts) == 2:
             app_info = f"{app_parts[0]} / {app_parts[1]}"
+            client_type = app_parts[0]  # Happ, v2rayNG, etc.
         else:
             app_info = app_parts[0]
+            client_type = app_parts[0]
+    else:
+        client_type = ua.split()[0] if ua else "Unknown"
 
     # 2. Определяем платформу и версию
     # Сначала проверяем специальные заголовки от приложений (X-Device-Os, X-Ver-Os)
@@ -219,8 +225,8 @@ async def sub_handler(request):
     device_key = f"{model}|{platform.split('/')[0].strip()}"  # Берём только базовую платформу без версии
     device_hash = hashlib.md5(device_key.encode()).hexdigest().upper()[:16]
 
-    # Пытаемся зарегистировать устройство (передаём модель для авто-переименования)
-    success, current_count, limit, user_id, is_new = await register_device(sub_uuid, device_hash, model)
+    # Пытаемся зарегистировать устройство (передаём модель для авто-переименования и client_type)
+    success, current_count, limit, user_id, is_new = await register_device(sub_uuid, device_hash, model, client_type)
 
     # Автоочистка дубликатов (на случай если они были созданы ранее)
     from database import cleanup_duplicate_devices
@@ -269,7 +275,11 @@ async def sub_handler(request):
                 msg = (
                     "⚠️ <b>Внимание! Превышен лимит устройств</b>\n\n"
                     f"На вашей подписке уже подключено максимально разрешенное количество устройств ({limit}).\n\n"
-                    "Чтобы подключить новое устройство, сбросьте ссылку в меню: <code>Подключить VPN</code> -> <code>Сбросить ссылку</code>."
+                    "📱 <b>Что делать:</b>\n"
+                    "1️⃣ Откройте мини-апп для управления устройствами\n"
+                    "2️⃣ Удалите старое устройство которое не используете\n"
+                    "3️⃣ После этого сможете подключить новое\n\n"
+                    "Или сбросьте ссылку в меню: <code>Подключить VPN</code> -> <code>Сбросить ссылку</code>"
                 )
                 await bot.send_message(user_id, msg, parse_mode="HTML")
             except: pass
@@ -435,7 +445,11 @@ async def register_device_handler(request):
                 msg = (
                     "⚠️ <b>Внимание! Превышен лимит устройств</b>\n\n"
                     f"На вашей подписке уже подключено максимально разрешенное количество устройств ({limit}).\n\n"
-                    "Чтобы подключить новое устройство, сбросьте ссылку в меню: <code>Подключить VPN</code> -> <code>Сбросить ссылку</code>.\n"
+                    "📱 <b>Что делать:</b>\n"
+                    "1️⃣ Откройте мини-апп для управления устройствами\n"
+                    "2️⃣ Удалите старое устройство которое не используете\n"
+                    "3️⃣ После этого сможете подключить новое\n\n"
+                    "Или сбросьте ссылку: <code>Подключить VPN</code> -> <code>Сбросить ссылку</code>\n"
                     "<i>Старая ссылка перестанет работать, и лимит устройств обнулится.</i>"
                 )
                 await bot.send_message(user_id, msg, parse_mode="HTML")
@@ -546,14 +560,15 @@ async def list_devices_handler(request):
         return web.json_response({"error": "Unauthorized"}, status=401)
 
     devices = await get_user_devices(user_id)
-    # Преобразуем кортежи в словари
+    # Преобразуем кортежи в словари и добавляем client_type
     res = []
     for d in devices:
         res.append({
             "id": d[0],
             "hash": d[1],
             "name": d[2] or "Неизвестное",
-            "last_seen": d[3]
+            "last_seen": d[3],
+            "client_type": d[4] or "Unknown"  # client_type из БД
         })
     return web.json_response(res)
 

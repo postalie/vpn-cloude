@@ -175,6 +175,9 @@ async def create_tables():
         if 'last_seen' not in device_columns:
             await db.execute('ALTER TABLE devices ADD COLUMN last_seen DATETIME')
             await db.execute('UPDATE devices SET last_seen = CURRENT_TIMESTAMP')
+        if 'client_type' not in device_columns:
+            await db.execute('ALTER TABLE devices ADD COLUMN client_type TEXT DEFAULT "Unknown"')
+            print("DB MIGRATION: Added 'client_type' column to devices")
 
         # Индекс для ускорения поиска дубликатов
         await db.execute('CREATE INDEX IF NOT EXISTS idx_devices_sub_uuid ON devices(sub_uuid)')
@@ -512,7 +515,7 @@ async def reset_subscription_uuid(user_id):
         await db.commit()
     return new_uuid
 
-async def register_device(sub_uuid, device_hash, device_model: str = None):
+async def register_device(sub_uuid, device_hash, device_model: str = None, client_type: str = None):
     """
     Регистрирует новое устройство для UUID.
     Возвращает: (success, current_count, limit, user_id, is_new)
@@ -521,6 +524,7 @@ async def register_device(sub_uuid, device_hash, device_model: str = None):
         sub_uuid: UUID подписки
         device_hash: Хеш устройства (model|platform)
         device_model: Название модели устройства для авто-переименования
+        client_type: Тип клиента (Happ, v2rayNG, etc.)
     """
     async with aiosqlite.connect(DB_NAME) as db:
         # Получаем лимит и user_id
@@ -562,8 +566,10 @@ async def register_device(sub_uuid, device_hash, device_model: str = None):
                 device_name = clean_model
 
         # Регистрируем
-        await db.execute('INSERT INTO devices (sub_uuid, device_hash, device_name, last_seen) VALUES (?, ?, ?, CURRENT_TIMESTAMP)', 
-                        (sub_uuid, device_hash, device_name))
+        await db.execute('''
+            INSERT INTO devices (sub_uuid, device_hash, device_name, last_seen, client_type) 
+            VALUES (?, ?, ?, CURRENT_TIMESTAMP, ?)
+        ''', (sub_uuid, device_hash, device_name, client_type or 'Unknown'))
         await db.commit()
         return True, current_count + 1, limit, user_id, True # is_new = True
 
@@ -614,8 +620,12 @@ async def get_user_devices(user_id):
             if not row or not row[0]:
                 return []
             sub_uuid = row[0]
-            
-        async with db.execute('SELECT id, device_hash, device_name, last_seen FROM devices WHERE sub_uuid = ?', (sub_uuid,)) as cursor:
+
+        async with db.execute('''
+            SELECT id, device_hash, device_name, last_seen, client_type 
+            FROM devices 
+            WHERE sub_uuid = ?
+        ''', (sub_uuid,)) as cursor:
             return await cursor.fetchall()
 
 async def rename_device(device_id, new_name):

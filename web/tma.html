@@ -1049,14 +1049,23 @@
             <!-- Step 2: Download Links -->
             <div id="add-device-step-2" style="display: none;">
                 <p style="color: var(--text-dim); font-size: 13px; margin-bottom: 16px;">
-                    Установите приложение Happ для подключения
+                    1️⃣ Установите приложение Happ
                 </p>
-                
+
                 <div id="download-links" style="display: grid; gap: 10px; margin-bottom: 16px;">
                     <!-- Ссылки будут добавлены через JS -->
                 </div>
-                
-                <button class="btn-primary" onclick="goToAddDeviceStep3()" style="width: 100%;">
+
+                <div id="open-happ-section" style="display: none; margin-top: 16px;">
+                    <p style="color: var(--text-dim); font-size: 13px; margin-bottom: 10px;">
+                        2️⃣ Откройте приложение
+                    </p>
+                    <a id="open-happ-btn" href="#" class="btn-primary" style="width: 100%; display: flex; align-items: center; justify-content: center; gap: 8px;">
+                        🚀 Открыть Happ
+                    </a>
+                </div>
+
+                <button class="btn-primary" onclick="goToAddDeviceStep3()" style="width: 100%; margin-top: 16px;">
                     Далее →
                 </button>
             </div>
@@ -1420,10 +1429,16 @@
         function openConnection() {
             const url = document.getElementById('sub-url-input').value;
             if (url.startsWith('http')) {
-                // Если ссылка уже зашифрована (ведет на clck.ru или github), 
-                // мы всё равно можем попробовать обернуть её в happ://add/
-                // Но лучше, если это уже Deep Link. Однако Happ поддерживает happ://add/http...
-                tg.openLink(url); // Просто открываем сокращенную ссылку, она сделает редирект на GitHub -> DeepLink
+                // Открываем happ://add/ с нашей ссылкой для автоматического добавления
+                const happDeepLink = `happ://add/${encodeURIComponent(url)}`;
+                
+                // Пробуем открыть через happ://
+                tg.openLink(happDeepLink);
+                
+                // Если не сработает, Telegram откроет обычную ссылку
+                setTimeout(() => {
+                    tg.openLink(url);
+                }, 500);
             } else {
                 tg.showAlert("У вас нет активной подписки.");
             }
@@ -1586,11 +1601,9 @@
         function getDownloadLinks(os) {
             const links = {
                 'Android': [
-                    { name: 'Google Play', url: 'https://play.google.com/store/apps/details?id=com.happproxy', icon: '🤖' },
-                    { name: 'RuStore', url: 'https://www.rustore.ru/catalog/app/com.happproxy', icon: '🇷🇺' }
+                    { name: 'Google Play', url: 'https://play.google.com/store/apps/details?id=com.happproxy', icon: '🤖' }
                 ],
                 'iOS': [
-                    { name: 'RuStore (RU)', url: 'https://www.rustore.ru/catalog/app/com.happproxy', icon: '🇷🇺' },
                     { name: 'App Store (Global)', url: 'https://apps.apple.com/en/app/happ-proxy-utility/id6504287215', icon: '🌍' }
                 ],
                 'Windows': [
@@ -1607,6 +1620,14 @@
                 ]
             };
             return links[os] || links['Другая'];
+        }
+
+        function getHappOpenLink(os) {
+            // Deep link для открытия приложения Happ
+            if (os === 'Android' || os === 'iOS') {
+                return 'happ://';
+            }
+            return null;
         }
 
         function openAddDeviceModal() {
@@ -1629,10 +1650,11 @@
         function goToAddDeviceStep2() {
             const os = document.getElementById('detected-os').value;
             const links = getDownloadLinks(os);
-            
+            const happLink = getHappOpenLink(os);
+
             const linksContainer = document.getElementById('download-links');
             linksContainer.innerHTML = '';
-            
+
             links.forEach(link => {
                 const btn = document.createElement('a');
                 btn.className = 'btn-primary';
@@ -1645,7 +1667,17 @@
                 btn.innerHTML = `${link.icon} ${link.name}`;
                 linksContainer.appendChild(btn);
             });
-            
+
+            // Показываем кнопку "Открыть Happ" для мобильных
+            const openHappSection = document.getElementById('open-happ-section');
+            const openHappBtn = document.getElementById('open-happ-btn');
+            if (happLink) {
+                openHappBtn.href = happLink;
+                openHappSection.style.display = 'block';
+            } else {
+                openHappSection.style.display = 'none';
+            }
+
             document.getElementById('add-device-step-1').style.display = 'none';
             document.getElementById('add-device-step-2').style.display = 'block';
         }
