@@ -478,38 +478,35 @@ def verify_telegram_data(init_data: str):
 async def authenticate_user(request):
     """
     Универсальная аутентификация: Telegram InitData или Token
-    С защитой от брутфорса (rate limiting)
     """
     auth = request.headers.get('Authorization')
     if not auth:
+        print("DEBUG: No Authorization header")
         return None
 
-    # RATE LIMITING: Проверяем лимит для аутентификации
-    client_ip = get_client_identifier(request)
-    if not auth_limiter.is_allowed(f"auth:{client_ip}"):
-        print(f"RATE LIMIT: Auth request blocked for {client_ip}")
-        return None  # Возвращаем None, что приведёт к Unauthorized
-
     # 1. Пробуем как Telegram InitData
-    user_data = verify_telegram_data(auth)
-    if user_data:
-        return user_data.get('id')
+    try:
+        user_data = verify_telegram_data(auth)
+        if user_data:
+            user_id = user_data.get('id')
+            print(f"DEBUG: Authenticated user {user_id} via Telegram")
+            return user_id
+    except Exception as e:
+        print(f"DEBUG: Telegram auth error: {e}")
 
     # 2. Пробуем как наш Token
-    user_id = await get_user_by_token(auth)
-    return user_id
+    try:
+        user_id = await get_user_by_token(auth)
+        if user_id:
+            print(f"DEBUG: Authenticated user {user_id} via token")
+        return user_id
+    except Exception as e:
+        print(f"DEBUG: Token auth error: {e}")
+    
+    return None
 
 async def get_me_handler(request):
     """Получение информации о текущем пользователе и его подписке"""
-    # RATE LIMITING: Проверяем лимит для API запросов
-    client_ip = get_client_identifier(request)
-    if not api_limiter.is_allowed(f"api:{client_ip}"):
-        return web.json_response(
-            {"error": "Too Many Requests", "retry_after": 60},
-            status=429,
-            headers={"Retry-After": "60"}
-        )
-
     user_id = await authenticate_user(request)
     if not user_id:
         return web.json_response({"error": "Unauthorized"}, status=401)
@@ -544,15 +541,6 @@ async def get_me_handler(request):
 
 async def list_devices_handler(request):
     """Список устройств пользователя"""
-    # RATE LIMITING: Проверяем лимит для API запросов
-    client_ip = get_client_identifier(request)
-    if not api_limiter.is_allowed(f"api:{client_ip}"):
-        return web.json_response(
-            {"error": "Too Many Requests", "retry_after": 60},
-            status=429,
-            headers={"Retry-After": "60"}
-        )
-
     user_id = await authenticate_user(request)
     if not user_id:
         return web.json_response({"error": "Unauthorized"}, status=401)
@@ -571,15 +559,6 @@ async def list_devices_handler(request):
 
 async def rename_device_handler(request):
     """Переименование устройства"""
-    # RATE LIMITING: Проверяем лимит для API запросов
-    client_ip = get_client_identifier(request)
-    if not api_limiter.is_allowed(f"api:{client_ip}"):
-        return web.json_response(
-            {"error": "Too Many Requests", "retry_after": 60},
-            status=429,
-            headers={"Retry-After": "60"}
-        )
-
     user_id = await authenticate_user(request)
     if not user_id:
         return web.json_response({"error": "Unauthorized"}, status=401)
@@ -591,22 +570,22 @@ async def rename_device_handler(request):
     if not device_id or not new_name:
         return web.json_response({"error": "Missing params"}, status=400)
 
-    # Проверка принадлежности устройства (опционально, но желательно)
-    # Для упрощения пока просто переименовываем
+    # Проверяем принадлежность устройства пользователю
+    async with aiosqlite.connect(DB_NAME) as db:
+        async with db.execute('''
+            SELECT d.id FROM devices d
+            JOIN subscriptions s ON d.sub_uuid = s.sub_uuid
+            WHERE d.id = ? AND s.user_id = ?
+        ''', (device_id, user_id)) as cursor:
+            row = await cursor.fetchone()
+            if not row:
+                return web.json_response({"error": "Устройство не найдено"}, status=404)
+    
     await rename_device(device_id, new_name)
-    return web.json_response({"status": "ok"})
+    return web.json_response({"status": "ok", "message": "Устройство переименовано"})
 
 async def delete_device_handler(request):
     """Удаление устройства"""
-    # RATE LIMITING: Проверяем лимит для API запросов
-    client_ip = get_client_identifier(request)
-    if not api_limiter.is_allowed(f"api:{client_ip}"):
-        return web.json_response(
-            {"error": "Too Many Requests", "retry_after": 60},
-            status=429,
-            headers={"Retry-After": "60"}
-        )
-
     user_id = await authenticate_user(request)
     if not user_id:
         return web.json_response({"error": "Unauthorized"}, status=401)
@@ -627,7 +606,7 @@ async def delete_device_handler(request):
         ''', (device_id, user_id)) as cursor:
             row = await cursor.fetchone()
             if not row:
-                return web.json_response({"error": "Устройство не найдено или не принадлежит вам"}, status=404)
+                return web.json_response({"error": "Устройство не найдено"}, status=404)
     
     await delete_device(device_id)
     return web.json_response({"status": "ok", "message": "Устройство удалено"})
@@ -712,15 +691,6 @@ async def unlink_all_devices_handler(request):
     """
     Отвязка всех устройств пользователя
     """
-    # RATE LIMITING: Проверяем лимит для API запросов (строгий лимит!)
-    client_ip = get_client_identifier(request)
-    if not auth_limiter.is_allowed(f"unlink_all:{client_ip}"):
-        return web.json_response(
-            {"error": "Too Many Requests", "retry_after": 300},
-            status=429,
-            headers={"Retry-After": "300"}
-        )
-
     user_id = await authenticate_user(request)
     if not user_id:
         return web.json_response({"error": "Unauthorized"}, status=401)
@@ -730,7 +700,7 @@ async def unlink_all_devices_handler(request):
         async with db.execute('SELECT sub_uuid FROM subscriptions WHERE user_id = ? AND is_active = 1', (user_id,)) as cursor:
             row = await cursor.fetchone()
             if not row or not row[0]:
-                return web.json_response({"error": "No active subscription"}, status=404)
+                return web.json_response({"error": "Нет активной подписки"}, status=404)
 
             sub_uuid = row[0]
 

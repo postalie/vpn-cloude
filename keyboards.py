@@ -227,13 +227,11 @@ def get_active_sub_kb(happ_link=None):
     return InlineKeyboardMarkup(inline_keyboard=buttons)
 
 # Меню подписки
-async def get_subscription_menu_kb(user_id, short_link=None):
-    from database import create_web_token
-    token = await create_web_token(user_id)
+async def get_subscription_menu_kb(short_link=None):
     btns = []
     
-    # Кнопка для открытия TMA
-    btns.append([InlineKeyboardButton(text="⚙️ Управление устройствами (TMA)", web_app=WebAppInfo(url=f"https://vpn-cloude-production.up.railway.app/dashboard?token={token}"))])
+    # Кнопка для открытия TMA (использует Telegram initData для аутентификации)
+    btns.append([InlineKeyboardButton(text="⚙️ Управление устройствами", web_app=WebAppInfo(url="https://vpn-cloude-production.up.railway.app/dashboard"))])
     
     if short_link:
         btns.append([InlineKeyboardButton(text="🚀 Подключить в Happ", url=short_link)])

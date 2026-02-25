@@ -996,10 +996,13 @@
 
         const API_BASE = window.location.origin + "/api";
 
-        // Получаем токен из URL или initData
-        const urlParams = new URLSearchParams(window.location.search);
-        const token = urlParams.get('token');
-        const authData = token || tg.initData;
+        // Используем Telegram initData для аутентификации (всегда)
+        const authData = tg.initData || tg.initDataUnsafe;
+        
+        // Проверяем что initData есть
+        if (!authData) {
+            console.error("No initData available");
+        }
 
         let currentUser = null;
         let selectedDeviceId = null;
@@ -1008,7 +1011,7 @@
         const devicesPerPage = 5;
 
         // Header color adjustment
-        tg.setHeaderColor('#0b0e14');
+        tg.setHeaderColor('#0b1018');
         tg.enableClosingConfirmation();
 
         // Элементы экрана авторизации
@@ -1036,32 +1039,42 @@
 
         // Инициализация приложения
         async function initApp() {
+            console.log('InitApp starting, authData:', authData ? 'present' : 'missing');
+            
             // Проверяем, есть ли данные для авторизации
-            if (!authData || authData === 'null') {
+            if (!authData || authData === 'null' || authData === 'undefined') {
+                console.error('No valid authData available');
                 showAuthError();
                 return;
             }
 
             try {
+                console.log('Fetching /me with authData...');
                 const res = await fetch(`${API_BASE}/me`, {
                     headers: { 'Authorization': authData }
                 });
+
+                console.log('Response status:', res.status);
                 
                 if (!res.ok) {
-                    throw new Error('Authorization failed');
+                    const errorText = await res.text();
+                    console.error('API error:', res.status, errorText);
+                    throw new Error(`Authorization failed: ${res.status}`);
                 }
-                
+
                 const data = await res.json();
+                console.log('User data:', data);
+                
                 if (data.error) {
                     throw new Error(data.error);
                 }
 
                 currentUser = data;
-                
+
                 // Скрываем экран авторизации и показываем основной интерфейс
                 authScreen.classList.add('hidden');
                 mainContainer.style.display = 'block';
-                
+
                 updateUserInfo();
             } catch (e) {
                 console.error('Auth error:', e);
@@ -1309,21 +1322,22 @@
             try {
                 const res = await fetch(`${API_BASE}/rename_device`, {
                     method: 'POST',
-                    headers: { 
-                        'Authorization': authData, 
-                        'Content-Type': 'application/json' 
+                    headers: {
+                        'Authorization': authData,
+                        'Content-Type': 'application/json'
                     },
                     body: JSON.stringify({ id: selectedDeviceId, name: newName })
                 });
-                if (res.ok) {
+                const data = await res.json();
+                if (res.ok && data.status === "ok") {
                     closeRenameModal();
                     fetchDevices();
                 } else {
-                    tg.showAlert("Не удалось переименовать");
+                    tg.showAlert(data.error || "Не удалось переименовать");
                 }
             } catch (e) {
                 console.error(e);
-                tg.showAlert("Не удалось переименовать");
+                tg.showAlert("Ошибка при переименовании");
             }
         }
 
@@ -1341,7 +1355,6 @@
                     });
                     const data = await res.json();
                     if (res.ok && data.status === "ok") {
-                        tg.showAlert("Устройство удалено");
                         fetchDevices();
                     } else {
                         tg.showAlert(data.error || "Ошибка при удалении");
@@ -1366,7 +1379,6 @@
                     });
                     const data = await res.json();
                     if (res.ok && data.status === "ok") {
-                        tg.showAlert("Все устройства отвязаны");
                         fetchDevices();
                     } else {
                         tg.showAlert(data.error || "Ошибка при отвязке");
