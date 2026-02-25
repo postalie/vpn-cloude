@@ -608,6 +608,22 @@
             animation: fadeIn 0.2s ease-out;
         }
 
+        #addDeviceModal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.8);
+            backdrop-filter: blur(5px);
+            display: none;
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+            padding: 20px;
+            animation: fadeIn 0.2s ease-out;
+        }
+
         .modal-body {
             background: linear-gradient(165deg, rgba(34, 44, 62, 0.94), rgba(21, 29, 42, 0.88));
             border: 1px solid var(--border);
@@ -683,6 +699,28 @@
 
         .btn-save:hover {
             box-shadow: 0 8px 18px rgba(47, 137, 255, 0.4);
+        }
+
+        .btn-ghost {
+            height: 40px;
+            border: 1px solid var(--border);
+            border-radius: 11px;
+            padding: 0 16px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            font-size: 12px;
+            font-weight: 600;
+            color: var(--text-main);
+            background: transparent;
+            cursor: pointer;
+            transition: all 0.15s ease;
+        }
+
+        .btn-ghost:hover {
+            background: rgba(255, 255, 255, 0.05);
+            border-color: var(--border-strong);
         }
 
         #empty-devices {
@@ -937,6 +975,14 @@
                 </div>
             </div>
 
+            <button class="btn-primary" onclick="openAddDeviceModal()" style="margin-top: 14px; width: 100%;">
+                ➕ Добавить устройство
+            </button>
+            
+            <button class="btn-ghost" onclick="fetchDevices()" style="margin-top: 10px; width: 100%;">
+                🔄 Обновить список
+            </button>
+
             <p style="font-size: 12px; color: var(--text-dim); margin: 15px 10px; line-height: 1.4;">
                 * Если вы удалите текущее устройство, оно добавится снова при следующем использовании VPN.
             </p>
@@ -976,6 +1022,81 @@
                 <button class="btn-cancel" onclick="closeRenameModal()">Отмена</button>
                 <button class="btn-save" onclick="saveDeviceName()">Сохранить</button>
             </div>
+        </div>
+    </div>
+
+    <!-- Add Device Modal -->
+    <div id="addDeviceModal" style="display: none;">
+        <div class="modal-body" style="max-width: 400px;">
+            <h2 id="add-device-title">➕ Добавление устройства</h2>
+            
+            <!-- Step 1: OS Detection -->
+            <div id="add-device-step-1">
+                <p style="color: var(--text-dim); font-size: 13px; margin-bottom: 16px;">
+                    Установка на этом устройстве
+                </p>
+                
+                <div class="field" style="margin-bottom: 16px;">
+                    <span>Ваша операционная система:</span>
+                    <input type="text" id="detected-os" readonly value="Определение..." style="background: rgba(47, 137, 255, 0.1); border-color: rgba(85, 178, 255, 0.4);">
+                </div>
+                
+                <button class="btn-primary" onclick="goToAddDeviceStep2()" style="width: 100%;">
+                    Далее →
+                </button>
+            </div>
+            
+            <!-- Step 2: Download Links -->
+            <div id="add-device-step-2" style="display: none;">
+                <p style="color: var(--text-dim); font-size: 13px; margin-bottom: 16px;">
+                    Установите приложение Happ для подключения
+                </p>
+                
+                <div id="download-links" style="display: grid; gap: 10px; margin-bottom: 16px;">
+                    <!-- Ссылки будут добавлены через JS -->
+                </div>
+                
+                <button class="btn-primary" onclick="goToAddDeviceStep3()" style="width: 100%;">
+                    Далее →
+                </button>
+            </div>
+            
+            <!-- Step 3: Waiting for Device -->
+            <div id="add-device-step-3" style="display: none;">
+                <p style="color: var(--text-dim); font-size: 13px; margin-bottom: 16px; text-align: center;">
+                    🔄 Ожидание подключения устройства...
+                </p>
+                
+                <div style="text-align: center; padding: 20px;">
+                    <div class="auth-loader" style="margin: 0 auto 16px;"></div>
+                    <p id="waiting-timer" style="color: var(--text-dim); font-size: 14px;">Ожидание: 0 сек</p>
+                </div>
+                
+                <div id="device-connected-msg" style="display: none; text-align: center; color: var(--success); margin: 16px 0;">
+                    ✅ Устройство подключено!
+                </div>
+                
+                <button class="btn-ghost" id="skip-wait-btn" onclick="showSkipOptions()" style="width: 100%; margin-top: 16px; display: none;">
+                    Пропустить
+                </button>
+            </div>
+            
+            <!-- Skip Options -->
+            <div id="add-device-skip" style="display: none;">
+                <p style="color: var(--text-dim); font-size: 13px; margin: 16px 0; text-align: center;">
+                    Возникли проблемы? Напишите в поддержку:
+                </p>
+                <a href="https://t.me/avestb" target="_blank" class="btn-primary" style="width: 100%; margin-bottom: 10px; display: flex; justify-content: center; align-items: center; gap: 8px;">
+                    ✈️ @avestb
+                </a>
+                <button class="btn-ghost" onclick="closeAddDeviceModal()" style="width: 100%;">
+                    Закрыть
+                </button>
+            </div>
+            
+            <button class="btn-ghost" onclick="closeAddDeviceModal()" id="add-device-close" style="width: 100%; margin-top: 10px;">
+                Отмена
+            </button>
         </div>
     </div>
 
@@ -1076,6 +1197,10 @@
                 mainContainer.style.display = 'block';
 
                 updateUserInfo();
+                
+                // Загружаем устройства сразу при входе
+                console.log('Loading devices...');
+                await fetchDevices();
             } catch (e) {
                 console.error('Auth error:', e);
                 showAuthError();
@@ -1277,7 +1402,8 @@
 
             if (section === 'devices') {
                 currentPage = 1;
-                fetchDevices();
+                // Устройства уже загружены при инициализации, просто показываем
+                renderDevicesPage();
             }
         }
 
@@ -1440,6 +1566,150 @@
             } catch (e) {
                 tg.showAlert("Ошибка при активации купона.");
             }
+        }
+
+        // === ADD DEVICE MODAL FUNCTIONS ===
+        let deviceCheckInterval = null;
+        let deviceCheckSeconds = 0;
+        let initialDeviceCount = 0;
+
+        function detectUserOS() {
+            const ua = navigator.userAgent;
+            if (/android/i.test(ua)) return 'Android';
+            if (/iPad|iPhone|iPod/.test(ua)) return 'iOS';
+            if (/windows/i.test(ua)) return 'Windows';
+            if (/macintosh/i.test(ua)) return 'macOS';
+            if (/linux/i.test(ua)) return 'Linux';
+            return 'Другая';
+        }
+
+        function getDownloadLinks(os) {
+            const links = {
+                'Android': [
+                    { name: 'Google Play', url: 'https://play.google.com/store/apps/details?id=com.happproxy', icon: '🤖' },
+                    { name: 'RuStore', url: 'https://www.rustore.ru/catalog/app/com.happproxy', icon: '🇷🇺' }
+                ],
+                'iOS': [
+                    { name: 'RuStore (RU)', url: 'https://www.rustore.ru/catalog/app/com.happproxy', icon: '🇷🇺' },
+                    { name: 'App Store (Global)', url: 'https://apps.apple.com/en/app/happ-proxy-utility/id6504287215', icon: '🌍' }
+                ],
+                'Windows': [
+                    { name: 'Скачать для Windows', url: 'https://github.com/Happ-proxy/happ-desktop/releases/latest/download/setup-Happ.x64.exe', icon: '🪟' }
+                ],
+                'macOS': [
+                    { name: 'Скачать для macOS', url: 'https://github.com/Happ-proxy/happ-desktop/releases', icon: '💻' }
+                ],
+                'Linux': [
+                    { name: 'Скачать для Linux', url: 'https://github.com/Happ-proxy/happ-desktop/releases', icon: '🐧' }
+                ],
+                'Другая': [
+                    { name: 'Все версии Happ', url: 'https://github.com/Happ-proxy/happ-desktop/releases', icon: '📥' }
+                ]
+            };
+            return links[os] || links['Другая'];
+        }
+
+        function openAddDeviceModal() {
+            const os = detectUserOS();
+            document.getElementById('detected-os').value = os;
+            
+            // Сбрасываем все шаги
+            document.getElementById('add-device-step-1').style.display = 'block';
+            document.getElementById('add-device-step-2').style.display = 'none';
+            document.getElementById('add-device-step-3').style.display = 'none';
+            document.getElementById('add-device-skip').style.display = 'none';
+            document.getElementById('add-device-close').style.display = 'flex';
+            document.getElementById('device-connected-msg').style.display = 'none';
+            document.getElementById('skip-wait-btn').style.display = 'none';
+            
+            // Показываем модалку
+            document.getElementById('addDeviceModal').style.display = 'flex';
+        }
+
+        function goToAddDeviceStep2() {
+            const os = document.getElementById('detected-os').value;
+            const links = getDownloadLinks(os);
+            
+            const linksContainer = document.getElementById('download-links');
+            linksContainer.innerHTML = '';
+            
+            links.forEach(link => {
+                const btn = document.createElement('a');
+                btn.className = 'btn-primary';
+                btn.href = link.url;
+                btn.target = '_blank';
+                btn.style.display = 'flex';
+                btn.style.alignItems = 'center';
+                btn.style.gap = '8px';
+                btn.style.justifyContent = 'center';
+                btn.innerHTML = `${link.icon} ${link.name}`;
+                linksContainer.appendChild(btn);
+            });
+            
+            document.getElementById('add-device-step-1').style.display = 'none';
+            document.getElementById('add-device-step-2').style.display = 'block';
+        }
+
+        function goToAddDeviceStep3() {
+            // Сохраняем текущее количество устройств
+            initialDeviceCount = allDevices.length;
+            
+            document.getElementById('add-device-step-2').style.display = 'none';
+            document.getElementById('add-device-step-3').style.display = 'block';
+            document.getElementById('add-device-close').style.display = 'none';
+            
+            // Запускаем таймер и проверку
+            deviceCheckSeconds = 0;
+            deviceCheckInterval = setInterval(() => {
+                deviceCheckSeconds++;
+                document.getElementById('waiting-timer').innerText = `Ожидание: ${deviceCheckSeconds} сек`;
+                
+                // Проверяем устройства каждые 2 секунды
+                if (deviceCheckSeconds % 2 === 0) {
+                    checkForNewDevice();
+                }
+                
+                // Показываем кнопку "Пропустить" через 10 секунд
+                if (deviceCheckSeconds >= 10) {
+                    document.getElementById('skip-wait-btn').style.display = 'flex';
+                }
+            }, 1000);
+        }
+
+        async function checkForNewDevice() {
+            try {
+                const res = await fetch(`${API_BASE}/list_devices`, {
+                    headers: { 'Authorization': authData }
+                });
+                const devices = await res.json();
+                
+                if (devices.length > initialDeviceCount) {
+                    // Устройство появилось!
+                    clearInterval(deviceCheckInterval);
+                    document.getElementById('device-connected-msg').style.display = 'block';
+                    document.getElementById('waiting-timer').style.display = 'none';
+                    document.getElementById('skip-wait-btn').style.display = 'none';
+                    
+                    // Обновляем список и закрываем через 1.5 секунды
+                    setTimeout(() => {
+                        fetchDevices();
+                        closeAddDeviceModal();
+                    }, 1500);
+                }
+            } catch (e) {
+                console.error('Error checking devices:', e);
+            }
+        }
+
+        function showSkipOptions() {
+            clearInterval(deviceCheckInterval);
+            document.getElementById('add-device-step-3').style.display = 'none';
+            document.getElementById('add-device-skip').style.display = 'block';
+        }
+
+        function closeAddDeviceModal() {
+            clearInterval(deviceCheckInterval);
+            document.getElementById('addDeviceModal').style.display = 'none';
         }
     </script>
 </body>
