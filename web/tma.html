@@ -337,21 +337,12 @@
             background: rgba(47, 137, 255, 0.25);
         }
 
-        .btn-device.btn-disable {
-            background: rgba(217, 142, 43, 0.15);
-            border-color: rgba(217, 142, 43, 0.4);
-        }
-
-        .btn-device.btn-disable:hover {
-            background: rgba(217, 142, 43, 0.25);
-        }
-
-        .btn-device.btn-block {
+        .btn-device.btn-delete {
             background: rgba(255, 123, 123, 0.15);
             border-color: rgba(255, 123, 123, 0.4);
         }
 
-        .btn-device.btn-block:hover {
+        .btn-device.btn-delete:hover {
             background: rgba(255, 123, 123, 0.25);
         }
 
@@ -1198,8 +1189,7 @@
                     <div class="device-info-row">
                         <div class="device-actions">
                             <button data-id="${d.id}" data-name="${escapeHtml(d.name)}" class="btn-device btn-rename" onclick="openRenameModal(${d.id}, '${escapeHtml(d.name).replace(/'/g, "\\'")}')">✏️ Переименовать</button>
-                            <button data-id="${d.id}" class="btn-device btn-disable" onclick="confirmDisable(${d.id})">🚫 Отключить</button>
-                            <button data-id="${d.id}" class="btn-device btn-block" onclick="confirmBlock(${d.id})">🔒 Заблокировать</button>
+                            <button data-id="${d.id}" class="btn-device btn-delete" onclick="confirmDelete(${d.id})">🗑️ Удалить</button>
                         </div>
                     </div>
                 `;
@@ -1347,66 +1337,18 @@
                             'Authorization': authData,
                             'Content-Type': 'application/json'
                         },
-                        body: JSON.stringify({ id })
+                        body: JSON.stringify({ device_id: id })
                     });
-                    if (res.ok) {
+                    const data = await res.json();
+                    if (res.ok && data.status === "ok") {
+                        tg.showAlert("Устройство удалено");
                         fetchDevices();
                     } else {
-                        tg.showAlert("Ошибка при удалении");
+                        tg.showAlert(data.error || "Ошибка при удалении");
                     }
                 } catch (e) {
                     console.error(e);
                     tg.showAlert("Ошибка при удалении");
-                }
-            });
-        }
-
-        function confirmDisable(id) {
-            tg.showConfirm("Вы уверены, что хотите отключить это устройство? Оно перестанет работать до следующего подключения.", async (ok) => {
-                if (!ok) return;
-                try {
-                    const res = await fetch(`${API_BASE}/disable_device`, {
-                        method: 'POST',
-                        headers: {
-                            'Authorization': authData,
-                            'Content-Type': 'application/json'
-                        },
-                        body: JSON.stringify({ id })
-                    });
-                    if (res.ok) {
-                        tg.showAlert("Устройство отключено");
-                        fetchDevices();
-                    } else {
-                        tg.showAlert("Ошибка при отключении");
-                    }
-                } catch (e) {
-                    console.error(e);
-                    tg.showAlert("Ошибка при отключении");
-                }
-            });
-        }
-
-        function confirmBlock(id) {
-            tg.showConfirm("Вы уверены, что хотите заблокировать это устройство? Доступ будет полностью запрещён.", async (ok) => {
-                if (!ok) return;
-                try {
-                    const res = await fetch(`${API_BASE}/block_device`, {
-                        method: 'POST',
-                        headers: {
-                            'Authorization': authData,
-                            'Content-Type': 'application/json'
-                        },
-                        body: JSON.stringify({ id })
-                    });
-                    if (res.ok) {
-                        tg.showAlert("Устройство заблокировано");
-                        fetchDevices();
-                    } else {
-                        tg.showAlert("Ошибка при блокировке");
-                    }
-                } catch (e) {
-                    console.error(e);
-                    tg.showAlert("Ошибка при блокировке");
                 }
             });
         }
@@ -1422,11 +1364,12 @@
                             'Content-Type': 'application/json'
                         }
                     });
-                    if (res.ok) {
+                    const data = await res.json();
+                    if (res.ok && data.status === "ok") {
                         tg.showAlert("Все устройства отвязаны");
                         fetchDevices();
                     } else {
-                        tg.showAlert("Ошибка при отвязке");
+                        tg.showAlert(data.error || "Ошибка при отвязке");
                     }
                 } catch (e) {
                     console.error(e);

@@ -226,6 +226,27 @@ def get_active_sub_kb(happ_link=None):
     buttons.append([InlineKeyboardButton(text="🔗 Настройка подключения", callback_data="connection")])
     return InlineKeyboardMarkup(inline_keyboard=buttons)
 
+# Меню подписки
+async def get_subscription_menu_kb(user_id, short_link=None):
+    from database import create_web_token
+    token = await create_web_token(user_id)
+    btns = []
+    
+    # Кнопка для открытия TMA
+    btns.append([InlineKeyboardButton(text="⚙️ Управление устройствами (TMA)", web_app=WebAppInfo(url=f"https://vpn-cloude-production.up.railway.app/dashboard?token={token}"))])
+    
+    if short_link:
+        btns.append([InlineKeyboardButton(text="🚀 Подключить в Happ", url=short_link)])
+    
+    btns.append([
+        InlineKeyboardButton(text="📱 Клиенты", callback_data="show_clients"),
+        InlineKeyboardButton(text="🆘 Помощь", callback_data="help_connection")
+    ])
+    btns.append([InlineKeyboardButton(text="🔄 Сбросить ссылку", callback_data="reset_link")])
+    btns.append([InlineKeyboardButton(text="« Назад в меню", callback_data="back_to_main")])
+    
+    return InlineKeyboardMarkup(inline_keyboard=btns)
+
 
 # Меню устройств
 def get_devices_kb(devices, limit):
@@ -259,23 +280,3 @@ def get_clients_kb():
         ]
     )
 
-# Меню подписки
-async def get_subscription_menu_kb(user_id, short_link=None):
-    from database import create_web_token
-    token = await create_web_token(user_id)
-    btns = []
-    
-    # Кнопка для открытия TMA
-    btns.append([InlineKeyboardButton(text="⚙️ Управление устройствами (TMA)", web_app=WebAppInfo(url=f"https://vpn-cloude-production.up.railway.app/dashboard"))])
-    
-    if short_link:
-        btns.append([InlineKeyboardButton(text="🚀 Подключить в Happ", url=short_link)])
-    
-    btns.append([
-        InlineKeyboardButton(text="📱 Клиенты", callback_data="show_clients"),
-        InlineKeyboardButton(text="🆘 Помощь", callback_data="help_connection")
-    ])
-    btns.append([InlineKeyboardButton(text="🔄 Сбросить ссылку", callback_data="reset_link")])
-    btns.append([InlineKeyboardButton(text="« Назад в меню", callback_data="back_to_main")])
-    
-    return InlineKeyboardMarkup(inline_keyboard=btns)

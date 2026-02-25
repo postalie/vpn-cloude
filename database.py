@@ -512,10 +512,15 @@ async def reset_subscription_uuid(user_id):
         await db.commit()
     return new_uuid
 
-async def register_device(sub_uuid, device_hash):
+async def register_device(sub_uuid, device_hash, device_model: str = None):
     """
     Регистрирует новое устройство для UUID.
     Возвращает: (success, current_count, limit, user_id, is_new)
+    
+    Args:
+        sub_uuid: UUID подписки
+        device_hash: Хеш устройства (model|platform)
+        device_model: Название модели устройства для авто-переименования
     """
     async with aiosqlite.connect(DB_NAME) as db:
         # Получаем лимит и user_id
@@ -546,8 +551,19 @@ async def register_device(sub_uuid, device_hash):
         if current_count >= limit:
             return False, current_count, limit, user_id, False
 
+        # Авто-переименование: если модель не "Unknown Device", используем её как имя
+        device_name = "Новое устройство"
+        if device_model and device_model != "Unknown Device":
+            # Очищаем имя от лишних символов
+            import re
+            # Оставляем только буквы, цифры, /, -, _, пробелы
+            clean_model = re.sub(r'[^\w\s/\-_.]', '', device_model).strip()
+            if clean_model:
+                device_name = clean_model
+
         # Регистрируем
-        await db.execute('INSERT INTO devices (sub_uuid, device_hash, device_name, last_seen) VALUES (?, ?, ?, CURRENT_TIMESTAMP)', (sub_uuid, device_hash, "Новое устройство"))
+        await db.execute('INSERT INTO devices (sub_uuid, device_hash, device_name, last_seen) VALUES (?, ?, ?, CURRENT_TIMESTAMP)', 
+                        (sub_uuid, device_hash, device_name))
         await db.commit()
         return True, current_count + 1, limit, user_id, True # is_new = True
 

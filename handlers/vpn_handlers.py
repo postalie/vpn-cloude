@@ -76,8 +76,6 @@ async def show_connection_menu(callback: types.CallbackQuery, state: FSMContext)
             ),
             parse_mode="HTML"
         )
-        
-        from keyboards import get_active_sub_kb
 
         msg_text = await callback.message.answer(
             f"🔗 <b>Способ 2 (быстрый переход):</b>\n"
@@ -86,7 +84,7 @@ async def show_connection_menu(callback: types.CallbackQuery, state: FSMContext)
             f"3️⃣ Включите VPN главным тумблером\n\n"
             f"<i>💡 Для стабильной работы сайта требуется отключить VPN сервисы!</i>\n",
             parse_mode="HTML",
-            reply_markup=get_active_sub_kb(short_link)
+            reply_markup=await get_subscription_menu_kb(callback.from_user.id, short_link)
         )
         
         await state.update_data(last_sub_messages=[msg_photo.message_id, msg_text.message_id])
@@ -301,9 +299,8 @@ async def process_purchase(callback: types.CallbackQuery, state: FSMContext):
     gh_link = get_happ_github_link(user_id, sub_uuid, domain_clean)
     short_gh_link = shorten_url(gh_link)
 
-    # Используем новую клавиатуру с сокращенной GH ссылкой
-    from keyboards import get_active_sub_kb
-    kb = get_active_sub_kb(short_gh_link)
+    # Используем клавиатуру с TMA и Happ ссылкой
+    kb = await get_subscription_menu_kb(user_id, short_gh_link)
 
     await callback.message.edit_text(
         f"💎 <b>Подписка оформлена!</b>\n\n"
