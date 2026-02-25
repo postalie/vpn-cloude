@@ -10,7 +10,7 @@ from database import (
     add_subscription, get_discount, use_discount,
     cleanup_duplicate_devices
 )
-from config import API_SECRET, BOT_TOKEN, BASE_URL, VPN_PRICE
+from config import API_SECRET, BOT_TOKEN, BASE_URL, VPN_PRICE, DB_NAME
 from utils import shorten_url, get_happ_github_link
 from utils.rate_limiter import (
     auth_limiter, api_limiter, sub_limiter,
