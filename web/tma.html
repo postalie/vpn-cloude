@@ -1126,9 +1126,13 @@
 
         const API_BASE = window.location.origin + "/api";
 
+        // Получаем параметр tab из URL для открытия нужной вкладки
+        const urlParams = new URLSearchParams(window.location.search);
+        const tabParam = urlParams.get('tab');
+
         // Используем Telegram initData для аутентификации (всегда)
         const authData = tg.initData || tg.initDataUnsafe;
-        
+
         // Проверяем что initData есть
         if (!authData) {
             console.error("No initData available");
@@ -1206,10 +1210,21 @@
                 mainContainer.style.display = 'block';
 
                 updateUserInfo();
-                
+
                 // Загружаем устройства сразу при входе
                 console.log('Loading devices...');
                 await fetchDevices();
+
+                // Если передан параметр tab, переключаем вкладку
+                if (tabParam === 'devices' || tabParam === 'add') {
+                    switchSection('devices');
+                    // Если tab=add, открываем мастер добавления устройства
+                    if (tabParam === 'add') {
+                        setTimeout(() => {
+                            openAddDeviceModal();
+                        }, 500);
+                    }
+                }
             } catch (e) {
                 console.error('Auth error:', e);
                 showAuthError();
@@ -1429,16 +1444,10 @@
         function openConnection() {
             const url = document.getElementById('sub-url-input').value;
             if (url.startsWith('http')) {
-                // Открываем happ://add/ с нашей ссылкой для автоматического добавления
-                const happDeepLink = `happ://add/${encodeURIComponent(url)}`;
-                
-                // Пробуем открыть через happ://
-                tg.openLink(happDeepLink);
-                
-                // Если не сработает, Telegram откроет обычную ссылку
-                setTimeout(() => {
-                    tg.openLink(url);
-                }, 500);
+                // Если ссылка уже зашифрована (ведет на clck.ru или github),
+                // мы всё равно можем попробовать обернуть её в happ://add/
+                // Но лучше, если это уже Deep Link. Однако Happ поддерживает happ://add/http...
+                tg.openLink(url); // Просто открываем сокращенную ссылку, она сделает редирект на GitHub -> DeepLink
             } else {
                 tg.showAlert("У вас нет активной подписки.");
             }
@@ -1604,7 +1613,8 @@
                     { name: 'Google Play', url: 'https://play.google.com/store/apps/details?id=com.happproxy', icon: '🤖' }
                 ],
                 'iOS': [
-                    { name: 'App Store (Global)', url: 'https://apps.apple.com/en/app/happ-proxy-utility/id6504287215', icon: '🌍' }
+                    { name: 'App Store (RU)', url: 'https://apps.apple.com/ru/app/happ-proxy-utility-plus/id6746188973', icon: '🇷🇺' },
+                    { name: 'App Store (Global)', url: 'https://apps.apple.com/us/app/happ-proxy-utility/id6504287215', icon: '🌍' }
                 ],
                 'Windows': [
                     { name: 'Скачать для Windows', url: 'https://github.com/Happ-proxy/happ-desktop/releases/latest/download/setup-Happ.x64.exe', icon: '🪟' }

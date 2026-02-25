@@ -44,12 +44,12 @@ async def show_connection_menu(callback: types.CallbackQuery, state: FSMContext)
             )
         
         domain_clean = BASE_URL.replace("https://", "").replace("http://", "")
-        
+
         # Генерируем github ссылку (она правильно зашифрована)
         github_link = get_happ_github_link(callback.from_user.id, sub_uuid, domain_clean)
         # Сокращаем
         short_link = shorten_url(github_link)
-        
+
         # QR и кнопка используют одну и ту же ссылку — НЕТ второго запроса к crypto.happ.su
         encoded_qr_data = urllib.parse.quote(short_link)
         qr_url = f"https://api.qrserver.com/v1/create-qr-code/?size=300x300&data={encoded_qr_data}"
@@ -135,7 +135,7 @@ async def show_help_connection(callback: types.CallbackQuery):
     "❓ <b>Нужна помощь?</b>\n"
     "Возникли проблемы?\n"
     "Напишите нашему администратору:\n\n"
-    "👤 @soldenchain\n\n"
+    "👤 @avestb\n\n"
 )
     from aiogram.types import InlineKeyboardMarkup, InlineKeyboardButton
     kb = InlineKeyboardMarkup(inline_keyboard=[[InlineKeyboardButton(text="« Назад", callback_data="connection")]])
