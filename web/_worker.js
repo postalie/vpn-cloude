@@ -12,7 +12,7 @@ export default {
             // 1. ПРОКСИРОВАНИЕ API ЗАПРОСОВ (для TMA)
             if (pathParts[0] === 'api') {
                 const apiPath = url.pathname;
-                const railwayApiUrl = `https://158.160.201.209${apiPath}${url.search}`;
+                const railwayApiUrl = `https://msk.cloudevpn.cfd:8080${apiPath}${url.search}`;
 
                 const newHeaders = new Headers(request.headers);
                 newHeaders.set("X-API-Key", "CloudeVpnVOIDAPI_1488");
@@ -60,7 +60,7 @@ export default {
                 });
             };
 
-            const railwayUrl = `https://158.160.201.209/api/sub/${uuid}`;
+            const railwayUrl = `https://msk.cloudevpn.cfd:8080/api/sub/${uuid}`;
             let response;
 
             try {

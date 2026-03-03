@@ -7,10 +7,16 @@ set -e
 
 echo "🚀 Начало установки..."
 
+# Фикс для Debian 11 (bullseye) - репозитории перемещены в archive
+echo "🔧 Фикс репозиториев..."
+sed -i 's|http://deb.debian.org/debian bullseye|http://archive.debian.org/debian bullseye|g' /etc/apt/sources.list
+sed -i 's|http://security.debian.org bullseye-security|http://archive.debian.org/debian-security bullseye-security|g' /etc/apt/sources.list
+sed -i '/bullseye-backports/d' /etc/apt/sources.list
+
 # Обновление и установка пакетов
 echo "📦 Обновление и установка пакетов..."
 apt update
-apt install -y python3 python3-pip python3-venv screen
+apt install -y python3 python3-pip python3-venv screen curl net-tools
 
 # Директория проекта
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
