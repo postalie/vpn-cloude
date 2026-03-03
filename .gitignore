@@ -12,10 +12,6 @@ env/
 # SSL сертификаты (не коммитить!)
 ssl/
 
-# База данных
-data_base/*.db
-data_base/*.db-journal
-
 # Логи
 *.log
 
