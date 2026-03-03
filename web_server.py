@@ -43,10 +43,10 @@ async def sub_handler(request):
 
     if not sub_uuid:
         return web.Response(text="No UUID provided", status=400)
-    
+
     # ПРОВЕРКА ПОДПИСКИ В БД
     sub_data = await get_subscription_by_uuid(sub_uuid)
-    
+
     if not sub_data:
         print(f"DEBUG: Unknown UUID requested: {sub_uuid}")
         error_key = f"vless://00000000-0000-0000-0000-000000000000@127.0.0.1:443?encryption=none&security=none#🚨 Подписка не найдена"

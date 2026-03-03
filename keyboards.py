@@ -246,16 +246,21 @@ async def get_subscription_menu_kb(short_link=None):
     return InlineKeyboardMarkup(inline_keyboard=btns)
 
 # Меню управления устройствами (кнопки под TMA)
-def get_device_action_kb():
-    return InlineKeyboardMarkup(
-        inline_keyboard=[
-            [InlineKeyboardButton(text="➕ Добавить устройство", web_app=WebAppInfo(url="https://msk.cloudevpn.cfd:8080/dashboard?tab=add"))],
-            [InlineKeyboardButton(text="⚙️ Управление устройствами", web_app=WebAppInfo(url="https://msk.cloudevpn.cfd:8080/dashboard?tab=devices"))],
-            [InlineKeyboardButton(text="🔄 Сбросить ссылку", callback_data="reset_link")],
-            [InlineKeyboardButton(text="🆘 Помощь", callback_data="help_connection")],
-            [InlineKeyboardButton(text="« Назад", callback_data="connection")]
-        ]
-    )
+def get_device_action_kb(short_link=None):
+    btns = []
+    
+    # Если есть короткая ссылка - показываем её кнопкой
+    if short_link:
+        btns.append([InlineKeyboardButton(text="🔗 Подключиться", url=short_link)])
+    else:
+        btns.append([InlineKeyboardButton(text="➕ Добавить устройство", web_app=WebAppInfo(url="https://msk.cloudevpn.cfd:8080/dashboard?tab=add"))])
+    
+    btns.append([InlineKeyboardButton(text="⚙️ Управление устройствами", web_app=WebAppInfo(url="https://msk.cloudevpn.cfd:8080/dashboard?tab=devices"))])
+    btns.append([InlineKeyboardButton(text="🔄 Сбросить ссылку", callback_data="reset_link")])
+    btns.append([InlineKeyboardButton(text="🆘 Помощь", callback_data="help_connection")])
+    btns.append([InlineKeyboardButton(text="« Назад", callback_data="connection")])
+    
+    return InlineKeyboardMarkup(inline_keyboard=btns)
 
 
 # Меню устройств

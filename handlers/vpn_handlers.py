@@ -79,12 +79,12 @@ async def show_connection_menu(callback: types.CallbackQuery, state: FSMContext)
 
         msg_text = await callback.message.answer(
             f"🔗 <b>Способ 2 (быстрый переход):</b>\n"
-            f"1️⃣ Нажмите кнопку <b>«Подключить в Happ»</b>\n"
-            f"2️⃣ В приложении нажмите <b>«Разрешить »</b>\n"
-            f"3️⃣ Включите VPN главным тумблером\n\n"
+            f"1️⃣ Нажмите на кнопку <b>«🔗 Ссылка на подписку»</b>\n"
+            f"2️⃣ Откроется страница с настройками\n"
+            f"3️⃣ Скопируйте ссылку или нажмите «Открыть в Happ»\n\n"
             f"<i>💡 Для стабильной работы сайта требуется отключить VPN сервисы!</i>\n",
             parse_mode="HTML",
-            reply_markup=get_device_action_kb()
+            reply_markup=get_device_action_kb(short_link)
         )
         
         await state.update_data(last_sub_messages=[msg_photo.message_id, msg_text.message_id])
@@ -299,8 +299,8 @@ async def process_purchase(callback: types.CallbackQuery, state: FSMContext):
     gh_link = get_happ_github_link(user_id, sub_uuid, domain_clean)
     short_gh_link = shorten_url(gh_link)
 
-    # Используем клавиатуру с кнопками устройств
-    kb = get_device_action_kb()
+    # Используем клавиатуру с короткой ссылкой
+    kb = get_device_action_kb(short_gh_link)
 
     await callback.message.edit_text(
         f"💎 <b>Подписка оформлена!</b>\n\n"
