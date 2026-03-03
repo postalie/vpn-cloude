@@ -12,7 +12,7 @@ export default {
             // 1. ПРОКСИРОВАНИЕ API ЗАПРОСОВ (для TMA)
             if (pathParts[0] === 'api') {
                 const apiPath = url.pathname;
-                const railwayApiUrl = `https://vpn-cloude-production.up.railway.app${apiPath}${url.search}`;
+                const railwayApiUrl = `https://fin.cloudevpn.cfd${apiPath}${url.search}`;
 
                 const newHeaders = new Headers(request.headers);
                 newHeaders.set("X-API-Key", "CloudeVpnVOIDAPI_1488");
@@ -60,7 +60,7 @@ export default {
                 });
             };
 
-            const railwayUrl = `https://vpn-cloude-production.up.railway.app/api/sub/${uuid}`;
+            const railwayUrl = `https://fin.cloudevpn.cfd/api/sub/${uuid}`;
             let response;
 
             try {
