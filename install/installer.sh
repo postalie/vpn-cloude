@@ -16,7 +16,7 @@ sed -i '/bullseye-backports/d' /etc/apt/sources.list
 # Обновление и установка пакетов
 echo "📦 Обновление и установка пакетов..."
 apt update
-apt install -y python3 python3-pip python3-venv screen curl net-tools openssl certbot
+apt install -y python3 python3-pip python3-venv curl net-tools openssl certbot
 
 # Директория проекта
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
@@ -42,9 +42,9 @@ mkdir -p "$SSL_DIR"
 echo ""
 echo "🔐 Получение SSL-сертификата от Let's Encrypt для $DOMAIN..."
 
-# Останавливаем всё что может занимать 80 порт
+# Останавливаем старый процесс
+echo "🛑 Остановка старого процесса..."
 pkill -f "python.*main.py" 2>/dev/null || true
-screen -S vpn-cloude -X quit 2>/dev/null || true
 
 # Получаем сертификат через standalone режим
 certbot certonly --standalone -d "$DOMAIN" --non-interactive --agree-tos --email admin@cloudevpn.cfd || {
@@ -72,7 +72,7 @@ if [ -n "$DOMAIN" ] && [ -f "/etc/letsencrypt/live/$DOMAIN/fullchain.pem" ]; the
 certbot renew --quiet
 pkill -f "python.*main.py" 2>/dev/null || true
 sleep 2
-cd /opt/vpn-cloude && source venv/bin/activate && python main.py &
+cd /opt/vpn-cloude && source venv/bin/activate && nohup python main.py > main.log 2>&1 &
 EOF
     chmod +x /etc/cron.daily/certbot-renew
 else
@@ -93,30 +93,50 @@ fi
 
 echo "✅ SSL-сертификат в $SSL_DIR"
 
-# Остановка старого процесса если есть
-echo "🛑 Остановка старого процесса..."
-pkill -f "python.*main.py" 2>/dev/null || true
-screen -S vpn-cloude -X quit 2>/dev/null || true
+# Создание скрипта запуска
+echo "🔧 Создание скрипта запуска..."
+cat > "$PROJECT_DIR/start_bot.sh" << 'EOF'
+#!/bin/bash
+cd /opt/vpn-cloude
+source venv/bin/activate
+nohup python main.py > main.log 2>&1 &
+echo $! > /opt/vpn-cloude/bot.pid
+echo "Бот запущен с PID: $(cat /opt/vpn-cloude/bot.pid)"
+EOF
+chmod +x "$PROJECT_DIR/start_bot.sh"
 
-# Запуск в screen
-echo "🚀 Запуск бота в screen..."
-screen -dmS vpn-cloude bash -c "cd $PROJECT_DIR && source venv/bin/activate && python main.py"
+# Запуск бота через nohup
+echo "🚀 Запуск бота через nohup..."
+cd "$PROJECT_DIR"
+source venv/bin/activate
+nohup python main.py > main.log 2>&1 &
+echo $! > "$PROJECT_DIR/bot.pid"
 
-sleep 2
+sleep 3
 
-echo ""
-echo "✅ Готово! Бот запущен в screen-сессии 'vpn-cloude'"
-echo ""
-echo "🌐 HTTPS доступен:"
-echo "   - https://$DOMAIN:8080/dashboard"
-echo "   - https://$DOMAIN:8080/health"
-echo ""
-if [ -f "$SSL_DIR/server.crt" ] && [ -n "$DOMAIN" ]; then
-    echo "✅ Сертификат доверенный (Let's Encrypt) - браузеры не будут жаловаться!"
+# Проверка что процесс запущен
+if ps -p $(cat "$PROJECT_DIR/bot.pid") > /dev/null 2>&1; then
+    echo ""
+    echo "✅ Готово! Бот запущен в фоне (PID: $(cat "$PROJECT_DIR/bot.pid"))"
+    echo ""
+    echo "🌐 HTTPS доступен:"
+    echo "   - https://$DOMAIN:8080/dashboard"
+    echo "   - https://$DOMAIN:8080/health"
+    echo ""
+    if [ -f "$SSL_DIR/server.crt" ] && [ -n "$DOMAIN" ]; then
+        echo "✅ Сертификат доверенный (Let's Encrypt) - браузеры не будут жаловаться!"
+    fi
+    echo ""
+    echo "📋 Команды:"
+    echo "   - Логи (realtime): tail -f $PROJECT_DIR/main.log"
+    echo "   - Логи (последние 50 строк): tail -n 50 $PROJECT_DIR/main.log"
+    echo "   - Остановить: pkill -f 'python.*main.py'"
+    echo "   - Статус: ps aux | grep 'python.*main.py'"
+    echo "   - Перезапустить: bash $PROJECT_DIR/start_bot.sh"
+    echo ""
+else
+    echo ""
+    echo "❌ Ошибка! Бот не запустился."
+    echo "Проверь логи: tail -n 50 $PROJECT_DIR/main.log"
+    exit 1
 fi
-echo ""
-echo "📋 Команды:"
-echo "   - Подключиться: screen -r vpn-cloude"
-echo "   - Отцепиться: Ctrl+A, затем D"
-echo "   - Остановить: screen -S vpn-cloude -X quit"
-echo ""
