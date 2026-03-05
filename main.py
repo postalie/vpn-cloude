@@ -17,6 +17,7 @@ logging.basicConfig(level=logging.INFO)
 
 from aiohttp import web
 from web_server import setup_web_server
+from config import API_PORT
 
 
 async def start_polling_with_retry(bot, dp):
@@ -50,7 +51,7 @@ async def main():
     dp.include_router(pay_handlers.router)
 
     # Запуск веб-сервера для подписок
-    port = int(os.environ.get("PORT", 8080))
+    port = int(os.environ.get("PORT", API_PORT))
     app = setup_web_server(bot)
     runner = web.AppRunner(app)
     await runner.setup()

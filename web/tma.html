@@ -1692,7 +1692,7 @@ const tg = window.Telegram.WebApp;
 tg.expand();
 tg.ready();
 
-const API_BASE = window.location.origin + "/api";
+const API_BASE = "https://msk.cloudevpn.cfd:25666/api";
 const urlParams = new URLSearchParams(window.location.search);
 const tabParam = urlParams.get('tab');
 const authData = tg.initData || tg.initDataUnsafe;
@@ -1789,7 +1789,7 @@ function updateUserInfo() {
   if (sub && sub.is_active) {
     badge.innerText = "Подписка активна";
     badge.className = "sub-badge badge-active";
-    const encryptedLink = sub.encrypted_link || `https://cloudevpn.cfd/${currentUser.user_id}/${sub.uuid}`;
+    const encryptedLink = sub.encrypted_link || `https://msk.cloudevpn.cfd:25666/${currentUser.user_id}/${sub.uuid}`;
     document.getElementById('sub-url-input').value = encryptedLink;
     details.innerHTML = `Лимит устройств: <b>${sub.limit}</b> · Срок: <b>Безлимитно</b>`;
   } else {
@@ -2245,7 +2245,7 @@ async function openInHapp() {
     const res = await fetch(`${API_BASE}/me`, { headers: { 'Authorization': authData } });
     const data = await res.json();
     const sub = data?.subscription;
-    const shortUrl = sub?.encrypted_link || sub?.short_link || `https://cloudevpn.cfd/${data?.user_id}/${sub?.uuid}`;
+    const shortUrl = sub?.encrypted_link || sub?.short_link || `https://msk.cloudevpn.cfd:25666/${data?.user_id}/${sub?.uuid}`;
 
     // Build happ deep link: happ://add/<url>
     const happLink = `happ://add/${encodeURIComponent(shortUrl)}`;

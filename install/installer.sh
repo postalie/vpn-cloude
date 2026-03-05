@@ -16,13 +16,18 @@ sed -i '/bullseye-backports/d' /etc/apt/sources.list
 # Обновление и установка пакетов
 echo "📦 Обновление и установка пакетов..."
 apt update
-apt install -y python3 python3-pip python3-venv curl net-tools openssl certbot dnsutils
+apt install -y python3 python3-pip python3-venv curl net-tools openssl certbot
 
 # Директория проекта
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 PROJECT_DIR="$(dirname "$SCRIPT_DIR")"
+INSTALL_DIR="/opt/vpn-cloude"
 
-cd "$PROJECT_DIR"
+echo "📁 Копирование проекта в $INSTALL_DIR..."
+mkdir -p "$INSTALL_DIR"
+cp -r "$PROJECT_DIR"/* "$INSTALL_DIR/"
+cp -r "$PROJECT_DIR"/.* "$INSTALL_DIR/" 2>/dev/null || true
+cd "$INSTALL_DIR"
 
 # Виртуальное окружение
 echo "🐍 Создание venv..."
@@ -34,176 +39,150 @@ echo "📚 Установка зависимостей..."
 pip install --upgrade pip
 pip install -r requirements.txt
 
-# Убиваем все старые процессы бота и освобождаем порты
-echo "🛑 Остановка старых процессов..."
-pkill -9 -f "python.*main.py" 2>/dev/null || true
-fuser -k 8080/tcp 2>/dev/null || true
-fuser -k 80/tcp 2>/dev/null || true
-
-# Ждём пока порты точно освободятся
-echo "⏳ Ожидание освобождения портов..."
-for i in $(seq 1 15); do
-    PORT_8080=$(ss -tlnp | grep ':8080 ' || true)
-    PORT_80=$(ss -tlnp | grep ':80 ' || true)
-    if [ -z "$PORT_8080" ] && [ -z "$PORT_80" ]; then
-        echo "✅ Порты 80 и 8080 свободны"
-        break
-    fi
-    echo "⏳ Ждём... ($i/15)"
-    sleep 1
-done
-
-# SSL сертификат
+# SSL сертификат для msk.cloudevpn.cfd
 DOMAIN="msk.cloudevpn.cfd"
-SSL_DIR="$PROJECT_DIR/ssl"
+SSL_DIR="$INSTALL_DIR/ssl"
 mkdir -p "$SSL_DIR"
 
 echo ""
 echo "🔐 Получение SSL-сертификата от Let's Encrypt для $DOMAIN..."
 
-# Получаем внешний IP сервера
-echo "🔍 Определение внешнего IP сервера..."
-SERVER_IP=$(curl -s --max-time 5 https://api.ipify.org 2>/dev/null || \
-            curl -s --max-time 5 https://ifconfig.me 2>/dev/null || \
-            curl -s --max-time 5 https://icanhazip.com 2>/dev/null || \
-            echo "")
+# Останавливаем старые процессы
+echo "🛑 Остановка старых процессов..."
+pkill -f "python.*main.py" 2>/dev/null || true
+pkill -f "python.*web_static" 2>/dev/null || true
 
-if [ -z "$SERVER_IP" ]; then
-    echo "⚠️  Не удалось определить внешний IP"
-    SERVER_IP=$(hostname -I | awk '{print $1}')
-    echo "⚠️  Используем локальный IP: $SERVER_IP"
-else
-    echo "✅ Внешний IP сервера: $SERVER_IP"
-fi
-
-# Проверяем DNS резолвинг домена
-echo "🔍 Проверка DNS для $DOMAIN..."
-DOMAIN_IP=$(dig +short "$DOMAIN" 2>/dev/null | tail -1 || \
-            host "$DOMAIN" 2>/dev/null | awk '/has address/ {print $4}' | head -1 || \
-            echo "")
-
-CERT_OK=false
-
-if [ "$DOMAIN_IP" = "$SERVER_IP" ]; then
-    echo "✅ DNS корректен: $DOMAIN -> $SERVER_IP"
-
-    # Получаем сертификат через standalone режим
-    if certbot certonly --standalone -d "$DOMAIN" --non-interactive --agree-tos --email admin@cloudevpn.cfd; then
-        if [ -f "/etc/letsencrypt/live/$DOMAIN/fullchain.pem" ]; then
-            cp "/etc/letsencrypt/live/$DOMAIN/fullchain.pem" "$SSL_DIR/server.crt"
-            cp "/etc/letsencrypt/live/$DOMAIN/privkey.pem" "$SSL_DIR/server.key"
-            chmod 600 "$SSL_DIR/server.key"
-            chmod 644 "$SSL_DIR/server.crt"
-            echo "✅ Сертификат Let's Encrypt установлен!"
-            CERT_OK=true
-
-            # Скрипт автообновления через cron
-            cat > /etc/cron.daily/certbot-renew << CRONEOF
-#!/bin/bash
-certbot renew --quiet --deploy-hook "cp /etc/letsencrypt/live/$DOMAIN/fullchain.pem $SSL_DIR/server.crt && cp /etc/letsencrypt/live/$DOMAIN/privkey.pem $SSL_DIR/server.key && chmod 600 $SSL_DIR/server.key && pkill -9 -f 'python.*main.py' 2>/dev/null || true && sleep 3 && bash $PROJECT_DIR/start_bot.sh"
-CRONEOF
-            chmod +x /etc/cron.daily/certbot-renew
-            echo "✅ Автообновление сертификата настроено"
-        fi
-    else
-        echo "❌ Certbot завершился с ошибкой"
-    fi
-else
-    if [ -z "$DOMAIN_IP" ]; then
-        echo "⚠️  DNS для $DOMAIN не резолвится"
-    else
-        echo "⚠️  DNS не совпадает: $DOMAIN -> $DOMAIN_IP (сервер: $SERVER_IP)"
-    fi
-fi
-
-# Если Let's Encrypt не получилось — самоподписанный
-if [ "$CERT_OK" = false ]; then
+# Получаем сертификат через standalone режим
+certbot certonly --standalone -d "$DOMAIN" --non-interactive --agree-tos --email admin@cloudevpn.cfd || {
+    echo "❌ Не удалось получить сертификат Let's Encrypt"
     echo ""
+    echo "Проверь:"
+    echo "  1. Домен $DOMAIN указывает на IP этого сервера"
+    echo "  2. Порт 80 открыт: ufw allow 80"
+    echo ""
+    echo "Пробуем самоподписанный сертификат..."
+    DOMAIN=""
+}
+
+if [ -n "$DOMAIN" ] && [ -f "/etc/letsencrypt/live/$DOMAIN/fullchain.pem" ]; then
+    # Копируем сертификаты Let's Encrypt
+    cp "/etc/letsencrypt/live/$DOMAIN/fullchain.pem" "$SSL_DIR/server.crt"
+    cp "/etc/letsencrypt/live/$DOMAIN/privkey.pem" "$SSL_DIR/server.key"
+    chmod 600 "$SSL_DIR/server.key"
+    chmod 644 "$SSL_DIR/server.crt"
+    echo "✅ Сертификат Let's Encrypt установлен для $DOMAIN!"
+else
+    # Самоподписанный если не получилось
     echo "🔐 Генерация самоподписанного SSL-сертификата..."
+    SERVER_IP=$(hostname -I | awk '{print $1}')
+    
     openssl req -x509 -nodes -days 365 -newkey rsa:2048 \
         -keyout "$SSL_DIR/server.key" \
         -out "$SSL_DIR/server.crt" \
         -subj "/C=RU/ST=Moscow/L=Moscow/O=Cloude VPN/CN=$DOMAIN" \
         -addext "subjectAltName=DNS:localhost,IP:127.0.0.1,IP:$SERVER_IP,DNS:$DOMAIN"
-
+    
     chmod 600 "$SSL_DIR/server.key"
     chmod 644 "$SSL_DIR/server.crt"
-    echo "⚠️  Используется самоподписанный сертификат"
+    echo "⚠️  Самоподписанный сертификат"
 fi
 
-echo "✅ SSL-сертификат сохранён в $SSL_DIR"
+echo "✅ SSL-сертификат в $SSL_DIR"
 
-# Создание скрипта запуска
-echo "🔧 Создание скрипта запуска..."
-cat > "$PROJECT_DIR/start_bot.sh" << EOF
+# Создание скриптов запуска
+echo "🔧 Создание скриптов запуска..."
+
+# Скрипт запуска основного бота (порт 8080)
+cat > "$INSTALL_DIR/start_bot.sh" << 'EOF'
 #!/bin/bash
-cd "$PROJECT_DIR"
+cd /opt/vpn-cloude
 source venv/bin/activate
-
-echo "🛑 Останавливаем старые процессы..."
-pkill -9 -f "python.*main.py" 2>/dev/null || true
-fuser -k 8080/tcp 2>/dev/null || true
-
-# Ждём пока порт 8080 точно освободится
-for i in \$(seq 1 15); do
-    if ! ss -tlnp | grep -q ':8080 '; then
-        echo "✅ Порт 8080 свободен"
-        break
-    fi
-    echo "⏳ Ждём освобождения порта 8080... (\$i/15)"
-    sleep 1
-done
-
-# Финальная проверка
-if ss -tlnp | grep -q ':8080 '; then
-    echo "❌ Порт 8080 всё ещё занят! Прерываем запуск."
-    exit 1
-fi
-
-nohup python main.py > "$PROJECT_DIR/main.log" 2>&1 &
-BOT_PID=\$!
-echo \$BOT_PID > "$PROJECT_DIR/bot.pid"
-echo "✅ Бот запущен с PID: \$BOT_PID"
+nohup python main.py > main.log 2>&1 &
+echo $! > /opt/vpn-cloude/bot.pid
+echo "Бот запущен с PID: $(cat /opt/vpn-cloude/bot.pid)"
 EOF
-chmod +x "$PROJECT_DIR/start_bot.sh"
+chmod +x "$INSTALL_DIR/start_bot.sh"
 
-# Запуск бота
-echo "🚀 Запуск бота..."
-bash "$PROJECT_DIR/start_bot.sh"
+# Скрипт запуска веб-сервера (порт 25666)
+cat > "$INSTALL_DIR/start_web.sh" << 'EOF'
+#!/bin/bash
+cd /opt/vpn-cloude
+source venv/bin/activate
+nohup python web_static_server.py > web_static.log 2>&1 &
+echo $! > /opt/vpn-cloude/web_static.pid
+echo "Web сервер запущен с PID: $(cat /opt/vpn-cloude/web_static.pid)"
+EOF
+chmod +x "$INSTALL_DIR/start_web.sh"
 
-# Ждём дольше чтобы бот успел инициализироваться
-sleep 5
+# Скрипт запуска всего
+cat > "$INSTALL_DIR/start_all.sh" << 'EOF'
+#!/bin/bash
+cd /opt/vpn-cloude
+bash start_bot.sh
+bash start_web.sh
+echo "✅ Все сервисы запущены"
+EOF
+chmod +x "$INSTALL_DIR/start_all.sh"
 
-# Проверка что процесс запущен
-BOT_PID=$(cat "$PROJECT_DIR/bot.pid" 2>/dev/null || echo "")
+# Скрипт остановки всего
+cat > "$INSTALL_DIR/stop_all.sh" << 'EOF'
+#!/bin/bash
+pkill -f "python.*main.py" 2>/dev/null || true
+pkill -f "python.*web_static" 2>/dev/null || true
+rm -f /opt/vpn-cloude/*.pid
+echo "✅ Все сервисы остановлены"
+EOF
+chmod +x "$INSTALL_DIR/stop_all.sh"
 
-if [ -n "$BOT_PID" ] && ps -p "$BOT_PID" > /dev/null 2>&1; then
-    echo ""
-    echo "✅ Готово! Бот запущен в фоне (PID: $BOT_PID)"
-    echo ""
-    echo "🌐 HTTPS доступен:"
-    echo "   - https://$DOMAIN:8080/dashboard"
-    echo "   - https://$DOMAIN:8080/health"
-    echo ""
-    if [ "$CERT_OK" = true ]; then
-        echo "✅ Сертификат доверенный (Let's Encrypt) - браузеры не будут жаловаться!"
-    else
-        echo "⚠️  Самоподписанный сертификат - браузеры будут предупреждать"
-    fi
-    echo ""
-    echo "📋 Команды:"
-    echo "   - Логи (realtime):           tail -f $PROJECT_DIR/main.log"
-    echo "   - Логи (последние 50 строк): tail -n 50 $PROJECT_DIR/main.log"
-    echo "   - Остановить:                pkill -f 'python.*main.py'"
-    echo "   - Статус:                    ps aux | grep 'python.*main.py'"
-    echo "   - Перезапустить:             bash $PROJECT_DIR/start_bot.sh"
-    echo ""
+# Запуск бота через nohup
+echo "🚀 Запуск основного бота (порт 8080)..."
+cd "$INSTALL_DIR"
+source venv/bin/activate
+nohup python main.py > main.log 2>&1 &
+echo $! > "$INSTALL_DIR/bot.pid"
+
+sleep 2
+
+# Запуск веб-сервера через nohup
+echo "🚀 Запуск веб-сервера (порт 25666)..."
+nohup python web_static_server.py > web_static.log 2>&1 &
+echo $! > "$INSTALL_DIR/web_static.pid"
+
+sleep 2
+
+# Проверка что процессы запущены
+echo ""
+if ps -p $(cat "$INSTALL_DIR/bot.pid") > /dev/null 2>&1; then
+    echo "✅ Бот запущен (PID: $(cat "$INSTALL_DIR/bot.pid"))"
 else
-    echo ""
     echo "❌ Ошибка! Бот не запустился."
-    echo "Последние строки лога:"
-    echo "---"
-    cat "$PROJECT_DIR/main.log" 2>/dev/null | tail -n 30
-    echo "---"
+    echo "Проверь логи: tail -n 50 $INSTALL_DIR/main.log"
     exit 1
 fi
+
+if ps -p $(cat "$INSTALL_DIR/web_static.pid") > /dev/null 2>&1; then
+    echo "✅ Web сервер запущен (PID: $(cat "$INSTALL_DIR/web_static.pid"))"
+else
+    echo "❌ Ошибка! Web сервер не запустился."
+    echo "Проверь логи: tail -n 50 $INSTALL_DIR/web_static.log"
+    exit 1
+fi
+
+echo ""
+echo "✅ Готово! Все сервисы запущены"
+echo ""
+echo "🌐 Сервисы доступны:"
+echo "   - Бот + API: https://$DOMAIN:8080"
+echo "   - TMA Dashboard: https://$DOMAIN:25666/dashboard"
+echo "   - Подписки: https://$DOMAIN:25666/sub/{uuid}"
+echo ""
+if [ -f "$SSL_DIR/server.crt" ] && [ -n "$DOMAIN" ]; then
+    echo "✅ Сертификат доверенный (Let's Encrypt)"
+fi
+echo ""
+echo "📋 Команды:"
+echo "   - Логи бота: tail -f $INSTALL_DIR/main.log"
+echo "   - Логи веб: tail -f $INSTALL_DIR/web_static.log"
+echo "   - Остановить: bash $INSTALL_DIR/stop_all.sh"
+echo "   - Запустить: bash $INSTALL_DIR/start_all.sh"
+echo "   - Статус: ps aux | grep 'python.*'"

@@ -67,27 +67,28 @@ def encrypt_link(url: str) -> str:
 
 
 def create_encrypted_happ_link(user_id: int, sub_uuid: str, domain: str) -> str:
-    from config import GITHUB_PAGE_URL
+    from config import GITHUB_PAGE_URL, BASE_URL
 
     subscription_url = f"https://{domain}/add/{user_id}/{sub_uuid}"
     encrypted = encrypt_link(subscription_url)
 
     if encrypted:
         encrypted_with_prefix = f"crypt5/{encrypted}"
-        
+
         # БЕЗ unquote! Просто кодируем строку как есть
         safe_encrypted = base64.urlsafe_b64encode(
             encrypted_with_prefix.encode('utf-8')
         ).decode().rstrip('=')
-        result = f"{GITHUB_PAGE_URL}/{safe_encrypted}"
-        print("ФИНАЛЬНАЯ ССЫЛКА:", result) 
+        # Используем BASE_URL вместо GITHUB_PAGE_URL для прямого доступа
+        result = f"{BASE_URL}/{safe_encrypted}"
+        print("ФИНАЛЬНАЯ ССЫЛКА:", result)
         return result
 
     safe_encrypted = base64.urlsafe_b64encode(
         subscription_url.encode('utf-8')
     ).decode().rstrip('=')
-    result = f"{GITHUB_PAGE_URL}/{safe_encrypted}"
-    print("ФИНАЛЬНАЯ ССЫЛКА:", result) 
+    result = f"{BASE_URL}/{safe_encrypted}"
+    print("ФИНАЛЬНАЯ ССЫЛКА:", result)
     return result
 
 
