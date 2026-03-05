@@ -796,16 +796,6 @@ def setup_web_server(bot):
     app.router.add_post('/api/buy_subscription', buy_subscription_handler)
     app.router.add_post('/api/activate_coupon', activate_coupon_handler)
 
-    # Обработчик для зашифрованных ссылок /add/{user_id}/{sub_uuid}
-    async def add_redirect_handler(request):
-        """Редирект с зашифрованной ссылки на TMA dashboard"""
-        user_id = request.match_info.get('user_id')
-        sub_uuid = request.match_info.get('sub_uuid')
-        # Редирект на TMA dashboard с параметром tab=add
-        raise web.HTTPFound(f"/dashboard?tab=add")
-
-    app.router.add_get('/add/{user_id}/{sub_uuid}', add_redirect_handler)
-
     # Настройка CORS (чтобы твой фронтенд-сайт мог делать запросы к этому API)
     import aiohttp_cors
     cors = aiohttp_cors.setup(app, defaults={
@@ -819,15 +809,10 @@ def setup_web_server(bot):
     # Применяем CORS ко всем маршрутам
     for route in list(app.router.routes()):
         cors.add(route)
-
+    
     # Статические файлы (TMA Dashboard)
     app.router.add_get('/dashboard', lambda r: web.FileResponse('web/tma.html'))
+    app.router.add_static('/', path='web/', name='static')
     
-    # SPA роутинг - все неизвестные запросы отдают tma.html
-    async def spa_handler(request):
-        return web.FileResponse('web/tma.html')
-    
-    app.router.add_get('/{path:.*}', spa_handler)
-
     print("Web Server with CORS (Cloude VPN API) initialized.")
     return app

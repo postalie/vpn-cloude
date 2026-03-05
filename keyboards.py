@@ -231,7 +231,7 @@ async def get_subscription_menu_kb(short_link=None):
     btns = []
 
     # Кнопка для открытия TMA (использует Telegram initData для аутентификации)
-    btns.append([InlineKeyboardButton(text="⚙️ Управление устройствами", web_app=WebAppInfo(url="https://msk.cloudevpn.cfd:25666/dashboard?tab=devices"))])
+    btns.append([InlineKeyboardButton(text="⚙️ Управление устройствами", web_app=WebAppInfo(url="https://msk.cloudevpn.cfd:8080/dashboard?tab=devices"))])
 
     if short_link:
         btns.append([InlineKeyboardButton(text="🚀 Подключить в Happ", url=short_link)])
@@ -253,9 +253,9 @@ def get_device_action_kb(short_link=None):
     if short_link:
         btns.append([InlineKeyboardButton(text="🔗 Подключиться", url=short_link)])
     else:
-        btns.append([InlineKeyboardButton(text="➕ Добавить устройство", web_app=WebAppInfo(url="https://msk.cloudevpn.cfd:25666/dashboard?tab=add"))])
+        btns.append([InlineKeyboardButton(text="➕ Добавить устройство", web_app=WebAppInfo(url="https://msk.cloudevpn.cfd:8080/dashboard?tab=add"))])
     
-    btns.append([InlineKeyboardButton(text="⚙️ Управление устройствами", web_app=WebAppInfo(url="https://msk.cloudevpn.cfd:25666/dashboard?tab=devices"))])
+    btns.append([InlineKeyboardButton(text="⚙️ Управление устройствами", web_app=WebAppInfo(url="https://msk.cloudevpn.cfd:8080/dashboard?tab=devices"))])
     btns.append([InlineKeyboardButton(text="🔄 Сбросить ссылку", callback_data="reset_link")])
     btns.append([InlineKeyboardButton(text="🆘 Помощь", callback_data="help_connection")])
     btns.append([InlineKeyboardButton(text="« Назад", callback_data="connection")])

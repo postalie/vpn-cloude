@@ -1150,6 +1150,30 @@ body.light {
   to   { transform:scale(1); opacity:1; }
 }
 
+/* ===== LANG PILLS ===== */
+.lang-pill {
+  padding: 6px 12px;
+  border-radius: 20px;
+  font-size: 11px;
+  font-weight: 600;
+  cursor: pointer;
+  border: 1px solid var(--input-border);
+  background: var(--glass-bg);
+  color: var(--text2);
+  transition: all 0.3s cubic-bezier(0.34,1.56,0.64,1);
+  user-select: none;
+}
+
+.lang-pill:active {
+  transform: scale(0.93);
+}
+
+.lang-pill.active-pill {
+  background: var(--accent-bg);
+  border-color: var(--accent-border);
+  color: #c084fc;
+}
+
 /* ===== THEME ICON ANIMATION ===== */
 .theme-icon-wrap {
   position: relative;
@@ -1303,45 +1327,95 @@ body.light .theme-icon-wrap .ti-moon {
     <!-- PAGE 2: SETTINGS (only Theme + Language) -->
     <div class="page to-right" id="p2">
       <p class="t1 ci" data-d="50" style="font-size:20px;font-weight:600;text-align:center;margin-bottom:4px">Настройки</p>
-      <p class="t3 ci" data-d="80" style="font-size:11px;text-align:center;margin-bottom:14px">Персонализация</p>
+      <p class="t3 ci" data-d="80" style="font-size:11px;text-align:center;margin-bottom:20px">Персонализация приложения</p>
 
-      <div class="glass-card ci" data-d="100">
-        <div class="glass-inner">
-          <p class="t4" style="font-size:10px;padding:12px 14px 6px;text-transform:uppercase;letter-spacing:1px">Приложение</p>
-          
-          <!-- Theme Toggle -->
-          <div class="srow" id="theme-row" onclick="toggleTheme(event)" style="cursor:pointer">
-            <div style="display:flex;align-items:center;gap:10px">
-              <div class="theme-icon-wrap">
-                <div class="ti-moon">🌙</div>
-                <div class="ti-sun">☀️</div>
+      <!-- Theme card with big visual toggle -->
+      <div class="glass-card ci" data-d="100" style="margin-bottom:12px">
+        <div class="glass-inner" style="padding:20px 18px">
+          <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px">
+            <div style="display:flex;align-items:center;gap:12px">
+              <div style="
+                width:44px;height:44px;border-radius:14px;
+                background:linear-gradient(135deg,rgba(168,85,247,0.15),rgba(236,72,153,0.1));
+                border:1px solid var(--accent-border);
+                display:flex;align-items:center;justify-content:center;
+              ">
+                <div class="theme-icon-wrap" style="width:24px;height:24px">
+                  <div class="ti-moon" style="font-size:20px">🌙</div>
+                  <div class="ti-sun" style="font-size:20px">☀️</div>
+                </div>
               </div>
               <div>
-                <p class="t1" style="font-size:13px;font-weight:600" id="theme-label">Тёмная тема</p>
-                <p class="t4" style="font-size:10px" id="theme-sublabel">Переключить на светлую</p>
+                <p class="t1" style="font-size:14px;font-weight:700" id="theme-label">Тёмная тема</p>
+                <p class="t3" style="font-size:11px;margin-top:2px" id="theme-sublabel">Переключить на светлую</p>
               </div>
             </div>
-            <div class="tog on" id="theme-tog"></div>
+            <div class="tog on" id="theme-tog" onclick="toggleTheme(event)" style="cursor:pointer"></div>
           </div>
 
-          <!-- Language -->
-          <div class="srow" onclick="openLangModal()" style="cursor:pointer">
-            <div style="display:flex;align-items:center;gap:10px">
-              <span style="font-size:17px">🌍</span>
+          <!-- Visual theme preview -->
+          <div id="theme-row" onclick="toggleTheme(event)" style="
+            cursor:pointer;
+            display:grid;grid-template-columns:1fr 1fr;gap:8px;
+          ">
+            <div id="theme-preview-dark" style="
+              border-radius:12px;padding:12px;
+              background:linear-gradient(135deg,#08080e,#0b0916);
+              border:2px solid rgba(168,85,247,0.5);
+              text-align:center;transition:all 0.4s ease;
+            ">
+              <div style="font-size:18px;margin-bottom:4px">🌑</div>
+              <p style="font-size:10px;font-weight:600;color:rgba(255,255,255,0.7)">Тёмная</p>
+            </div>
+            <div id="theme-preview-light" style="
+              border-radius:12px;padding:12px;
+              background:linear-gradient(135deg,#f2f0f5,#eae7f0);
+              border:2px solid transparent;
+              text-align:center;transition:all 0.4s ease;
+            ">
+              <div style="font-size:18px;margin-bottom:4px">☀️</div>
+              <p style="font-size:10px;font-weight:600;color:rgba(30,20,50,0.6)">Светлая</p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Language card -->
+      <div class="glass-card ci" data-d="150" style="margin-bottom:12px">
+        <div class="glass-inner" style="padding:20px 18px">
+          <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px">
+            <div style="display:flex;align-items:center;gap:12px">
+              <div style="
+                width:44px;height:44px;border-radius:14px;
+                background:linear-gradient(135deg,rgba(168,85,247,0.15),rgba(236,72,153,0.1));
+                border:1px solid var(--accent-border);
+                display:flex;align-items:center;justify-content:center;font-size:22px;
+              ">🌍</div>
               <div>
-                <p class="t1" style="font-size:13px;font-weight:600">Язык</p>
-                <p class="t4" style="font-size:10px" id="current-lang-sub">Выбор языка интерфейса</p>
+                <p class="t1" style="font-size:14px;font-weight:700">Язык</p>
+                <p class="t3" style="font-size:11px;margin-top:2px" id="current-lang-sub">Язык интерфейса</p>
               </div>
             </div>
-            <div class="gbtn" style="padding:5px 11px"><span style="font-size:11px" class="ta" id="lang-display">Русский</span></div>
+            <div class="gbtn" onclick="openLangModal()" style="padding:7px 14px;cursor:pointer">
+              <span style="font-size:12px;font-weight:600" class="ta" id="lang-display">Русский</span>
+            </div>
+          </div>
+
+          <!-- Language quick select pills -->
+          <div style="display:flex;gap:6px;flex-wrap:wrap">
+            <div class="lang-pill active-pill" data-lang="ru" onclick="quickLang(this,'ru','Русский','Русский')">🇷🇺 RU</div>
+            <div class="lang-pill" data-lang="en" onclick="quickLang(this,'en','English','English')">🇬🇧 EN</div>
+            <div class="lang-pill" data-lang="uk" onclick="quickLang(this,'uk','Українська','UA')">🇺🇦 UA</div>
+            <div class="lang-pill" data-lang="kz" onclick="quickLang(this,'kz','Қазақша','KZ')">🇰🇿 KZ</div>
+            <div class="lang-pill" data-lang="uz" onclick="quickLang(this,'uz','O\'zbekcha','UZ')">🇺🇿 UZ</div>
           </div>
         </div>
       </div>
 
       <!-- About section -->
-      <div class="glass-card ci" data-d="150" style="margin-top:12px">
+      <div class="glass-card ci" data-d="200" style="margin-top:4px">
         <div class="glass-inner">
-          <p class="t4" style="font-size:10px;padding:12px 14px 6px;text-transform:uppercase;letter-spacing:1px">О сервисе</p>
+          <p class="t4" style="font-size:10px;padding:12px 14px 6px;text-transform:uppercase;letter-spacing:1.2px">О сервисе</p>
           <div class="srow">
             <p class="t2" style="font-size:12px">Версия</p>
             <span class="t3" style="font-size:12px;font-family:'Fira Code',monospace">2.1.0</span>
@@ -1452,113 +1526,159 @@ body.light .theme-icon-wrap .ti-moon {
 <div id="addDeviceWizard" style="
   position:fixed;inset:0;z-index:1500;
   display:none;flex-direction:column;align-items:center;justify-content:flex-start;
-  padding: max(env(safe-area-inset-top,0px),24px) 20px 32px;
+  padding: max(env(safe-area-inset-top,0px),24px) 20px 40px;
   background:var(--modal-bg);
-  animation: wizardIn 0.4s cubic-bezier(0.34,1.56,0.64,1);
   overflow-y:auto;
+  -webkit-overflow-scrolling:touch;
 ">
+  <!-- Glassmorphism top bar -->
+  <div style="
+    position:absolute;top:0;left:0;right:0;
+    height:max(env(safe-area-inset-top,0px),0px);
+    background:var(--modal-bg);
+    z-index:2;
+  "></div>
+
   <!-- Close btn -->
   <button onclick="closeAddDeviceModal()" style="
-    position:absolute;top:max(env(safe-area-inset-top,0px),16px);right:16px;
+    position:absolute;top:max(calc(env(safe-area-inset-top,0px) + 12px),16px);right:16px;
     width:34px;height:34px;border-radius:50%;
     background:var(--glass-bg);border:1px solid var(--glass-border);
-    color:var(--text2);font-size:16px;cursor:pointer;
+    color:var(--text2);font-size:14px;cursor:pointer;
     display:flex;align-items:center;justify-content:center;
-    transition:all 0.2s;
+    transition:all 0.2s;z-index:3;
   " id="wiz-close-btn">✕</button>
 
+  <!-- Title -->
+  <p class="t3" style="font-size:11px;text-transform:uppercase;letter-spacing:1.5px;margin-bottom:20px;margin-top:8px">Добавление устройства</p>
+
   <!-- Progress ring -->
-  <div style="margin-top:8px;margin-bottom:24px;position:relative;width:120px;height:120px;flex-shrink:0">
-    <svg width="120" height="120" viewBox="0 0 120 120" style="transform:rotate(-90deg)">
-      <circle cx="60" cy="60" r="50" fill="none" stroke="var(--glass-border)" stroke-width="6"/>
-      <circle id="wiz-ring" cx="60" cy="60" r="50" fill="none"
-        stroke="url(#ringGrad)" stroke-width="6"
+  <div style="margin-bottom:28px;position:relative;width:130px;height:130px;flex-shrink:0">
+    <svg width="130" height="130" viewBox="0 0 130 130" style="transform:rotate(-90deg)">
+      <circle cx="65" cy="65" r="54" fill="none" stroke="var(--glass-border)" stroke-width="5"/>
+      <circle id="wiz-ring" cx="65" cy="65" r="54" fill="none"
+        stroke="url(#ringGrad2)" stroke-width="5"
         stroke-linecap="round"
-        stroke-dasharray="314"
-        stroke-dashoffset="314"
-        style="transition:stroke-dashoffset 0.6s cubic-bezier(0.34,1.56,0.64,1)"
+        stroke-dasharray="339.3"
+        stroke-dashoffset="339.3"
+        style="transition:stroke-dashoffset 0.65s cubic-bezier(0.34,1.56,0.64,1)"
       />
       <defs>
-        <linearGradient id="ringGrad" x1="0%" y1="0%" x2="100%" y2="0%">
+        <linearGradient id="ringGrad2" x1="0%" y1="0%" x2="100%" y2="0%">
           <stop offset="0%" style="stop-color:#a855f7"/>
           <stop offset="100%" style="stop-color:#ec4899"/>
         </linearGradient>
       </defs>
     </svg>
+    <!-- Glow ring -->
+    <div style="
+      position:absolute;inset:8px;border-radius:50%;
+      background:radial-gradient(circle,rgba(168,85,247,0.06) 0%,transparent 70%);
+      pointer-events:none;
+    "></div>
     <div style="
       position:absolute;inset:0;display:flex;flex-direction:column;
-      align-items:center;justify-content:center;
+      align-items:center;justify-content:center;gap:2px;
     ">
-      <span id="wiz-pct" style="font-size:22px;font-weight:700;color:var(--text1);line-height:1">33%</span>
-      <span id="wiz-step-lbl" style="font-size:10px;color:var(--text3);margin-top:2px">Шаг 1 / 3</span>
+      <span id="wiz-pct" style="font-size:26px;font-weight:800;color:var(--text1);line-height:1;
+        background:linear-gradient(135deg,#a855f7,#ec4899);
+        -webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent;
+      ">33%</span>
+      <span id="wiz-step-lbl" style="font-size:10px;color:var(--text3)">Шаг 1 / 3</span>
     </div>
+  </div>
+
+  <!-- Dots indicator -->
+  <div style="display:flex;gap:6px;margin-bottom:24px" id="wiz-dots">
+    <div id="wiz-dot-1" style="width:20px;height:4px;border-radius:2px;background:linear-gradient(90deg,#a855f7,#ec4899);transition:all 0.4s ease"></div>
+    <div id="wiz-dot-2" style="width:8px;height:4px;border-radius:2px;background:var(--glass-border);transition:all 0.4s ease"></div>
+    <div id="wiz-dot-3" style="width:8px;height:4px;border-radius:2px;background:var(--glass-border);transition:all 0.4s ease"></div>
   </div>
 
   <!-- STEP 1 -->
-  <div id="wiz-step-1" style="width:100%;max-width:360px">
-    <p class="t1" style="font-size:18px;font-weight:700;text-align:center;margin-bottom:6px">Выберите устройство</p>
-    <p class="t3" style="font-size:12px;text-align:center;margin-bottom:20px">Мы автоматически определили вашу ОС</p>
+  <div id="wiz-step-1" style="width:100%;max-width:380px;animation:wizardIn 0.4s cubic-bezier(0.34,1.56,0.64,1)">
+    <p class="t1" style="font-size:19px;font-weight:700;text-align:center;margin-bottom:6px">Ваше устройство</p>
+    <p class="t3" style="font-size:12px;text-align:center;margin-bottom:20px;line-height:1.5">Определили вашу ОС автоматически.<br>Можно изменить вручную.</p>
 
-    <div id="os-cards" style="display:grid;gap:10px;margin-bottom:24px"></div>
+    <div id="os-cards" style="display:grid;gap:8px;margin-bottom:24px"></div>
 
-    <button class="btn-primary" onclick="wizStep2()">Далее →</button>
-    <button class="btn-ghost" onclick="closeAddDeviceModal()" style="margin-top:8px">Отмена</button>
+    <button class="btn-primary" onclick="wizStep2()" style="margin-bottom:8px">Далее →</button>
+    <button class="btn-ghost" onclick="closeAddDeviceModal()">Отмена</button>
   </div>
 
   <!-- STEP 2 -->
-  <div id="wiz-step-2" style="width:100%;max-width:360px;display:none">
-    <p class="t1" style="font-size:18px;font-weight:700;text-align:center;margin-bottom:6px">Установите Happ</p>
-    <p class="t3" style="font-size:12px;text-align:center;margin-bottom:20px">Выберите подходящую версию</p>
+  <div id="wiz-step-2" style="width:100%;max-width:380px;display:none">
+    <p class="t1" style="font-size:19px;font-weight:700;text-align:center;margin-bottom:6px">Установите Happ</p>
+    <p class="t3" style="font-size:12px;text-align:center;margin-bottom:20px;line-height:1.5">Скачайте приложение для вашей ОС.<br>После установки нажмите «Далее».</p>
 
     <div id="wiz-download-links" style="display:grid;gap:10px;margin-bottom:24px"></div>
 
-    <button class="btn-primary" onclick="wizStep3()">Далее →</button>
-    <button class="btn-ghost" onclick="wizStep1()" style="margin-top:8px">← Назад</button>
+    <button class="btn-primary" onclick="wizStep3()" style="margin-bottom:8px">Далее →</button>
+    <button class="btn-ghost" onclick="wizStep1()">← Назад</button>
   </div>
 
   <!-- STEP 3 -->
-  <div id="wiz-step-3" style="width:100%;max-width:360px;display:none">
-    <p class="t1" style="font-size:18px;font-weight:700;text-align:center;margin-bottom:6px">Добавить в Happ</p>
-    <p class="t3" style="font-size:12px;text-align:center;margin-bottom:20px">Нажмите кнопку — конфиг откроется в приложении</p>
+  <div id="wiz-step-3" style="width:100%;max-width:380px;display:none">
 
-    <!-- Success state (hidden initially) -->
-    <div id="wiz-success" style="display:none;text-align:center;margin-bottom:20px">
-      <div style="font-size:56px;margin-bottom:12px;animation:popIn 0.5s cubic-bezier(0.34,1.56,0.64,1)">✅</div>
-      <p class="t1" style="font-size:16px;font-weight:700;margin-bottom:6px">Всё готово!</p>
-      <p class="t3" style="font-size:12px;line-height:1.5">Конфиг отправлен в Happ.<br>Выберите сервер и подключайтесь!</p>
+    <!-- Success state -->
+    <div id="wiz-success" style="display:none;text-align:center;padding:10px 0 20px">
+      <div style="
+        width:80px;height:80px;border-radius:50%;margin:0 auto 16px;
+        background:linear-gradient(135deg,rgba(74,222,128,0.15),rgba(74,222,128,0.05));
+        border:1.5px solid rgba(74,222,128,0.3);
+        display:flex;align-items:center;justify-content:center;
+        font-size:38px;
+        animation:popIn 0.6s cubic-bezier(0.34,1.56,0.64,1);
+      ">✅</div>
+      <p class="t1" style="font-size:20px;font-weight:800;margin-bottom:8px">Всё отлично!</p>
+      <p class="t3" style="font-size:13px;line-height:1.6;margin-bottom:4px">Конфиг уже летит в Happ 🚀</p>
+      <p class="t3" style="font-size:12px;line-height:1.5">Выберите сервер в приложении<br>и наслаждайтесь свободным интернетом!</p>
+      <div style="
+        margin:20px auto 0;padding:12px 16px;
+        background:var(--green-bg);border:1px solid var(--green-border);
+        border-radius:14px;max-width:280px;
+      ">
+        <p style="font-size:11px;color:var(--green);line-height:1.5">
+          💡 Если Happ не открылся автоматически — вставьте ссылку вручную в раздел «Подписки» приложения.
+        </p>
+      </div>
     </div>
 
-    <!-- Happ button (shown initially) -->
+    <!-- Happ button -->
     <div id="wiz-happ-btn-wrap">
-      <div class="glass-card" style="margin-bottom:16px;overflow:hidden">
-        <div class="glass-inner" style="padding:14px">
-          <div style="display:flex;align-items:center;gap:12px">
+      <p class="t1" style="font-size:19px;font-weight:700;text-align:center;margin-bottom:6px">Открыть в Happ</p>
+      <p class="t3" style="font-size:12px;text-align:center;margin-bottom:20px;line-height:1.5">Кнопка откроет Happ и автоматически<br>добавит ваш конфиг VPN.</p>
+
+      <div class="glass-card" style="margin-bottom:16px">
+        <div class="glass-inner" style="padding:16px">
+          <div style="display:flex;align-items:center;gap:14px">
             <div style="
-              width:44px;height:44px;border-radius:14px;flex-shrink:0;
-              background:linear-gradient(135deg,rgba(168,85,247,0.25),rgba(236,72,153,0.15));
+              width:52px;height:52px;border-radius:16px;flex-shrink:0;
+              background:linear-gradient(135deg,rgba(168,85,247,0.2),rgba(236,72,153,0.12));
               border:1px solid var(--accent-border);
-              display:flex;align-items:center;justify-content:center;font-size:22px;
+              display:flex;align-items:center;justify-content:center;font-size:26px;
             ">🚀</div>
-            <div>
-              <p class="t1" style="font-size:13px;font-weight:600;margin-bottom:2px">Happ VPN</p>
-              <p class="t3" style="font-size:10px">Откроет конфиг автоматически</p>
+            <div style="flex:1">
+              <p class="t1" style="font-size:14px;font-weight:700;margin-bottom:3px">Happ VPN</p>
+              <p class="t3" style="font-size:11px;line-height:1.4">Импортирует конфиг автоматически по deep-link</p>
             </div>
           </div>
         </div>
       </div>
 
-      <button class="btn-primary" id="wiz-open-happ" onclick="openInHapp()" style="margin-bottom:8px">
-        <span style="font-size:16px">🔗</span> Добавить в Happ
+      <button class="btn-primary" id="wiz-open-happ" onclick="openInHapp()" style="margin-bottom:8px;font-size:14px">
+        <span style="font-size:18px">🔗</span> Добавить в Happ
       </button>
       <button class="btn-ghost" onclick="wizStep2()">← Назад</button>
     </div>
 
-    <button class="btn-ghost" onclick="closeAddDeviceModal()" id="wiz-done-btn" style="margin-top:8px;display:none">Готово ✓</button>
+    <button class="btn-ghost" onclick="closeAddDeviceModal()" id="wiz-done-btn" style="margin-top:12px;display:none;color:var(--green);border-color:var(--green-border)">
+      ✓ Готово — закрыть
+    </button>
   </div>
 </div>
 
-<!-- OLD ADD DEVICE MODAL (kept for compat, hidden) -->
-<div class="modal-overlay" id="addDeviceModal" style="display:none!important"></div>
+
 
 <!-- LANGUAGE MODAL -->
 <div class="modal-overlay" id="langModal">
@@ -1692,7 +1812,7 @@ const tg = window.Telegram.WebApp;
 tg.expand();
 tg.ready();
 
-const API_BASE = "https://msk.cloudevpn.cfd:25666/api";
+const API_BASE = window.location.origin + "/api";
 const urlParams = new URLSearchParams(window.location.search);
 const tabParam = urlParams.get('tab');
 const authData = tg.initData || tg.initDataUnsafe;
@@ -1789,7 +1909,7 @@ function updateUserInfo() {
   if (sub && sub.is_active) {
     badge.innerText = "Подписка активна";
     badge.className = "sub-badge badge-active";
-    const encryptedLink = sub.encrypted_link || `https://msk.cloudevpn.cfd:25666/${currentUser.user_id}/${sub.uuid}`;
+    const encryptedLink = sub.encrypted_link || `https://cloudevpn.cfd/${currentUser.user_id}/${sub.uuid}`;
     document.getElementById('sub-url-input').value = encryptedLink;
     details.innerHTML = `Лимит устройств: <b>${sub.limit}</b> · Срок: <b>Безлимитно</b>`;
   } else {
@@ -1842,7 +1962,7 @@ function toggleTheme(e) {
   // After animation midpoint, switch actual theme
   setTimeout(() => {
     isDark = !isDark;
-    
+
     if (isDark) {
       document.body.classList.remove('light');
       tog.classList.add('on');
@@ -1858,11 +1978,21 @@ function toggleTheme(e) {
       localStorage.setItem('cloudvpn-theme', 'light');
       try { tg.setHeaderColor('#f2f0f5'); } catch(e) {}
     }
-    
-    // Remove morph circle
-    setTimeout(() => {
-      morph.remove();
-    }, 500);
+
+    // Update theme preview cards
+    const pdark = document.getElementById('theme-preview-dark');
+    const plight = document.getElementById('theme-preview-light');
+    if (pdark && plight) {
+      if (isDark) {
+        pdark.style.borderColor = 'rgba(168,85,247,0.5)';
+        plight.style.borderColor = 'transparent';
+      } else {
+        plight.style.borderColor = 'rgba(128,55,220,0.5)';
+        pdark.style.borderColor = 'transparent';
+      }
+    }
+
+    setTimeout(() => { morph.remove(); }, 500);
   }, 450);
   
   hap();
@@ -1881,16 +2011,28 @@ function closeLangModal() {
 function selectLang(el) {
   document.querySelectorAll('.lang-option').forEach(o => o.classList.remove('selected'));
   el.classList.add('selected');
-  
   const langName = el.querySelector('.lang-name').textContent;
   const langCode = el.getAttribute('data-lang');
-  
   document.getElementById('lang-display').textContent = langName;
+  // sync pills
+  document.querySelectorAll('.lang-pill').forEach(p => {
+    p.classList.toggle('active-pill', p.getAttribute('data-lang') === langCode);
+  });
   localStorage.setItem('cloudvpn-lang', langCode);
-  
   hap();
-  
   setTimeout(() => closeLangModal(), 300);
+}
+
+function quickLang(el, code, name, display) {
+  document.querySelectorAll('.lang-pill').forEach(p => p.classList.remove('active-pill'));
+  el.classList.add('active-pill');
+  document.getElementById('lang-display').textContent = display;
+  // sync modal
+  document.querySelectorAll('.lang-option').forEach(o => {
+    o.classList.toggle('selected', o.getAttribute('data-lang') === code);
+  });
+  localStorage.setItem('cloudvpn-lang', code);
+  hap();
 }
 
 // ===== DEVICES =====
@@ -2127,11 +2269,26 @@ function detectUserOS() {
 }
 
 function setWizRing(pct, step) {
-  const circ = 314;
+  const circ = 339.3;
   const offset = circ - (circ * pct / 100);
   document.getElementById('wiz-ring').style.strokeDashoffset = offset;
   document.getElementById('wiz-pct').textContent = pct + '%';
   document.getElementById('wiz-step-lbl').textContent = `Шаг ${step} / 3`;
+  // Update dots
+  [1,2,3].forEach(i => {
+    const dot = document.getElementById('wiz-dot-' + i);
+    if (!dot) return;
+    if (i === step) {
+      dot.style.width = '20px';
+      dot.style.background = 'linear-gradient(90deg,#a855f7,#ec4899)';
+    } else if (i < step) {
+      dot.style.width = '8px';
+      dot.style.background = 'rgba(168,85,247,0.4)';
+    } else {
+      dot.style.width = '8px';
+      dot.style.background = 'var(--glass-border)';
+    }
+  });
 }
 
 function openAddDeviceModal() {
@@ -2183,24 +2340,26 @@ function openAddDeviceModal() {
   });
 
   // Show wizard
-  wizStep1(true);
   document.getElementById('addDeviceWizard').style.display = 'flex';
+  wizStep1();
   hap();
 }
 
-function wizStep1(init) {
-  if (!init) setWizRing(33, 1);
-  else setTimeout(() => setWizRing(33, 1), 80);
+function wizStep1() {
+  setTimeout(() => setWizRing(33, 1), 80);
   document.getElementById('wiz-step-1').style.display = 'block';
   document.getElementById('wiz-step-2').style.display = 'none';
   document.getElementById('wiz-step-3').style.display = 'none';
+  // animate step in
+  const el = document.getElementById('wiz-step-1');
+  el.style.animation = 'none';
+  setTimeout(() => { el.style.animation = 'wizardIn 0.35s cubic-bezier(0.34,1.56,0.64,1)'; }, 10);
 }
 
 function wizStep2() {
   if (!wizSelectedOS) { hap(); return; }
   setWizRing(66, 2);
 
-  // Build download links
   const links = DOWNLOAD_LINKS[wizSelectedOS] || DOWNLOAD_LINKS['Android'];
   const container = document.getElementById('wiz-download-links');
   container.innerHTML = '';
@@ -2211,13 +2370,16 @@ function wizStep2() {
     a.target = '_blank';
     a.rel = 'noopener';
     a.style.textDecoration = 'none';
-    a.innerHTML = `<span>${link.icon}</span> ${link.name}`;
+    a.style.marginBottom = '0';
+    a.innerHTML = `<span style="font-size:18px">${link.icon}</span> ${link.name}`;
     a.addEventListener('click', () => hap());
     container.appendChild(a);
   });
 
   document.getElementById('wiz-step-1').style.display = 'none';
-  document.getElementById('wiz-step-2').style.display = 'block';
+  const s2 = document.getElementById('wiz-step-2');
+  s2.style.display = 'block';
+  s2.style.animation = 'wizardIn 0.35s cubic-bezier(0.34,1.56,0.64,1)';
   document.getElementById('wiz-step-3').style.display = 'none';
   hap();
 }
@@ -2226,9 +2388,16 @@ function wizStep3() {
   setWizRing(100, 3);
   document.getElementById('wiz-step-1').style.display = 'none';
   document.getElementById('wiz-step-2').style.display = 'none';
-  document.getElementById('wiz-step-3').style.display = 'block';
+  const s3 = document.getElementById('wiz-step-3');
+  s3.style.display = 'block';
+  s3.style.animation = 'wizardIn 0.35s cubic-bezier(0.34,1.56,0.64,1)';
   document.getElementById('wiz-success').style.display = 'none';
   document.getElementById('wiz-happ-btn-wrap').style.display = 'block';
+  const btn = document.getElementById('wiz-open-happ');
+  btn.textContent = '';
+  btn.innerHTML = '<span style="font-size:18px">🔗</span> Добавить в Happ';
+  btn.style.opacity = '';
+  btn.style.pointerEvents = '';
   document.getElementById('wiz-done-btn').style.display = 'none';
   hap();
 }
@@ -2245,13 +2414,10 @@ async function openInHapp() {
     const res = await fetch(`${API_BASE}/me`, { headers: { 'Authorization': authData } });
     const data = await res.json();
     const sub = data?.subscription;
-    const shortUrl = sub?.encrypted_link || sub?.short_link || `https://msk.cloudevpn.cfd:25666/${data?.user_id}/${sub?.uuid}`;
+    const shortUrl = sub?.encrypted_link || sub?.short_link || `https://cloudevpn.cfd/${data?.user_id}/${sub?.uuid}`;
 
-    // Build happ deep link: happ://add/<url>
-    const happLink = `happ://add/${encodeURIComponent(shortUrl)}`;
-
-    // Open in new tab/window
-    window.open(happLink, '_blank');
+    // Просто переходим по short link — сервер сам редиректнет на happ://add/...
+    window.open(shortUrl, '_blank');
 
     // Show success
     document.getElementById('wiz-happ-btn-wrap').style.display = 'none';

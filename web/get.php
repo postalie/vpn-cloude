@@ -5,10 +5,10 @@
  */
 
 // Configuration
-$RAILWAY_API_URL = "https://msk.cloudevpn.cfd:8080"; // Update if different
+$RAILWAY_API_URL = "https://vpn-cloudee-production.up.railway.app"; // Update if different
 $API_SECRET = "CloudeVpnVOIDAPI_1488";
 $JSON_FILE = "devices.json";
-$REDIRECT_BASE = "https://msk.cloudevpn.cfd:8080/sub/"; // Base URL for actual subscription
+$REDIRECT_BASE = "https://cloudevpn.cfd/sub/"; // Base URL for actual subscription
 
 // 1. Get Subscription ID
 $id = isset($_GET['id']) ? $_GET['id'] : null;

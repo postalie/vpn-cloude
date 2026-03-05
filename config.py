@@ -15,9 +15,9 @@ VPN_PRICE = 100
 # Основной бренд
 BRAND_NAME = "Cloude VPN"
 
-# Базовый URL для подписок (ТВОЙ СЕРВЕР)
+# Базовый URL для подписок (ТВОЙ САЙТ на Cloudflare)
 # Именно эту ссылку будут видеть юзеры в боте
-BASE_URL = "https://msk.cloudevpn.cfd"
+BASE_URL = "https://cloudevpn.cfd"
 
 # URL страницы GitHub Pages
 # Сюда будет вести кнопка с зашифрованной подпиской
@@ -28,10 +28,6 @@ API_SECRET = "CloudeVpnVOIDAPI_1488"
 
 # CryptoBot Token
 CRYPTO_BOT_TOKEN = "520599:AAW21XjdInZ2LUECMGvQpoeoQIX73vfmYf3"
-
-# Порты серверов
-API_PORT = 8080          # Основной бот + API
-WEB_PORT = 25666         # TMA Dashboard + статика
 
 # Локальный URL для подключения (IP будет подставлен при установке)
 LOCAL_URL = "https://{SERVER_IP}:8080"
