@@ -1,1759 +1,2084 @@
 <!DOCTYPE html>
 <html lang="ru">
-
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
-    <title>Cloude VPN | Dashboard</title>
-    <script src="https://telegram.org/js/telegram-web-app.js"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;700&family=Fira+Code:wght@400;500;600&family=Nunito+Sans:wght@400;600;700&display=swap" rel="stylesheet">
-    <style>
-        :root {
-            color-scheme: dark;
-            --bg-color: #0b1018;
-            --bg-2: #121a27;
-            --card-bg: rgba(24, 31, 45, 0.9);
-            --card-bg-2: rgba(31, 40, 57, 0.88);
-            --surface-3: #1c2635;
-            --border: rgba(143, 168, 206, 0.2);
-            --border-strong: rgba(143, 168, 206, 0.36);
-            --text-main: #f3f6fb;
-            --text-dim: #a5afc3;
-            --accent: #2f89ff;
-            --accent-2: #55b2ff;
-            --success: #79dea3;
-            --danger: #ff7b7b;
-            --radius: 16px;
-            --shadow: 0 10px 35px rgba(4, 8, 15, 0.38);
-        }
-
-        * {
-            box-sizing: border-box;
-            -webkit-tap-highlight-color: transparent;
-        }
-
-        body {
-            background-color: var(--bg-color);
-            color: var(--text-main);
-            font-family: 'Nunito Sans', 'Segoe UI', sans-serif;
-            margin: 0;
-            padding: 0;
-            overflow-x: hidden;
-            overflow-y: auto;
-            background:
-                radial-gradient(1200px 620px at -12% -20%, rgba(47, 137, 255, 0.19), transparent 65%),
-                radial-gradient(880px 460px at 112% 6%, rgba(38, 190, 177, 0.14), transparent 62%),
-                linear-gradient(165deg, var(--bg-color) 0%, var(--bg-2) 100%);
-            min-height: 100vh;
-            -webkit-overflow-scrolling: touch;
-        }
-
-        .container {
-            padding: 20px;
-            max-width: 500px;
-            margin: 0 auto;
-            padding-bottom: 40px;
-        }
-
-        header {
-            text-align: center;
-            margin-bottom: 30px;
-            animation: fadeInDown 0.8s ease-out;
-        }
-
-        h1 {
-            font-weight: 600;
-            margin: 0;
-            font-size: 28px;
-            letter-spacing: -0.5px;
-            background: linear-gradient(135deg, #fff 0%, #a5c0ff 100%);
-            -webkit-background-clip: text;
-            background-clip: text;
-            -webkit-text-fill-color: transparent;
-        }
-
-        .balance-card {
-            background: linear-gradient(165deg, rgba(34, 44, 62, 0.94), rgba(21, 29, 42, 0.88));
-            border: 1px solid var(--border);
-            border-radius: var(--radius);
-            padding: 20px;
-            margin-bottom: 20px;
-            backdrop-filter: blur(10px);
-            text-align: center;
-            position: relative;
-            overflow: hidden;
-            animation: fadeInUp 0.6s ease-out;
-            box-shadow: var(--shadow);
-        }
-
-        .balance-label {
-            color: var(--text-dim);
-            font-size: 14px;
-            text-transform: uppercase;
-            letter-spacing: 1px;
-        }
-
-        .balance-value {
-            font-size: 32px;
-            font-weight: 600;
-            margin: 5px 0;
-        }
-
-        .sub-status {
-            display: inline-block;
-            padding: 6px 14px;
-            border-radius: 50px;
-            font-size: 13px;
-            font-weight: 600;
-            margin-top: 10px;
-        }
-
-        .status-active {
-            border: 1px solid rgba(121, 222, 163, 0.42);
-            background: rgba(45, 120, 82, 0.32);
-            color: #b9f6d3;
-        }
-
-        .status-expired {
-            border: 1px solid rgba(255, 123, 123, 0.38);
-            background: rgba(120, 42, 42, 0.32);
-            color: #ffc0c0;
-        }
-
-        .status-warning {
-            border: 1px solid rgba(217, 142, 43, 0.4);
-            background: rgba(120, 82, 42, 0.32);
-            color: #ffd8a8;
-        }
-
-        .tabs {
-            display: flex;
-            background: rgba(0, 0, 0, 0.3);
-            border-radius: 12px;
-            padding: 4px;
-            margin-bottom: 25px;
-            border: 1px solid var(--border);
-            position: relative;
-        }
-
-        .tab {
-            flex: 1;
-            padding: 10px;
-            text-align: center;
-            border-radius: 12px;
-            font-size: 13px;
-            font-weight: 600;
-            cursor: pointer;
-            transition: all 0.22s ease;
-            color: var(--text-dim);
-            position: relative;
-            z-index: 1;
-        }
-
-        .tab.active {
-            color: var(--text-main);
-            background: rgba(47, 137, 255, 0.12);
-            border: 1px solid rgba(85, 178, 255, 0.6);
-        }
-
-        .content-section {
-            display: none;
-            animation: fadeIn 0.4s ease-out;
-        }
-
-        .content-section.active {
-            display: block;
-        }
-
-        .card {
-            background: linear-gradient(180deg, rgba(255, 255, 255, 0.02), transparent 55%), var(--card-bg);
-            border: 1px solid var(--border);
-            border-radius: var(--radius);
-            padding: 14px;
-            margin-bottom: 14px;
-            backdrop-filter: blur(5px);
-            transition: transform 0.2s, border-color 0.2s;
-            box-shadow: var(--shadow);
-        }
-
-        .card:active {
-            transform: translateY(-1px);
-        }
-
-        .device-list {
-            display: grid;
-            gap: 12px;
-        }
-
-        .device-item {
-            border: 1px solid var(--border);
-            border-radius: var(--radius);
-            background: linear-gradient(125deg, rgba(36, 98, 190, 0.15), rgba(22, 31, 47, 0.95));
-            padding: 14px;
-            display: grid;
-            gap: 12px;
-            transition: border-color 0.15s ease, transform 0.14s ease;
-            box-shadow: var(--shadow);
-        }
-
-        .device-item:hover {
-            border-color: var(--border-strong);
-            transform: translateY(-1px);
-        }
-
-        .device-header {
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            gap: 10px;
-        }
-
-        .device-icon-wrap {
-            display: flex;
-            align-items: center;
-            gap: 12px;
-            flex: 1;
-            min-width: 0;
-        }
-
-        .device-icon {
-            width: 42px;
-            height: 42px;
-            border-radius: 12px;
-            background: var(--surface-3);
-            border: 1px solid var(--border-strong);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 20px;
-            flex-shrink: 0;
-        }
-
-        .device-icon.android { background: linear-gradient(135deg, #3DDC84, #2A8C5C); }
-        .device-icon.ios { background: linear-gradient(135deg, #A2AAAD, #6B7280); }
-        .device-icon.windows { background: linear-gradient(135deg, #00A4EF, #0078D4); }
-        .device-icon.macos { background: linear-gradient(135deg, #FF6B6B, #EE5A5A); }
-        .device-icon.linux { background: linear-gradient(135deg, #FCC624, #D4A017); }
-        .device-icon.unknown { background: var(--surface-3); }
-
-        .device-meta {
-            flex: 1;
-            min-width: 0;
-        }
-
-        .device-title {
-            font-size: 15px;
-            font-weight: 700;
-            margin: 0;
-            white-space: nowrap;
-            overflow: hidden;
-            text-overflow: ellipsis;
-        }
-
-        .device-sub {
-            font-size: 11px;
-            color: var(--text-dim);
-            margin: 2px 0 0;
-            display: flex;
-            align-items: center;
-            gap: 6px;
-            flex-wrap: wrap;
-        }
-
-        .device-hash {
-            background: rgba(255, 255, 255, 0.08);
-            padding: 2px 8px;
-            border-radius: 6px;
-            font-size: 10px;
-            font-family: 'Fira Code', monospace;
-            color: #d7e8ff;
-        }
-
-        .device-status {
-            display: flex;
-            align-items: center;
-            gap: 6px;
-            font-size: 11px;
-        }
-
-        .status-dot {
-            width: 8px;
-            height: 8px;
-            border-radius: 50%;
-            background: var(--text-dim);
-        }
-
-        .status-dot.online {
-            background: var(--success);
-            box-shadow: 0 0 8px rgba(121, 222, 163, 0.6);
-        }
-
-        .device-info-row {
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            gap: 10px;
-            flex-wrap: wrap;
-        }
-
-        .device-actions {
-            display: flex;
-            gap: 8px;
-            flex-wrap: wrap;
-        }
-
-        .btn-device {
-            height: 36px;
-            border: 1px solid var(--border);
-            border-radius: 10px;
-            padding: 0 12px;
-            display: inline-flex;
-            align-items: center;
-            justify-content: center;
-            gap: 6px;
-            font-size: 11px;
-            font-family: 'Fira Code', monospace;
-            color: var(--text-main);
-            background: var(--card-bg-2);
-            cursor: pointer;
-            transition: all 0.15s ease;
-        }
-
-        .btn-device:hover {
-            border-color: var(--border-strong);
-            transform: translateY(-1px);
-        }
-
-        .btn-device:active {
-            transform: translateY(0);
-        }
-
-        .btn-device.btn-rename {
-            background: rgba(47, 137, 255, 0.15);
-            border-color: rgba(85, 178, 255, 0.4);
-        }
-
-        .btn-device.btn-rename:hover {
-            background: rgba(47, 137, 255, 0.25);
-        }
-
-        .btn-device.btn-delete {
-            background: rgba(255, 123, 123, 0.15);
-            border-color: rgba(255, 123, 123, 0.4);
-        }
-
-        .btn-device.btn-delete:hover {
-            background: rgba(255, 123, 123, 0.25);
-        }
-
-        .devices-limit-card {
-            border: 1px solid var(--border);
-            border-radius: var(--radius);
-            background: var(--card-bg-2);
-            padding: 14px;
-            margin-bottom: 14px;
-            box-shadow: var(--shadow);
-        }
-
-        .devices-limit-header {
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            margin-bottom: 10px;
-        }
-
-        .devices-limit-title {
-            font-size: 14px;
-            font-weight: 700;
-            margin: 0;
-        }
-
-        .devices-limit-chip {
-            border: 1px solid var(--border);
-            border-radius: 999px;
-            padding: 4px 10px;
-            font-size: 11px;
-            background: var(--surface-3);
-            color: var(--text-dim);
-        }
-
-        .devices-limit-chip.warning {
-            border-color: rgba(217, 142, 43, 0.4);
-            background: rgba(120, 82, 42, 0.32);
-            color: #ffd8a8;
-        }
-
-        .devices-limit-chip.danger {
-            border-color: rgba(255, 123, 123, 0.38);
-            background: rgba(120, 42, 42, 0.32);
-            color: #ffc0c0;
-        }
-
-        .traffic-progress {
-            width: 100%;
-            height: 10px;
-            border: 1px solid var(--border);
-            border-radius: 999px;
-            background: var(--surface-3);
-            overflow: hidden;
-        }
-
-        .traffic-progress-bar {
-            height: 100%;
-            width: 0%;
-            background: linear-gradient(90deg, var(--accent), var(--accent-2));
-            transition: width 0.22s ease;
-        }
-
-        .traffic-progress-bar.warning {
-            background: linear-gradient(90deg, #d98e2b, #f3b14e);
-        }
-
-        .traffic-progress-bar.danger {
-            background: linear-gradient(90deg, #cf4a4a, #f67777);
-        }
-
-        .devices-footer {
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            gap: 10px;
-            margin-top: 14px;
-            flex-wrap: wrap;
-        }
-
-        .pager {
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 8px;
-        }
-
-        .pager .btn-device {
-            min-width: 72px;
-        }
-
-        .btn-unlink-all {
-            height: 40px;
-            border: 1px solid rgba(255, 123, 123, 0.45);
-            border-radius: 11px;
-            padding: 0 16px;
-            display: inline-flex;
-            align-items: center;
-            gap: 6px;
-            font-size: 12px;
-            font-weight: 600;
-            color: var(--text-main);
-            background: rgba(118, 40, 40, 0.34);
-            cursor: pointer;
-            transition: all 0.15s ease;
-        }
-
-        .btn-unlink-all:hover {
-            border-color: rgba(255, 123, 123, 0.62);
-            background: rgba(118, 40, 40, 0.45);
-        }
-
-        .btn-icon {
-            background: var(--card-bg-2);
-            border: 1px solid var(--border);
-            width: 38px;
-            height: 38px;
-            border-radius: 10px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            cursor: pointer;
-            transition: all 0.15s;
-            font-size: 16px;
-            padding: 0;
-            flex-shrink: 0;
-        }
-
-        .btn-icon:active {
-            transform: scale(0.95);
-        }
-
-        .btn-icon:hover {
-            border-color: var(--border-strong);
-            background: rgba(47, 137, 255, 0.12);
-        }
-
-        .input-code {
-            background: rgba(17, 24, 35, 0.86);
-            border: 1px solid var(--border);
-            border-radius: 10px;
-            padding: 12px;
-            color: var(--text-main);
-            font-family: 'Fira Code', monospace;
-            font-size: 13px;
-            outline: none;
-            transition: border-color 0.16s ease, box-shadow 0.16s ease;
-        }
-
-        .input-code:focus {
-            border-color: rgba(85, 178, 255, 0.72);
-            box-shadow: 0 0 0 3px rgba(47, 137, 255, 0.16);
-        }
-
-        .btn-primary {
-            height: 44px;
-            border: 1px solid rgba(80, 175, 255, 0.65);
-            border-radius: 12px;
-            padding: 0 16px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 8px;
-            font-size: 13px;
-            font-weight: 600;
-            color: #f6faff;
-            background: linear-gradient(135deg, var(--accent), var(--accent-2));
-            cursor: pointer;
-            transition: all 0.15s ease;
-            box-shadow: 0 6px 16px rgba(47, 137, 255, 0.34);
-            width: 100%;
-            margin-top: 10px;
-        }
-
-        .btn-primary:hover {
-            box-shadow: 0 8px 18px rgba(47, 137, 255, 0.4);
-            transform: translateY(-1px);
-        }
-
-        .btn-primary:active {
-            transform: translateY(0);
-        }
-
-        .instruction-step {
-            display: flex;
-            gap: 12px;
-            margin-bottom: 16px;
-        }
-
-        .step-num {
-            background: linear-gradient(135deg, var(--accent), var(--accent-2));
-            width: 28px;
-            height: 28px;
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            flex-shrink: 0;
-            font-weight: 700;
-            font-size: 13px;
-        }
-
-        .step-text h4 {
-            margin: 0 0 5px;
-            font-size: 14px;
-            font-weight: 600;
-        }
-
-        .step-text p {
-            margin: 0;
-            font-size: 12px;
-            color: var(--text-dim);
-            line-height: 1.5;
-        }
-
-        /* Animations */
-        @keyframes fadeInDown {
-            from {
-                opacity: 0;
-                transform: translateY(-20px);
-            }
-
-            to {
-                opacity: 1;
-                transform: translateY(0);
-            }
-        }
-
-        @keyframes fadeInUp {
-            from {
-                opacity: 0;
-                transform: translateY(20px);
-            }
-
-            to {
-                opacity: 1;
-                transform: translateY(0);
-            }
-        }
-
-        @keyframes fadeIn {
-            from {
-                opacity: 0;
-            }
-
-            to {
-                opacity: 1;
-            }
-        }
-
-        #renameModal {
-            position: fixed;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            background: rgba(0, 0, 0, 0.8);
-            backdrop-filter: blur(5px);
-            display: none;
-            justify-content: center;
-            align-items: center;
-            z-index: 1000;
-            padding: 20px;
-            animation: fadeIn 0.2s ease-out;
-        }
-
-        #addDeviceModal {
-            position: fixed;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            background: rgba(0, 0, 0, 0.8);
-            backdrop-filter: blur(5px);
-            display: none;
-            justify-content: center;
-            align-items: center;
-            z-index: 1000;
-            padding: 20px;
-            animation: fadeIn 0.2s ease-out;
-        }
-
-        .modal-body {
-            background: linear-gradient(165deg, rgba(34, 44, 62, 0.94), rgba(21, 29, 42, 0.88));
-            border: 1px solid var(--border);
-            border-radius: var(--radius);
-            padding: 20px;
-            width: 100%;
-            max-width: 340px;
-            animation: fadeInUp 0.3s ease-out;
-            box-shadow: var(--shadow);
-        }
-
-        .modal-body h2 {
-            margin: 0 0 15px;
-            font-size: 18px;
-            font-weight: 700;
-            text-align: center;
-        }
-
-        .modal-body input {
-            width: 100%;
-            background: rgba(17, 24, 35, 0.86);
-            border: 1px solid var(--border);
-            padding: 12px;
-            border-radius: 10px;
-            color: var(--text-main);
-            font-family: 'Fira Code', monospace;
-            font-size: 13px;
-            margin-bottom: 16px;
-            outline: none;
-            transition: border-color 0.16s ease, box-shadow 0.16s ease;
-        }
-
-        .modal-body input:focus {
-            border-color: rgba(85, 178, 255, 0.72);
-            box-shadow: 0 0 0 3px rgba(47, 137, 255, 0.16);
-        }
-
-        .modal-btns {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 10px;
-        }
-
-        .modal-btns button {
-            height: 40px;
-            border-radius: 11px;
-            cursor: pointer;
-            font-weight: 600;
-            font-size: 12px;
-            transition: all 0.15s ease;
-            border: 1px solid var(--border);
-        }
-
-        .modal-btns button:active {
-            transform: scale(0.97);
-        }
-
-        .btn-cancel {
-            background: var(--card-bg-2);
-            color: var(--text-main);
-        }
-
-        .btn-cancel:hover {
-            border-color: var(--border-strong);
-        }
-
-        .btn-save {
-            background: linear-gradient(135deg, var(--accent), var(--accent-2));
-            border-color: rgba(80, 175, 255, 0.65);
-            color: #f6faff;
-            box-shadow: 0 6px 16px rgba(47, 137, 255, 0.34);
-        }
-
-        .btn-save:hover {
-            box-shadow: 0 8px 18px rgba(47, 137, 255, 0.4);
-        }
-
-        .btn-ghost {
-            height: 40px;
-            border: 1px solid var(--border);
-            border-radius: 11px;
-            padding: 0 16px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 8px;
-            font-size: 12px;
-            font-weight: 600;
-            color: var(--text-main);
-            background: transparent;
-            cursor: pointer;
-            transition: all 0.15s ease;
-        }
-
-        .btn-ghost:hover {
-            background: rgba(255, 255, 255, 0.05);
-            border-color: var(--border-strong);
-        }
-
-        #empty-devices {
-            text-align: center;
-            padding: 40px 20px;
-            color: var(--text-dim);
-            font-size: 13px;
-        }
-
-        .empty-state-icon {
-            font-size: 48px;
-            margin-bottom: 12px;
-            opacity: 0.6;
-        }
-
-        /* Экран загрузки/авторизации */
-        #auth-screen {
-            position: fixed;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            background:
-                radial-gradient(1200px 620px at -12% -20%, rgba(47, 137, 255, 0.19), transparent 65%),
-                radial-gradient(880px 460px at 112% 6%, rgba(38, 190, 177, 0.14), transparent 62%),
-                linear-gradient(165deg, var(--bg-color) 0%, var(--bg-2) 100%);
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            z-index: 2000;
-            padding: 20px;
-            animation: fadeIn 0.3s ease-out;
-        }
-
-        #auth-screen.hidden {
-            display: none;
-        }
-
-        .auth-loader {
-            width: 50px;
-            height: 50px;
-            border: 4px solid rgba(47, 137, 255, 0.2);
-            border-top-color: var(--accent);
-            border-radius: 50%;
-            animation: spin 1s linear infinite;
-            margin-bottom: 20px;
-        }
-
-        @keyframes spin {
-            to {
-                transform: rotate(360deg);
-            }
-        }
-
-        .auth-title {
-            font-size: 18px;
-            font-weight: 700;
-            margin-bottom: 8px;
-            text-align: center;
-        }
-
-        .auth-subtitle {
-            font-size: 13px;
-            color: var(--text-dim);
-            text-align: center;
-            margin-bottom: 30px;
-        }
-
-        .auth-error {
-            background: linear-gradient(165deg, rgba(34, 44, 62, 0.94), rgba(21, 29, 42, 0.88));
-            border: 1px solid rgba(255, 123, 123, 0.42);
-            border-radius: var(--radius);
-            padding: 20px;
-            text-align: center;
-            max-width: 340px;
-            box-shadow: var(--shadow);
-        }
-
-        .auth-error-icon {
-            font-size: 42px;
-            margin-bottom: 12px;
-        }
-
-        .auth-error-title {
-            font-size: 16px;
-            font-weight: 700;
-            margin-bottom: 8px;
-            color: var(--danger);
-        }
-
-        .auth-error-text {
-            font-size: 12px;
-            color: var(--text-dim);
-            margin-bottom: 16px;
-            line-height: 1.5;
-        }
-
-        .btn-telegram {
-            height: 44px;
-            background: linear-gradient(135deg, #2AABEE 0%, #229ED9 100%);
-            color: white;
-            border: none;
-            padding: 0 24px;
-            border-radius: 12px;
-            font-weight: 600;
-            font-size: 14px;
-            cursor: pointer;
-            text-decoration: none;
-            display: inline-flex;
-            align-items: center;
-            gap: 10px;
-            transition: all 0.2s;
-            box-shadow: 0 6px 20px rgba(42, 171, 238, 0.35);
-        }
-
-        .btn-telegram:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 8px 24px rgba(42, 171, 238, 0.45);
-        }
-
-        .btn-telegram:active {
-            transform: translateY(0);
-        }
-
-        .btn-telegram svg {
-            width: 20px;
-            height: 20px;
-            fill: currentColor;
-        }
-
-        /* Адаптивность для мобильных */
-        @media (max-width: 380px) {
-            .container {
-                padding: 14px;
-            }
-
-            h1 {
-                font-size: 22px;
-            }
-
-            .balance-value {
-                font-size: 26px;
-            }
-
-            .device-icon {
-                width: 38px;
-                height: 38px;
-                font-size: 18px;
-            }
-
-            .device-title {
-                font-size: 14px;
-            }
-
-            .device-actions {
-                flex-direction: row;
-            }
-
-            .device-actions .btn-device {
-                flex: 1;
-                min-width: 0;
-                padding: 0 8px;
-                font-size: 10px;
-            }
-
-            .devices-footer {
-                flex-direction: column;
-                align-items: stretch;
-            }
-
-            .pager {
-                order: 2;
-            }
-
-            .btn-unlink-all {
-                order: 1;
-                justify-content: center;
-            }
-        }
-    </style>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+<title>Cloud VPN | Dashboard</title>
+<script src="https://telegram.org/js/telegram-web-app.js"></script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Fira+Code:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+  -webkit-tap-highlight-color: transparent;
+  -webkit-font-smoothing: antialiased;
+}
+
+html, body {
+  font-family: 'Inter', -apple-system, sans-serif;
+  background: #08080e;
+  overflow: hidden;
+  height: 100dvh;
+  width: 100vw;
+  position: fixed;
+  color: #fff;
+}
+
+#bg-canvas {
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+}
+
+/* ===== APP LAYOUT ===== */
+.app {
+  position: fixed;
+  inset: 0;
+  z-index: 10;
+  display: flex;
+  flex-direction: column;
+}
+
+.app-header {
+  flex-shrink: 0;
+  height: 56px;
+  padding-top: env(safe-area-inset-top, 0px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  position: relative;
+  z-index: 20;
+}
+
+.app-body {
+  flex: 1;
+  position: relative;
+  overflow: hidden;
+  min-height: 0;
+}
+
+.app-footer {
+  flex-shrink: 0;
+  padding: 8px 12px;
+  padding-bottom: max(8px, env(safe-area-inset-bottom));
+  position: relative;
+  z-index: 20;
+}
+
+/* ===== LOGO ===== */
+.logo-wrap {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.logo-icon {
+  width: 28px;
+  height: 28px;
+  position: relative;
+}
+
+.logo-text {
+  font-size: 13px;
+  font-weight: 600;
+  letter-spacing: 1.5px;
+  text-transform: uppercase;
+  color: rgba(255,255,255,0.45);
+}
+
+/* ===== GLASS ===== */
+.glass-card {
+  position: relative;
+  background: rgba(255,255,255,0.04);
+  border: 1px solid rgba(255,255,255,0.1);
+  border-radius: 20px;
+  overflow: hidden;
+}
+
+.glass-card::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  background: linear-gradient(168deg, rgba(255,255,255,0.12) 0%, rgba(255,255,255,0.03) 20%, transparent 50%);
+  pointer-events: none;
+  z-index: 1;
+}
+
+.glass-card::after {
+  content: '';
+  position: absolute;
+  inset: -1px;
+  border-radius: inherit;
+  background: linear-gradient(135deg, rgba(168,85,247,0.12) 0%, transparent 40%, rgba(236,72,153,0.08) 100%);
+  mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+  mask-composite: exclude;
+  -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+  -webkit-mask-composite: xor;
+  padding: 1px;
+  pointer-events: none;
+  z-index: 2;
+}
+
+.glass-inner {
+  position: relative;
+  z-index: 5;
+}
+
+/* ===== PAGES ===== */
+.page {
+  position: absolute;
+  inset: 0;
+  overflow-y: auto;
+  overflow-x: hidden;
+  -webkit-overflow-scrolling: touch;
+  scrollbar-width: none;
+  padding: 8px 16px 20px;
+  will-change: transform, opacity;
+  transition: transform 0.45s cubic-bezier(0.25, 1, 0.5, 1), opacity 0.45s cubic-bezier(0.25, 1, 0.5, 1);
+}
+.page::-webkit-scrollbar { display: none; }
+
+.page {
+  transform: translateX(100%);
+  opacity: 0;
+  pointer-events: none;
+}
+
+.page.active {
+  transform: translateX(0);
+  opacity: 1;
+  pointer-events: auto;
+}
+
+.page.to-left {
+  transform: translateX(-30%);
+  opacity: 0;
+  pointer-events: none;
+}
+
+.page.to-right {
+  transform: translateX(100%);
+  opacity: 0;
+  pointer-events: none;
+}
+
+.ci {
+  opacity: 0;
+  transform: translateY(16px);
+  transition: opacity 0.5s cubic-bezier(0.25, 1, 0.5, 1), transform 0.5s cubic-bezier(0.25, 1, 0.5, 1);
+}
+
+.ci.revealed {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+/* ===== NAV ===== */
+.nav-inner {
+  position: relative;
+  background: rgba(255,255,255,0.04);
+  border: 1px solid rgba(255,255,255,0.08);
+  border-radius: 22px;
+  padding: 4px;
+  display: flex;
+  overflow: hidden;
+}
+
+.nav-inner::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  background: linear-gradient(168deg, rgba(255,255,255,0.06) 0%, transparent 40%);
+  pointer-events: none;
+}
+
+.nav-ind {
+  position: absolute;
+  height: calc(100% - 8px);
+  top: 4px;
+  border-radius: 18px;
+  background: rgba(168,85,247,0.12);
+  border: 1px solid rgba(168,85,247,0.2);
+  transition: all 0.5s cubic-bezier(0.34, 1.56, 0.64, 1);
+  z-index: 0;
+}
+
+.nav-item {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+  padding: 8px 0 6px;
+  cursor: pointer;
+  position: relative;
+  z-index: 1;
+  transition: all 0.3s ease;
+}
+
+.nav-item svg {
+  width: 20px;
+  height: 20px;
+  stroke: rgba(255,255,255,0.3);
+  fill: none;
+  stroke-width: 1.8;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  transition: all 0.3s ease;
+}
+
+.nav-item.active svg {
+  stroke: #c084fc;
+  filter: drop-shadow(0 0 6px rgba(168,85,247,0.4));
+}
+
+.nav-item span {
+  font-size: 9px;
+  font-weight: 500;
+  color: rgba(255,255,255,0.25);
+  transition: all 0.3s ease;
+}
+
+.nav-item.active span {
+  color: #c084fc;
+}
+
+/* ===== TOGGLE ===== */
+.tog {
+  width: 46px;
+  height: 26px;
+  border-radius: 13px;
+  background: rgba(255,255,255,0.06);
+  border: 1px solid rgba(255,255,255,0.1);
+  position: relative;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  flex-shrink: 0;
+}
+
+.tog::before {
+  content: '';
+  position: absolute;
+  top: 3px;
+  left: 3px;
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  background: rgba(255,255,255,0.2);
+  transition: all 0.35s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+.tog.on {
+  background: rgba(168,85,247,0.18);
+  border-color: rgba(168,85,247,0.25);
+}
+
+.tog.on::before {
+  transform: translateX(20px);
+  background: #a855f7;
+  box-shadow: 0 0 8px rgba(168,85,247,0.4);
+}
+
+/* ===== GLASS BTN ===== */
+.gbtn {
+  position: relative;
+  background: rgba(255,255,255,0.05);
+  border: 1px solid rgba(255,255,255,0.1);
+  border-radius: 12px;
+  overflow: hidden;
+  transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+  cursor: pointer;
+}
+
+.gbtn::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  background: linear-gradient(168deg, rgba(255,255,255,0.1) 0%, transparent 50%);
+  pointer-events: none;
+}
+
+.gbtn:active {
+  transform: scale(0.96);
+  background: rgba(255,255,255,0.08);
+}
+
+/* ===== SETTING ROW ===== */
+.srow {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 13px 14px;
+}
+
+.srow + .srow {
+  border-top: 1px solid rgba(255,255,255,0.04);
+}
+
+/* ===== STAT PILL ===== */
+.spill {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 3px;
+  padding: 12px 4px;
+  flex: 1;
+}
+
+.spill + .spill {
+  border-left: 1px solid rgba(255,255,255,0.05);
+}
+
+/* ===== AVATAR ===== */
+.avatar {
+  width: 72px;
+  height: 72px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, rgba(168,85,247,0.25), rgba(236,72,153,0.25));
+  border: 1.5px solid rgba(255,255,255,0.12);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+  overflow: hidden;
+}
+
+.avatar::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  background: linear-gradient(168deg, rgba(255,255,255,0.18) 0%, transparent 50%);
+}
+
+/* ===== BALANCE CARD ===== */
+.balance-card {
+  text-align: center;
+  padding: 18px 14px;
+}
+
+.balance-label {
+  font-size: 10px;
+  text-transform: uppercase;
+  letter-spacing: 1.5px;
+  color: rgba(255,255,255,0.3);
+}
+
+.balance-value {
+  font-size: 30px;
+  font-weight: 700;
+  margin: 6px 0;
+  background: linear-gradient(135deg, #fff 0%, #c084fc 100%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+.sub-badge {
+  display: inline-block;
+  padding: 5px 14px;
+  border-radius: 50px;
+  font-size: 11px;
+  font-weight: 600;
+}
+
+.badge-active {
+  border: 1px solid rgba(74,222,128,0.35);
+  background: rgba(74,222,128,0.08);
+  color: rgba(74,222,128,0.85);
+}
+
+.badge-expired {
+  border: 1px solid rgba(248,113,113,0.35);
+  background: rgba(248,113,113,0.08);
+  color: rgba(248,113,113,0.85);
+}
+
+/* ===== SUB URL INPUT ===== */
+.sub-url-row {
+  display: flex;
+  gap: 8px;
+  margin-top: 10px;
+}
+
+.sub-url-input {
+  flex: 1;
+  background: rgba(255,255,255,0.03);
+  border: 1px solid rgba(255,255,255,0.08);
+  border-radius: 12px;
+  padding: 10px 12px;
+  color: #c084fc;
+  font-family: 'Fira Code', monospace;
+  font-size: 12px;
+  outline: none;
+  min-width: 0;
+}
+
+.sub-url-input:focus {
+  border-color: rgba(168,85,247,0.35);
+}
+
+.btn-copy {
+  width: 40px;
+  height: 40px;
+  border-radius: 12px;
+  background: rgba(255,255,255,0.04);
+  border: 1px solid rgba(255,255,255,0.08);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  font-size: 16px;
+  transition: all 0.2s;
+  flex-shrink: 0;
+}
+
+.btn-copy:active {
+  transform: scale(0.92);
+  background: rgba(168,85,247,0.1);
+}
+
+/* ===== PRIMARY BTN ===== */
+.btn-primary {
+  width: 100%;
+  height: 46px;
+  border-radius: 14px;
+  border: 1px solid rgba(168,85,247,0.3);
+  background: linear-gradient(135deg, rgba(168,85,247,0.15), rgba(236,72,153,0.1));
+  color: rgba(255,255,255,0.85);
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+  position: relative;
+  overflow: hidden;
+  text-decoration: none;
+}
+
+.btn-primary::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  background: linear-gradient(168deg, rgba(255,255,255,0.1) 0%, transparent 50%);
+  pointer-events: none;
+}
+
+.btn-primary:active {
+  transform: scale(0.97);
+}
+
+.btn-ghost {
+  width: 100%;
+  height: 42px;
+  border-radius: 12px;
+  border: 1px solid rgba(255,255,255,0.08);
+  background: transparent;
+  color: rgba(255,255,255,0.5);
+  font-size: 12px;
+  font-weight: 500;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  transition: all 0.2s;
+}
+
+.btn-ghost:active {
+  background: rgba(255,255,255,0.04);
+}
+
+/* ===== DEVICE LIST ===== */
+.device-item {
+  background: rgba(255,255,255,0.02);
+  border: 1px solid rgba(255,255,255,0.06);
+  border-radius: 16px;
+  padding: 12px 14px;
+  margin-bottom: 8px;
+  transition: all 0.2s;
+}
+
+.device-item:active {
+  transform: scale(0.98);
+  background: rgba(255,255,255,0.04);
+}
+
+.device-header {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.device-icon-wrap {
+  width: 38px;
+  height: 38px;
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 18px;
+  flex-shrink: 0;
+}
+
+.device-icon-wrap.android { background: linear-gradient(135deg, rgba(61,220,132,0.2), rgba(61,220,132,0.05)); }
+.device-icon-wrap.ios { background: linear-gradient(135deg, rgba(162,170,173,0.2), rgba(162,170,173,0.05)); }
+.device-icon-wrap.windows { background: linear-gradient(135deg, rgba(0,164,239,0.2), rgba(0,164,239,0.05)); }
+.device-icon-wrap.macos { background: linear-gradient(135deg, rgba(255,107,107,0.2), rgba(255,107,107,0.05)); }
+.device-icon-wrap.linux { background: linear-gradient(135deg, rgba(252,198,36,0.2), rgba(252,198,36,0.05)); }
+.device-icon-wrap.unknown { background: rgba(255,255,255,0.05); }
+
+.device-meta {
+  flex: 1;
+  min-width: 0;
+}
+
+.device-name {
+  font-size: 13px;
+  font-weight: 600;
+  color: rgba(255,255,255,0.85);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.device-sub {
+  font-size: 10px;
+  color: rgba(255,255,255,0.3);
+  margin-top: 2px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.device-hash {
+  background: rgba(255,255,255,0.06);
+  padding: 1px 6px;
+  border-radius: 4px;
+  font-family: 'Fira Code', monospace;
+  font-size: 9px;
+  color: rgba(168,85,247,0.7);
+}
+
+.status-dot {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: rgba(255,255,255,0.15);
+  flex-shrink: 0;
+}
+
+.status-dot.online {
+  background: rgba(74,222,128,0.8);
+  box-shadow: 0 0 6px rgba(74,222,128,0.4);
+}
+
+.device-actions {
+  display: flex;
+  gap: 6px;
+  margin-top: 10px;
+}
+
+.btn-device {
+  flex: 1;
+  height: 32px;
+  border-radius: 10px;
+  border: 1px solid rgba(255,255,255,0.08);
+  background: rgba(255,255,255,0.03);
+  color: rgba(255,255,255,0.6);
+  font-size: 11px;
+  font-weight: 500;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+  transition: all 0.2s;
+}
+
+.btn-device:active {
+  transform: scale(0.96);
+}
+
+.btn-device.btn-rename {
+  border-color: rgba(168,85,247,0.2);
+  background: rgba(168,85,247,0.06);
+}
+
+.btn-device.btn-delete {
+  border-color: rgba(248,113,113,0.2);
+  background: rgba(248,113,113,0.06);
+}
+
+/* ===== DEVICES LIMIT ===== */
+.devices-limit-card {
+  padding: 14px;
+}
+
+.devices-limit-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 10px;
+}
+
+.devices-limit-chip {
+  padding: 3px 10px;
+  border-radius: 999px;
+  font-size: 11px;
+  font-weight: 600;
+  background: rgba(255,255,255,0.04);
+  border: 1px solid rgba(255,255,255,0.08);
+  color: rgba(255,255,255,0.5);
+}
+
+.devices-limit-chip.warning {
+  border-color: rgba(250,204,21,0.3);
+  color: rgba(250,204,21,0.8);
+}
+
+.devices-limit-chip.danger {
+  border-color: rgba(248,113,113,0.3);
+  color: rgba(248,113,113,0.8);
+}
+
+.traffic-progress {
+  width: 100%;
+  height: 4px;
+  border-radius: 2px;
+  background: rgba(255,255,255,0.04);
+  overflow: hidden;
+}
+
+.traffic-bar {
+  height: 100%;
+  border-radius: 2px;
+  background: linear-gradient(90deg, #a855f7, #c084fc);
+  transition: width 0.4s ease;
+}
+
+.traffic-bar.warning {
+  background: linear-gradient(90deg, #eab308, #facc15);
+}
+
+.traffic-bar.danger {
+  background: linear-gradient(90deg, #dc2626, #f87171);
+}
+
+/* ===== PAGER ===== */
+.pager {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  margin-top: 10px;
+}
+
+.pager-btn {
+  height: 32px;
+  padding: 0 14px;
+  border-radius: 10px;
+  border: 1px solid rgba(255,255,255,0.08);
+  background: rgba(255,255,255,0.03);
+  color: rgba(255,255,255,0.5);
+  font-size: 11px;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.pager-btn:disabled {
+  opacity: 0.3;
+  pointer-events: none;
+}
+
+.pager-btn:active {
+  transform: scale(0.95);
+}
+
+.pager-info {
+  font-size: 11px;
+  color: rgba(255,255,255,0.25);
+  font-family: 'Fira Code', monospace;
+}
+
+/* ===== MODALS ===== */
+.modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.7);
+  display: none;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+  padding: 20px;
+  animation: modalIn 0.25s ease-out;
+}
+
+.modal-overlay.show {
+  display: flex;
+}
+
+@keyframes modalIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+.modal-body {
+  background: rgba(18,18,28,0.95);
+  border: 1px solid rgba(255,255,255,0.1);
+  border-radius: 20px;
+  padding: 20px;
+  width: 100%;
+  max-width: 340px;
+  animation: modalSlide 0.35s cubic-bezier(0.34, 1.56, 0.64, 1);
+  position: relative;
+  overflow: hidden;
+}
+
+.modal-body::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  background: linear-gradient(168deg, rgba(255,255,255,0.08) 0%, transparent 40%);
+  pointer-events: none;
+}
+
+@keyframes modalSlide {
+  from { opacity: 0; transform: translateY(20px) scale(0.95); }
+  to { opacity: 1; transform: translateY(0) scale(1); }
+}
+
+.modal-title {
+  font-size: 17px;
+  font-weight: 700;
+  text-align: center;
+  margin-bottom: 16px;
+  color: rgba(255,255,255,0.9);
+  position: relative;
+  z-index: 1;
+}
+
+.modal-input {
+  width: 100%;
+  background: rgba(255,255,255,0.04);
+  border: 1px solid rgba(255,255,255,0.1);
+  border-radius: 12px;
+  padding: 12px;
+  color: rgba(255,255,255,0.85);
+  font-family: 'Fira Code', monospace;
+  font-size: 13px;
+  outline: none;
+  margin-bottom: 14px;
+  transition: border-color 0.2s;
+  position: relative;
+  z-index: 1;
+}
+
+.modal-input:focus {
+  border-color: rgba(168,85,247,0.4);
+}
+
+.modal-btns {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+  position: relative;
+  z-index: 1;
+}
+
+.btn-modal-cancel {
+  height: 40px;
+  border-radius: 12px;
+  border: 1px solid rgba(255,255,255,0.08);
+  background: rgba(255,255,255,0.04);
+  color: rgba(255,255,255,0.6);
+  font-weight: 600;
+  font-size: 12px;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.btn-modal-save {
+  height: 40px;
+  border-radius: 12px;
+  border: 1px solid rgba(168,85,247,0.3);
+  background: linear-gradient(135deg, rgba(168,85,247,0.2), rgba(236,72,153,0.12));
+  color: rgba(255,255,255,0.85);
+  font-weight: 600;
+  font-size: 12px;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.btn-modal-cancel:active, .btn-modal-save:active {
+  transform: scale(0.96);
+}
+
+/* ===== BTN UNLINK ALL ===== */
+.btn-unlink-all {
+  width: 100%;
+  height: 40px;
+  border-radius: 12px;
+  border: 1px solid rgba(248,113,113,0.2);
+  background: rgba(248,113,113,0.06);
+  color: rgba(248,113,113,0.8);
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  transition: all 0.2s;
+  margin-top: 8px;
+}
+
+.btn-unlink-all:active {
+  transform: scale(0.97);
+}
+
+/* ===== SERVER ROW ===== */
+.srv {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 13px 14px;
+  border-radius: 16px;
+  background: rgba(255,255,255,0.02);
+  border: 1px solid rgba(255,255,255,0.05);
+  transition: all 0.3s ease;
+  cursor: pointer;
+}
+
+.srv:active {
+  transform: scale(0.98);
+  background: rgba(255,255,255,0.05);
+}
+
+.srv.sel {
+  background: rgba(168,85,247,0.07);
+  border-color: rgba(168,85,247,0.18);
+}
+
+/* ===== INSTRUCTION ===== */
+.instruction-step {
+  display: flex;
+  gap: 12px;
+  margin-bottom: 14px;
+}
+
+.step-num {
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, rgba(168,85,247,0.3), rgba(236,72,153,0.2));
+  border: 1px solid rgba(168,85,247,0.2);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  font-weight: 700;
+  font-size: 12px;
+  color: rgba(255,255,255,0.8);
+}
+
+/* ===== AUTH SCREEN ===== */
+#auth-screen {
+  position: fixed;
+  inset: 0;
+  z-index: 2000;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+  background: #08080e;
+}
+
+#auth-screen.hidden {
+  display: none;
+}
+
+.auth-loader {
+  width: 44px;
+  height: 44px;
+  border: 3px solid rgba(168,85,247,0.15);
+  border-top-color: #a855f7;
+  border-radius: 50%;
+  animation: spin 0.9s linear infinite;
+  margin-bottom: 18px;
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
+.auth-title {
+  font-size: 16px;
+  font-weight: 600;
+  color: rgba(255,255,255,0.8);
+  margin-bottom: 6px;
+}
+
+.auth-subtitle {
+  font-size: 12px;
+  color: rgba(255,255,255,0.3);
+}
+
+.auth-error {
+  background: rgba(255,255,255,0.03);
+  border: 1px solid rgba(248,113,113,0.2);
+  border-radius: 20px;
+  padding: 24px;
+  text-align: center;
+  max-width: 300px;
+}
+
+.auth-error-icon {
+  font-size: 40px;
+  margin-bottom: 12px;
+}
+
+.auth-error-title {
+  font-size: 16px;
+  font-weight: 700;
+  color: rgba(248,113,113,0.85);
+  margin-bottom: 8px;
+}
+
+.auth-error-text {
+  font-size: 12px;
+  color: rgba(255,255,255,0.35);
+  margin-bottom: 16px;
+  line-height: 1.5;
+}
+
+.btn-telegram {
+  height: 44px;
+  background: linear-gradient(135deg, rgba(168,85,247,0.25), rgba(236,72,153,0.15));
+  border: 1px solid rgba(168,85,247,0.3);
+  color: white;
+  padding: 0 20px;
+  border-radius: 14px;
+  font-weight: 600;
+  font-size: 13px;
+  cursor: pointer;
+  text-decoration: none;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  transition: all 0.2s;
+}
+
+.btn-telegram:active {
+  transform: scale(0.96);
+}
+
+/* ===== VPN BUTTON ===== */
+.vpn-outer {
+  position: relative;
+  width: 140px;
+  height: 140px;
+  margin: 12px auto;
+}
+
+.vpn-ring1 {
+  position: absolute;
+  inset: 0;
+  border-radius: 50%;
+  border: 1.5px solid rgba(255,255,255,0.08);
+  transition: all 0.6s ease;
+}
+
+.vpn-ring2 {
+  position: absolute;
+  inset: -10px;
+  border-radius: 50%;
+  border: 1px solid rgba(255,255,255,0.04);
+  transition: all 0.6s ease;
+}
+
+.vpn-btn {
+  position: absolute;
+  inset: 18px;
+  border-radius: 50%;
+  background: rgba(255,255,255,0.04);
+  border: 1px solid rgba(255,255,255,0.1);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+  overflow: hidden;
+}
+
+.vpn-btn::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  background: linear-gradient(168deg, rgba(255,255,255,0.14) 0%, transparent 50%);
+  pointer-events: none;
+}
+
+.vpn-btn:active {
+  transform: scale(0.92);
+}
+
+.vpn-btn svg {
+  width: 38px;
+  height: 38px;
+  stroke: rgba(255,255,255,0.4);
+  fill: none;
+  stroke-width: 1.5;
+  transition: all 0.5s ease;
+}
+
+.vpn-outer.on .vpn-ring1 {
+  border-color: rgba(74,222,128,0.25);
+  box-shadow: 0 0 25px rgba(74,222,128,0.08);
+}
+
+.vpn-outer.on .vpn-ring2 {
+  border-color: rgba(74,222,128,0.08);
+  animation: pulse 2.5s ease-in-out infinite;
+}
+
+.vpn-outer.on .vpn-btn {
+  background: rgba(74,222,128,0.06);
+  border-color: rgba(74,222,128,0.15);
+}
+
+.vpn-outer.on .vpn-btn svg {
+  stroke: #4ade80;
+  filter: drop-shadow(0 0 10px rgba(74,222,128,0.3));
+}
+
+@keyframes pulse {
+  0%, 100% { transform: scale(1); opacity: 1; }
+  50% { transform: scale(1.06); opacity: 0.4; }
+}
+
+/* ===== COLORS ===== */
+.t1 { color: rgba(255,255,255,0.85); }
+.t2 { color: rgba(255,255,255,0.6); }
+.t3 { color: rgba(255,255,255,0.35); }
+.t4 { color: rgba(255,255,255,0.2); }
+.ta { color: rgba(168,85,247,0.9); }
+.tg { color: rgba(74,222,128,0.8); }
+
+/* ===== ADD DEVICE STEPS ===== */
+.add-step { position: relative; z-index: 1; }
+.add-step p { color: rgba(255,255,255,0.4); font-size: 12px; margin-bottom: 12px; }
+.add-step .field-label { font-size: 12px; color: rgba(255,255,255,0.5); margin-bottom: 6px; }
+</style>
 </head>
-
 <body>
-    <!-- Экран авторизации -->
-    <div id="auth-screen">
-        <div class="auth-loader"></div>
-        <div class="auth-title">Авторизация...</div>
-        <div class="auth-subtitle">Проверяем ваши данные</div>
+
+<canvas id="bg-canvas"></canvas>
+
+<!-- AUTH SCREEN -->
+<div id="auth-screen">
+  <div class="auth-loader"></div>
+  <div class="auth-title">Авторизация...</div>
+  <div class="auth-subtitle">Проверяем ваши данные</div>
+</div>
+
+<!-- MAIN APP -->
+<div class="app" id="main-app" style="display:none">
+
+  <!-- HEADER with logo -->
+  <div class="app-header">
+    <div class="logo-wrap">
+      <div class="logo-icon">
+        <svg viewBox="0 0 100 100" width="28" height="28" fill="none">
+          <!-- Cloud shape -->
+          <defs>
+            <linearGradient id="cloudGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+              <stop offset="0%" style="stop-color:rgba(255,255,255,0.9)"/>
+              <stop offset="100%" style="stop-color:rgba(200,180,255,0.7)"/>
+            </linearGradient>
+            <linearGradient id="shieldGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+              <stop offset="0%" style="stop-color:rgba(255,255,255,1)"/>
+              <stop offset="100%" style="stop-color:rgba(192,132,252,0.8)"/>
+            </linearGradient>
+          </defs>
+          <!-- Cloud -->
+          <path d="M25 65 C10 65 5 52 15 44 C10 30 25 20 38 25 C42 15 58 12 67 20 C78 15 92 22 90 36 C98 42 95 58 82 60 C85 68 75 72 68 65 Z" 
+                stroke="url(#cloudGrad)" stroke-width="2.5" fill="rgba(255,255,255,0.06)"/>
+          <!-- Shield inside cloud -->
+          <path d="M50 30 L62 35 L62 48 C62 56 56 62 50 65 C44 62 38 56 38 48 L38 35 Z" 
+                stroke="url(#shieldGrad)" stroke-width="2" fill="rgba(168,85,247,0.08)"/>
+          <!-- Lock keyhole -->
+          <circle cx="50" cy="45" r="3" fill="rgba(255,255,255,0.8)"/>
+          <rect x="48.5" y="47" width="3" height="5" rx="1" fill="rgba(255,255,255,0.8)"/>
+        </svg>
+      </div>
+      <span class="logo-text">Cloud VPN</span>
+    </div>
+  </div>
+
+  <!-- BODY -->
+  <div class="app-body">
+
+    <!-- PAGE 0: HOME -->
+    <div class="page active" id="p0">
+      <!-- Balance -->
+      <div class="glass-card ci" data-d="50">
+        <div class="glass-inner balance-card">
+          <div class="balance-label">Ваш баланс</div>
+          <div class="balance-value" id="user-balance">... ₽</div>
+          <div class="sub-badge badge-expired" id="sub-badge">Загрузка...</div>
+        </div>
+      </div>
+
+      <!-- Sub URL -->
+      <div class="glass-card ci" data-d="100" style="margin-top:12px">
+        <div class="glass-inner" style="padding:14px">
+          <p class="t3" style="font-size:11px;margin-bottom:8px">Ваша ссылка для подключения:</p>
+          <div class="sub-url-row">
+            <input type="text" class="sub-url-input" id="sub-url-input" readonly value="...">
+            <div class="btn-copy" onclick="copySubUrl()">📋</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Connect Button -->
+      <div class="ci" data-d="150" style="margin-top:12px">
+        <button class="btn-primary" onclick="openConnection()">🚀 Подключить VPN</button>
+      </div>
+
+      <p id="sub-details" class="t3 ci" data-d="180" style="text-align:center;font-size:11px;margin-top:12px"></p>
+
+      <!-- VPN Toggle (visual demo) -->
+      <div class="ci" data-d="200" style="text-align:center;margin-top:8px">
+        <p class="t1" style="font-size:18px;font-weight:600" id="vpnSt">Статус</p>
+        <p class="t4" style="font-size:11px;margin-top:2px" id="vpnTm">—</p>
+      </div>
+
+      <div class="vpn-outer ci" data-d="230" id="vpnW">
+        <div class="vpn-ring2"></div>
+        <div class="vpn-ring1"></div>
+        <div class="vpn-btn" onclick="toggleVPN()">
+          <svg viewBox="0 0 24 24"><path d="M18.36 6.64A9 9 0 1 1 5.64 6.64"/><line x1="12" y1="2" x2="12" y2="12"/></svg>
+        </div>
+      </div>
+
+      <!-- Stats -->
+      <div class="glass-card ci" data-d="260">
+        <div class="glass-inner" style="display:flex">
+          <div class="spill">
+            <span style="font-size:10px" class="t3">↓ Загрузка</span>
+            <span style="font-size:16px;font-weight:600" class="t1" id="dl">—</span>
+            <span style="font-size:9px" class="t4">Мбит/с</span>
+          </div>
+          <div class="spill">
+            <span style="font-size:10px" class="t3">↑ Отдача</span>
+            <span style="font-size:16px;font-weight:600" class="t1" id="ul">—</span>
+            <span style="font-size:9px" class="t4">Мбит/с</span>
+          </div>
+          <div class="spill">
+            <span style="font-size:10px" class="t3">Пинг</span>
+            <span style="font-size:16px;font-weight:600" class="t1" id="pg">—</span>
+            <span style="font-size:9px" class="t4">мс</span>
+          </div>
+        </div>
+      </div>
+
+      <p class="t3 ci" data-d="300" style="text-align:center;font-size:11px;margin-top:16px">
+        По всем вопросам: <a href="https://t.me/soldenchain" style="color:#c084fc;text-decoration:none">Техподдержка</a>
+      </p>
     </div>
 
-    <div class="container" id="main-container" style="display: none;">
-        <header>
-            <h1>☁️ CloudVPN Panel</h1>
-        </header>
+    <!-- PAGE 1: DEVICES -->
+    <div class="page to-right" id="p1">
+      <p class="t1 ci" data-d="50" style="font-size:20px;font-weight:600;text-align:center;margin-bottom:4px">Устройства</p>
+      <p class="t3 ci" data-d="80" style="font-size:11px;text-align:center;margin-bottom:14px">Управление подключениями</p>
 
-        <div class="balance-card">
-            <div class="balance-label">Ваш баланс</div>
-            <div class="balance-value" id="user-balance">... ₽</div>
-            <div id="sub-badge" class="sub-status">Загрузка...</div>
+      <!-- Devices Limit -->
+      <div class="glass-card ci" data-d="100" style="margin-bottom:12px">
+        <div class="glass-inner devices-limit-card">
+          <div class="devices-limit-header">
+            <span class="t1" style="font-size:13px;font-weight:600">Лимит устройств</span>
+            <span class="devices-limit-chip" id="devices-limit-chip">0 / 0</span>
+          </div>
+          <div class="traffic-progress">
+            <div class="traffic-bar" id="devices-progress-bar" style="width:0%"></div>
+          </div>
         </div>
+      </div>
 
-        <div class="tabs">
-            <div class="tab active" data-section="home" onclick="switchSection('home')">Главная</div>
-            <div class="tab" data-section="devices" onclick="switchSection('devices')">Устройства</div>
-            <div class="tab" data-section="info" onclick="switchSection('info')">Инфо</div>
+      <!-- Device List -->
+      <div id="device-list" class="ci" data-d="130">
+        <div style="text-align:center;padding:20px;color:rgba(255,255,255,0.3);font-size:12px">Загружаем список устройств...</div>
+      </div>
+
+      <!-- Devices Footer -->
+      <div id="devices-footer" class="ci" data-d="160" style="display:none">
+        <button class="btn-unlink-all" onclick="confirmUnlinkAll()">⚠️ Отвязать все устройства</button>
+        <div class="pager">
+          <button class="pager-btn" id="btn-prev-page" onclick="prevPage()" disabled>← Назад</button>
+          <span class="pager-info" id="page-indicator">1 / 1</span>
+          <button class="pager-btn" id="btn-next-page" onclick="nextPage()">Вперёд →</button>
         </div>
+      </div>
 
-        <section id="home-section" class="content-section active">
-            <div class="card">
-                <p style="margin: 0; color: var(--text-dim); font-size: 13px;">Ваша ссылка для подключения:</p>
-                <div style="display: flex; gap: 10px; margin-top: 10px;">
-                    <input type="text" id="sub-url-input" readonly value="..."
-                        style="flex: 1; background: rgba(0,0,0,0.2); border: 1px solid rgba(255,255,255,0.1); border-radius: 8px; padding: 10px; color: #3498db; font-family: monospace; font-size: 13px;">
-                    <button onclick="copySubUrl()" class="btn-icon">📋</button>
-                </div>
-            </div>
-            <button class="btn-primary" onclick="openConnection()">🚀 Подключить VPN</button>
-            <p id="sub-details" style="text-align: center; font-size: 13px; color: var(--text-dim); margin-top: 15px;">
-            </p>
+      <div class="ci" data-d="180" style="margin-top:12px">
+        <button class="btn-primary" onclick="openAddDeviceModal()" style="margin-bottom:8px">➕ Добавить устройство</button>
+        <button class="btn-ghost" onclick="fetchDevices()">🔄 Обновить список</button>
+      </div>
 
-            <p style="text-align: center; font-size: 12px; color: var(--text-dim); margin-top: 20px;">
-                По всем вопросам: <a href="https://t.me/soldenchain"
-                    style="color: #3498db; text-decoration: none;">Техподдержка</a>
-            </p>
-        </section>
-
-        <!-- Store removed by admin request: users should purchase via bot -->
-
-        <section id="devices-section" class="content-section">
-            <div class="devices-limit-card">
-                <div class="devices-limit-header">
-                    <h4 class="devices-limit-title">Устройства</h4>
-                    <span class="devices-limit-chip" id="devices-limit-chip">0 / 0</span>
-                </div>
-                <div class="traffic-progress">
-                    <div class="traffic-progress-bar" id="devices-progress-bar"></div>
-                </div>
-            </div>
-
-            <div class="device-list" id="device-list">
-                <!-- Devices will be injected here -->
-                <div id="loading-devices" style="text-align: center; padding: 20px; color: var(--text-dim);">Загружаем список устройств...</div>
-            </div>
-
-            <div class="devices-footer" id="devices-footer" style="display: none;">
-                <button class="btn-unlink-all" onclick="confirmUnlinkAll()">⚠️ Отвязать все устройства</button>
-                <div class="pager">
-                    <button class="btn-device" id="btn-prev-page" onclick="prevPage()" disabled>Назад</button>
-                    <code id="page-indicator" style="color: var(--text-dim); font-size: 11px; font-family: 'Fira Code', monospace;">1 / 1</code>
-                    <button class="btn-device" id="btn-next-page" onclick="nextPage()">Вперед</button>
-                </div>
-            </div>
-
-            <button class="btn-primary" onclick="openAddDeviceModal()" style="margin-top: 14px; width: 100%;">
-                ➕ Добавить устройство
-            </button>
-            
-            <button class="btn-ghost" onclick="fetchDevices()" style="margin-top: 10px; width: 100%;">
-                🔄 Обновить список
-            </button>
-
-            <p style="font-size: 12px; color: var(--text-dim); margin: 15px 10px; line-height: 1.4;">
-                * Если вы удалите текущее устройство, оно добавится снова при следующем использовании VPN.
-            </p>
-        </section>
-
-        <section id="info-section" class="content-section">
-            <div class="instruction-step">
-                <div class="step-num">1</div>
-                <div class="step-text">
-                    <h4>Скачайте приложение</h4>
-                    <p>Для iOS/Android мы рекомендуем <b>Happ</b>. Ссылка доступна по кнопке "Открыть" на главной.</p>
-                </div>
-            </div>
-            <div class="instruction-step">
-                <div class="step-num">2</div>
-                <div class="step-text">
-                    <h4>Импортируйте ссылку</h4>
-                    <p>Скопируйте вашу персональную ссылку и вставьте её в разделе подписок вашего приложения.</p>
-                </div>
-            </div>
-            <div class="instruction-step">
-                <div class="step-num">3</div>
-                <div class="step-text">
-                    <h4>Включите VPN</h4>
-                    <p>Выберите любой локальный сервер и нажмите на кнопку подключения. Наслаждайтесь свободой!</p>
-                </div>
-            </div>
-        </section>
+      <p class="t4 ci" data-d="200" style="font-size:10px;margin-top:12px;line-height:1.4;text-align:center">
+        * Если вы удалите текущее устройство, оно добавится снова при следующем использовании VPN.
+      </p>
     </div>
 
-    <!-- Rename Modal -->
-    <div id="renameModal">
-        <div class="modal-body">
-            <h2>Переименовать</h2>
-            <input type="text" id="newDeviceName" placeholder="Напр. Мой iPhone">
-            <div class="modal-btns">
-                <button class="btn-cancel" onclick="closeRenameModal()">Отмена</button>
-                <button class="btn-save" onclick="saveDeviceName()">Сохранить</button>
+    <!-- PAGE 2: SETTINGS -->
+    <div class="page to-right" id="p2">
+      <p class="t1 ci" data-d="50" style="font-size:20px;font-weight:600;text-align:center;margin-bottom:4px">Настройки</p>
+      <p class="t3 ci" data-d="80" style="font-size:11px;text-align:center;margin-bottom:14px">Конфигурация</p>
+
+      <div class="glass-card ci" data-d="100" style="margin-bottom:12px">
+        <div class="glass-inner">
+          <p class="t4" style="font-size:10px;padding:12px 14px 6px;text-transform:uppercase;letter-spacing:1px">Подключение</p>
+          <div class="srow">
+            <div style="display:flex;align-items:center;gap:10px">
+              <span style="font-size:17px">⚡</span>
+              <div><p class="t1" style="font-size:13px">Протокол</p><p class="t4" style="font-size:10px">Шифрование</p></div>
             </div>
+            <div class="gbtn" style="padding:5px 11px" onclick="cycleP()"><span style="font-size:11px" class="ta" id="pTxt">WireGuard</span></div>
+          </div>
+          <div class="srow">
+            <div style="display:flex;align-items:center;gap:10px">
+              <span style="font-size:17px">🛡️</span>
+              <div><p class="t1" style="font-size:13px">Kill Switch</p><p class="t4" style="font-size:10px">Блокировка при обрыве</p></div>
+            </div>
+            <div class="tog on" onclick="this.classList.toggle('on');hap()"></div>
+          </div>
+          <div class="srow">
+            <div style="display:flex;align-items:center;gap:10px">
+              <span style="font-size:17px">🔄</span>
+              <div><p class="t1" style="font-size:13px">Double VPN</p><p class="t4" style="font-size:10px">Двойное шифрование</p></div>
+            </div>
+            <div class="tog" onclick="this.classList.toggle('on');hap()"></div>
+          </div>
+          <div class="srow">
+            <div style="display:flex;align-items:center;gap:10px">
+              <span style="font-size:17px">🚫</span>
+              <div><p class="t1" style="font-size:13px">Блок рекламы</p><p class="t4" style="font-size:10px">AdBlock</p></div>
+            </div>
+            <div class="tog on" onclick="this.classList.toggle('on');hap()"></div>
+          </div>
         </div>
+      </div>
+
+      <div class="glass-card ci" data-d="150" style="margin-bottom:12px">
+        <div class="glass-inner">
+          <p class="t4" style="font-size:10px;padding:12px 14px 6px;text-transform:uppercase;letter-spacing:1px">Сеть</p>
+          <div class="srow">
+            <div style="display:flex;align-items:center;gap:10px">
+              <span style="font-size:17px">🌐</span>
+              <div><p class="t1" style="font-size:13px">DNS</p><p class="t4" style="font-size:10px">Приватный DNS</p></div>
+            </div>
+            <div class="gbtn" style="padding:5px 11px" onclick="cycleD()"><span style="font-size:11px" class="ta" id="dTxt">Cloudflare</span></div>
+          </div>
+          <div class="srow">
+            <div style="display:flex;align-items:center;gap:10px">
+              <span style="font-size:17px">🎣</span>
+              <div><p class="t1" style="font-size:13px">Антифишинг</p><p class="t4" style="font-size:10px">Защита от мошенников</p></div>
+            </div>
+            <div class="tog on" onclick="this.classList.toggle('on');hap()"></div>
+          </div>
+          <div class="srow">
+            <div style="display:flex;align-items:center;gap:10px">
+              <span style="font-size:17px">📡</span>
+              <div><p class="t1" style="font-size:13px">Split Tunneling</p><p class="t4" style="font-size:10px">Раздельный трафик</p></div>
+            </div>
+            <div class="tog" onclick="this.classList.toggle('on');hap()"></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="glass-card ci" data-d="200">
+        <div class="glass-inner">
+          <p class="t4" style="font-size:10px;padding:12px 14px 6px;text-transform:uppercase;letter-spacing:1px">Приложение</p>
+          <div class="srow">
+            <div style="display:flex;align-items:center;gap:10px">
+              <span style="font-size:17px">🌙</span>
+              <p class="t1" style="font-size:13px">Тёмная тема</p>
+            </div>
+            <div class="tog on" onclick="this.classList.toggle('on');hap()"></div>
+          </div>
+          <div class="srow">
+            <div style="display:flex;align-items:center;gap:10px">
+              <span style="font-size:17px">🔔</span>
+              <p class="t1" style="font-size:13px">Уведомления</p>
+            </div>
+            <div class="tog on" onclick="this.classList.toggle('on');hap()"></div>
+          </div>
+          <div class="srow">
+            <div style="display:flex;align-items:center;gap:10px">
+              <span style="font-size:17px">🌍</span>
+              <p class="t1" style="font-size:13px">Язык</p>
+            </div>
+            <div class="gbtn" style="padding:5px 11px"><span style="font-size:11px" class="ta">Русский</span></div>
+          </div>
+        </div>
+      </div>
     </div>
 
-    <!-- Add Device Modal -->
-    <div id="addDeviceModal" style="display: none;">
-        <div class="modal-body" style="max-width: 400px;">
-            <h2 id="add-device-title">➕ Добавление устройства</h2>
-            
-            <!-- Step 1: OS Detection -->
-            <div id="add-device-step-1">
-                <p style="color: var(--text-dim); font-size: 13px; margin-bottom: 16px;">
-                    Установка на этом устройстве
-                </p>
-                
-                <div class="field" style="margin-bottom: 16px;">
-                    <span>Ваша операционная система:</span>
-                    <input type="text" id="detected-os" readonly value="Определение..." style="background: rgba(47, 137, 255, 0.1); border-color: rgba(85, 178, 255, 0.4);">
-                </div>
-                
-                <button class="btn-primary" onclick="goToAddDeviceStep2()" style="width: 100%;">
-                    Далее →
-                </button>
-            </div>
-            
-            <!-- Step 2: Download Links -->
-            <div id="add-device-step-2" style="display: none;">
-                <p style="color: var(--text-dim); font-size: 13px; margin-bottom: 16px;">
-                    1️⃣ Установите приложение Happ
-                </p>
+    <!-- PAGE 3: INFO -->
+    <div class="page to-right" id="p3">
+      <p class="t1 ci" data-d="50" style="font-size:20px;font-weight:600;text-align:center;margin-bottom:14px">Инструкция</p>
 
-                <div id="download-links" style="display: grid; gap: 10px; margin-bottom: 16px;">
-                    <!-- Ссылки будут добавлены через JS -->
-                </div>
-
-                <div id="open-happ-section" style="display: none; margin-top: 16px;">
-                    <p style="color: var(--text-dim); font-size: 13px; margin-bottom: 10px;">
-                        2️⃣ Откройте приложение
-                    </p>
-                    <a id="open-happ-btn" href="#" class="btn-primary" style="width: 100%; display: flex; align-items: center; justify-content: center; gap: 8px;">
-                        🚀 Открыть Happ
-                    </a>
-                </div>
-
-                <button class="btn-primary" onclick="goToAddDeviceStep3()" style="width: 100%; margin-top: 16px;">
-                    Далее →
-                </button>
+      <div class="glass-card ci" data-d="100" style="margin-bottom:12px">
+        <div class="glass-inner" style="padding:16px 14px">
+          <div class="instruction-step">
+            <div class="step-num">1</div>
+            <div>
+              <p class="t1" style="font-size:13px;font-weight:600;margin-bottom:4px">Скачайте приложение</p>
+              <p class="t3" style="font-size:11px;line-height:1.4">Для iOS/Android мы рекомендуем <b style="color:rgba(255,255,255,0.7)">Happ</b>. Ссылка доступна по кнопке на главной.</p>
             </div>
-            
-            <!-- Step 3: Waiting for Device -->
-            <div id="add-device-step-3" style="display: none;">
-                <p style="color: var(--text-dim); font-size: 13px; margin-bottom: 16px; text-align: center;">
-                    🔄 Ожидание подключения устройства...
-                </p>
-                
-                <div style="text-align: center; padding: 20px;">
-                    <div class="auth-loader" style="margin: 0 auto 16px;"></div>
-                    <p id="waiting-timer" style="color: var(--text-dim); font-size: 14px;">Ожидание: 0 сек</p>
-                </div>
-                
-                <div id="device-connected-msg" style="display: none; text-align: center; color: var(--success); margin: 16px 0;">
-                    ✅ Устройство подключено!
-                </div>
-                
-                <button class="btn-ghost" id="skip-wait-btn" onclick="showSkipOptions()" style="width: 100%; margin-top: 16px; display: none;">
-                    Пропустить
-                </button>
+          </div>
+          <div class="instruction-step">
+            <div class="step-num">2</div>
+            <div>
+              <p class="t1" style="font-size:13px;font-weight:600;margin-bottom:4px">Импортируйте ссылку</p>
+              <p class="t3" style="font-size:11px;line-height:1.4">Скопируйте вашу персональную ссылку и вставьте её в разделе подписок вашего приложения.</p>
             </div>
-            
-            <!-- Skip Options -->
-            <div id="add-device-skip" style="display: none;">
-                <p style="color: var(--text-dim); font-size: 13px; margin: 16px 0; text-align: center;">
-                    Возникли проблемы? Напишите в поддержку:
-                </p>
-                <a href="https://t.me/avestb" target="_blank" class="btn-primary" style="width: 100%; margin-bottom: 10px; display: flex; justify-content: center; align-items: center; gap: 8px;">
-                    ✈️ @avestb
-                </a>
-                <button class="btn-ghost" onclick="closeAddDeviceModal()" style="width: 100%;">
-                    Закрыть
-                </button>
+          </div>
+          <div class="instruction-step" style="margin-bottom:0">
+            <div class="step-num">3</div>
+            <div>
+              <p class="t1" style="font-size:13px;font-weight:600;margin-bottom:4px">Включите VPN</p>
+              <p class="t3" style="font-size:11px;line-height:1.4">Выберите любой сервер и нажмите на кнопку подключения. Наслаждайтесь свободой!</p>
             </div>
-            
-            <button class="btn-ghost" onclick="closeAddDeviceModal()" id="add-device-close" style="width: 100%; margin-top: 10px;">
-                Отмена
-            </button>
+          </div>
         </div>
+      </div>
+
+      <div class="glass-card ci" data-d="150" style="margin-bottom:12px">
+        <div class="glass-inner" style="padding:16px 14px">
+          <p class="t4" style="font-size:10px;text-transform:uppercase;letter-spacing:1px;margin-bottom:12px">О сервисе</p>
+          <div class="srow" style="padding:8px 0">
+            <p class="t2" style="font-size:12px">Версия</p>
+            <span class="t3" style="font-size:12px;font-family:'Fira Code',monospace">2.1.0</span>
+          </div>
+          <div class="srow" style="padding:8px 0">
+            <p class="t2" style="font-size:12px">Протоколы</p>
+            <span class="t3" style="font-size:12px">WG / VLESS / SS</span>
+          </div>
+          <div class="srow" style="padding:8px 0">
+            <p class="t2" style="font-size:12px">Серверы</p>
+            <span class="t3" style="font-size:12px">12 локаций</span>
+          </div>
+        </div>
+      </div>
+
+      <div style="display:flex;gap:8px" class="ci" data-d="200">
+        <a href="https://t.me/soldenchain" target="_blank" class="glass-card" style="flex:1;text-decoration:none;cursor:pointer">
+          <div class="glass-inner" style="padding:14px;text-align:center">
+            <span style="font-size:20px">💬</span>
+            <p class="t3" style="font-size:10px;margin-top:4px">Поддержка</p>
+          </div>
+        </a>
+        <div class="glass-card" style="flex:1;cursor:pointer">
+          <div class="glass-inner" style="padding:14px;text-align:center">
+            <span style="font-size:20px">📋</span>
+            <p class="t3" style="font-size:10px;margin-top:4px">Правила</p>
+          </div>
+        </div>
+        <div class="glass-card" style="flex:1;cursor:pointer">
+          <div class="glass-inner" style="padding:14px;text-align:center">
+            <span style="font-size:20px">🔗</span>
+            <p class="t3" style="font-size:10px;margin-top:4px">Пригласить</p>
+          </div>
+        </div>
+      </div>
     </div>
 
-    <script>
-        const tg = window.Telegram.WebApp;
-        tg.expand();
-        tg.ready();
-
-        // Настраиваем цвета под тему Telegram
-        const theme = tg.themeParams;
-        if (theme) {
-            document.documentElement.style.setProperty('--bg-color', theme.bg_color || '#0b0e14');
-            document.documentElement.style.setProperty('--card-bg', 'rgba(255, 255, 255, 0.05)');
-            document.documentElement.style.setProperty('--text-main', theme.text_color || '#ffffff');
-            document.documentElement.style.setProperty('--text-dim', theme.hint_color || '#a0a0a0');
-            document.documentElement.style.setProperty('--accent-primary', theme.button_color || '#3498db');
-        }
-
-        const API_BASE = window.location.origin + "/api";
-
-        // Получаем параметр tab из URL для открытия нужной вкладки
-        const urlParams = new URLSearchParams(window.location.search);
-        const tabParam = urlParams.get('tab');
-
-        // Используем Telegram initData для аутентификации (всегда)
-        const authData = tg.initData || tg.initDataUnsafe;
-
-        // Проверяем что initData есть
-        if (!authData) {
-            console.error("No initData available");
-        }
-
-        let currentUser = null;
-        let selectedDeviceId = null;
-        let allDevices = [];
-        let currentPage = 1;
-        const devicesPerPage = 5;
-
-        // Header color adjustment
-        tg.setHeaderColor('#0b1018');
-        tg.enableClosingConfirmation();
-
-        // Элементы экрана авторизации
-        const authScreen = document.getElementById('auth-screen');
-        const mainContainer = document.getElementById('main-container');
-
-        // Показываем экран ошибки авторизации
-        function showAuthError() {
-            authScreen.innerHTML = `
-                <div class="auth-error">
-                    <div class="auth-error-icon">🔒</div>
-                    <div class="auth-error-title">Ошибка авторизации</div>
-                    <div class="auth-error-text">
-                        Для доступа к панели управления, пожалуйста, войдите через бота
-                    </div>
-                    <a href="https://t.me/cloudevpnbot" class="btn-telegram" target="_blank">
-                        <svg viewBox="0 0 24 24">
-                            <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm4.64 6.8c-.15 1.58-.8 5.42-1.13 7.19-.14.75-.42 1-.68 1.03-.58.05-1.02-.38-1.58-.75-.88-.58-1.38-.94-2.23-1.5-.99-.65-.35-1.01.22-1.59.15-.15 2.71-2.48 2.76-2.69.01-.03.01-.17-.07-.24-.08-.07-.19-.05-.29-.03-.12.03-2.03 1.29-5.73 3.78-.54.37-1.03.55-1.47.54-.48-.01-1.41-.27-2.11-.5-.85-.28-1.53-.43-1.47-.91.03-.25.38-.51 1.04-.77 4.09-1.78 6.83-2.97 8.21-3.56 3.91-1.66 4.72-1.96 5.25-1.97.12 0 .38.03.55.17.14.12.18.28.2.45-.01.07-.01.14-.02.21z"/>
-                        </svg>
-                        Открыть бота
-                    </a>
-                </div>
-            `;
-        }
-
-        // Инициализация приложения
-        async function initApp() {
-            console.log('InitApp starting, authData:', authData ? 'present' : 'missing');
-            
-            // Проверяем, есть ли данные для авторизации
-            if (!authData || authData === 'null' || authData === 'undefined') {
-                console.error('No valid authData available');
-                showAuthError();
-                return;
-            }
-
-            try {
-                console.log('Fetching /me with authData...');
-                const res = await fetch(`${API_BASE}/me`, {
-                    headers: { 'Authorization': authData }
-                });
-
-                console.log('Response status:', res.status);
-                
-                if (!res.ok) {
-                    const errorText = await res.text();
-                    console.error('API error:', res.status, errorText);
-                    throw new Error(`Authorization failed: ${res.status}`);
-                }
-
-                const data = await res.json();
-                console.log('User data:', data);
-                
-                if (data.error) {
-                    throw new Error(data.error);
-                }
-
-                currentUser = data;
-
-                // Скрываем экран авторизации и показываем основной интерфейс
-                authScreen.classList.add('hidden');
-                mainContainer.style.display = 'block';
-
-                updateUserInfo();
-
-                // Загружаем устройства сразу при входе
-                console.log('Loading devices...');
-                await fetchDevices();
-
-                // Если передан параметр tab, переключаем вкладку
-                if (tabParam === 'devices' || tabParam === 'add') {
-                    switchSection('devices');
-                    // Если tab=add, открываем мастер добавления устройства
-                    if (tabParam === 'add') {
-                        setTimeout(() => {
-                            openAddDeviceModal();
-                        }, 500);
-                    }
-                }
-            } catch (e) {
-                console.error('Auth error:', e);
-                showAuthError();
-            }
-        }
-
-        // Запускаем инициализацию
-        initApp();
-
-        function updateUserInfo() {
-            document.getElementById('user-balance').innerText = `${currentUser.balance} ₽`;
-
-            const badge = document.getElementById('sub-badge');
-            const details = document.getElementById('sub-details');
-            const sub = currentUser.subscription;
-
-            if (sub && sub.is_active) {
-                badge.innerText = "Подписка активна";
-                badge.className = "sub-status status-active";
-
-                const encryptedLink = sub.encrypted_link || `https://cloudevpn.cfd/${currentUser.user_id}/${sub.uuid}`;
-                document.getElementById('sub-url-input').value = encryptedLink;
-
-                details.innerHTML = `Лимит устройств: <b>${sub.limit}</b><br>Срок: <b>Безлимитно</b>`;
-            } else {
-                badge.innerText = "Подписка не активна";
-                badge.className = "sub-status status-expired";
-                document.getElementById('sub-url-input').value = "Требуется подписка";
-                details.innerText = "Оформите подписку через бота";
-            }
-        }
-
-        async function fetchDevices() {
-            const listDiv = document.getElementById('device-list');
-            const footer = document.getElementById('devices-footer');
-            const limitChip = document.getElementById('devices-limit-chip');
-            const progressBar = document.getElementById('devices-progress-bar');
-
-            try {
-                const res = await fetch(`${API_BASE}/list_devices`, {
-                    headers: { 'Authorization': authData }
-                });
-                const devices = await res.json();
-                allDevices = devices;
-
-                // Обновляем лимит устройств
-                const limit = currentUser?.subscription?.limit || 5;
-                const used = devices.length;
-                const percent = Math.min((used / limit) * 100, 100);
-
-                limitChip.innerText = `${used} / ${limit}`;
-                progressBar.style.width = `${percent}%`;
-
-                // Сбрасываем классы прогресс-бара
-                progressBar.classList.remove('warning', 'danger');
-                limitChip.classList.remove('warning', 'danger');
-
-                if (percent >= 100) {
-                    progressBar.classList.add('danger');
-                    limitChip.classList.add('danger');
-                } else if (percent >= 80) {
-                    progressBar.classList.add('warning');
-                    limitChip.classList.add('warning');
-                }
-
-                if (devices.length === 0) {
-                    listDiv.innerHTML = `
-                        <div id="empty-devices">
-                            <div class="empty-state-icon">📭</div>
-                            <div>Нет подключенных устройств</div>
-                        </div>
-                    `;
-                    footer.style.display = 'none';
-                    return;
-                }
-
-                footer.style.display = 'flex';
-                renderDevicesPage();
-
-            } catch (e) {
-                console.error(e);
-                listDiv.innerHTML = '<div style="color: var(--danger); text-align: center; padding: 20px;">Ошибка загрузки устройств</div>';
-                footer.style.display = 'none';
-            }
-        }
-
-        function renderDevicesPage() {
-            const listDiv = document.getElementById('device-list');
-            const totalPages = Math.ceil(allDevices.length / devicesPerPage) || 1;
-            currentPage = Math.max(1, Math.min(currentPage, totalPages));
-
-            const start = (currentPage - 1) * devicesPerPage;
-            const pageDevices = allDevices.slice(start, start + devicesPerPage);
-
-            listDiv.innerHTML = '';
-
-            pageDevices.forEach(d => {
-                const card = document.createElement('div');
-                card.className = 'device-item';
-
-                const lastSeen = new Date(d.last_seen);
-                const isOnline = (new Date() - lastSeen) < (5 * 60 * 1000);
-
-                const platform = detectPlatform(d.name);
-                const platformIcon = getPlatformIcon(platform);
-
-                card.innerHTML = `
-                    <div class="device-header">
-                        <div class="device-icon-wrap">
-                            <div class="device-icon ${platform}">${platformIcon}</div>
-                            <div class="device-meta">
-                                <h3 class="device-title">${escapeHtml(d.name)}</h3>
-                                <p class="device-sub">
-                                    <span class="device-hash">${escapeHtml(d.hash.substring(0, 8).toUpperCase())}</span>
-                                    <span>${escapeHtml(d.client_type || 'v2raytun')}</span>
-                                </p>
-                            </div>
-                        </div>
-                        <div class="device-status">
-                            <span class="status-dot ${isOnline ? 'online' : ''}"></span>
-                            <span>${isOnline ? 'Онлайн' : formatDate(lastSeen)}</span>
-                        </div>
-                    </div>
-                    <div class="device-info-row">
-                        <div class="device-actions">
-                            <button data-id="${d.id}" data-name="${escapeHtml(d.name)}" class="btn-device btn-rename" onclick="openRenameModal(${d.id}, '${escapeHtml(d.name).replace(/'/g, "\\'")}')">✏️ Переименовать</button>
-                            <button data-id="${d.id}" class="btn-device btn-delete" onclick="confirmDelete(${d.id})">🗑️ Удалить</button>
-                        </div>
-                    </div>
-                `;
-                listDiv.appendChild(card);
-            });
-
-            // Обновляем пагинацию
-            document.getElementById('page-indicator').innerText = `${currentPage} / ${totalPages}`;
-            document.getElementById('btn-prev-page').disabled = currentPage === 1;
-            document.getElementById('btn-next-page').disabled = currentPage === totalPages;
-        }
-
-        function detectPlatform(name) {
-            const lower = name.toLowerCase();
-            if (lower.includes('iphone') || lower.includes('ipad') || lower.includes('ios')) return 'ios';
-            if (lower.includes('android')) return 'android';
-            if (lower.includes('windows')) return 'windows';
-            if (lower.includes('mac') || lower.includes('macos')) return 'macos';
-            if (lower.includes('linux')) return 'linux';
-            return 'unknown';
-        }
-
-        function getPlatformIcon(platform) {
-            const icons = {
-                android: '🤖',
-                ios: '🍎',
-                windows: '🪟',
-                macos: '💻',
-                linux: '🐧',
-                unknown: '📱'
-            };
-            return icons[platform] || '📱';
-        }
-
-        function prevPage() {
-            if (currentPage > 1) {
-                currentPage--;
-                renderDevicesPage();
-            }
-        }
-
-        function nextPage() {
-            const totalPages = Math.ceil(allDevices.length / devicesPerPage) || 1;
-            if (currentPage < totalPages) {
-                currentPage++;
-                renderDevicesPage();
-            }
-        }
-
-        function escapeHtml(text) {
-            const div = document.createElement('div');
-            div.textContent = text;
-            return div.innerHTML;
-        }
-
-        function formatDate(date) {
-            const now = new Date();
-            const diff = now - date;
-            if (diff < 60000) return 'Только что';
-            if (diff < 3600000) return Math.floor(diff / 60000) + ' мин. назад';
-            return date.toLocaleString('ru-RU', { day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' });
-        }
-
-        function switchSection(section) {
-            document.querySelectorAll('.tab').forEach(t => {
-                t.classList.remove('active');
-                if (t.dataset.section === section) t.classList.add('active');
-            });
-            document.querySelectorAll('.content-section').forEach(s => s.classList.remove('active'));
-
-            document.getElementById(`${section}-section`).classList.add('active');
-
-            if (section === 'devices') {
-                currentPage = 1;
-                // Устройства уже загружены при инициализации, просто показываем
-                renderDevicesPage();
-            }
-        }
-
-        function copySubUrl() {
-            const input = document.getElementById('sub-url-input');
-            if (input.value.startsWith('http')) {
-                input.select();
-                document.execCommand('copy');
-                tg.showScanQrPopup({ text: "Ссылка скопирована!" });
-                setTimeout(() => tg.closeScanQrPopup(), 1000);
-            }
-        }
-
-        function openConnection() {
-            const url = document.getElementById('sub-url-input').value;
-            if (url.startsWith('http')) {
-                // Если ссылка уже зашифрована (ведет на clck.ru или github),
-                // мы всё равно можем попробовать обернуть её в happ://add/
-                // Но лучше, если это уже Deep Link. Однако Happ поддерживает happ://add/http...
-                tg.openLink(url); // Просто открываем сокращенную ссылку, она сделает редирект на GitHub -> DeepLink
-            } else {
-                tg.showAlert("У вас нет активной подписки.");
-            }
-        }
-
-        // Device Management
-        function openRenameModal(id, name) {
-            selectedDeviceId = id;
-            document.getElementById('newDeviceName').value = name || '';
-            document.getElementById('renameModal').style.display = 'flex';
-        }
-
-        function closeRenameModal() {
-            document.getElementById('renameModal').style.display = 'none';
-            selectedDeviceId = null;
-        }
-
-        async function saveDeviceName() {
-            const newName = document.getElementById('newDeviceName').value.trim();
-            if (!newName || !selectedDeviceId) return;
-
-            try {
-                const res = await fetch(`${API_BASE}/rename_device`, {
-                    method: 'POST',
-                    headers: {
-                        'Authorization': authData,
-                        'Content-Type': 'application/json'
-                    },
-                    body: JSON.stringify({ id: selectedDeviceId, name: newName })
-                });
-                const data = await res.json();
-                if (res.ok && data.status === "ok") {
-                    closeRenameModal();
-                    fetchDevices();
-                } else {
-                    tg.showAlert(data.error || "Не удалось переименовать");
-                }
-            } catch (e) {
-                console.error(e);
-                tg.showAlert("Ошибка при переименовании");
-            }
-        }
-
-        function confirmDelete(id) {
-            tg.showConfirm("Вы уверены, что хотите удалить это устройство?", async (ok) => {
-                if (!ok) return;
-                try {
-                    const res = await fetch(`${API_BASE}/delete_device`, {
-                        method: 'POST',
-                        headers: {
-                            'Authorization': authData,
-                            'Content-Type': 'application/json'
-                        },
-                        body: JSON.stringify({ device_id: id })
-                    });
-                    const data = await res.json();
-                    if (res.ok && data.status === "ok") {
-                        fetchDevices();
-                    } else {
-                        tg.showAlert(data.error || "Ошибка при удалении");
-                    }
-                } catch (e) {
-                    console.error(e);
-                    tg.showAlert("Ошибка при удалении");
-                }
-            });
-        }
-
-        function confirmUnlinkAll() {
-            tg.showConfirm("Вы уверены, что хотите отвязать ВСЕ устройства? Это действие нельзя отменить.", async (ok) => {
-                if (!ok) return;
-                try {
-                    const res = await fetch(`${API_BASE}/unlink_all_devices`, {
-                        method: 'POST',
-                        headers: {
-                            'Authorization': authData,
-                            'Content-Type': 'application/json'
-                        }
-                    });
-                    const data = await res.json();
-                    if (res.ok && data.status === "ok") {
-                        fetchDevices();
-                    } else {
-                        tg.showAlert(data.error || "Ошибка при отвязке");
-                    }
-                } catch (e) {
-                    console.error(e);
-                    tg.showAlert("Ошибка при отвязке");
-                }
-            });
-        }
-
-        async function buySubscription() {
-            try {
-                const res = await fetch(`${API_BASE}/buy_subscription`, {
-                    method: 'POST',
-                    headers: { 'Authorization': authData, 'Content-Type': 'application/json' },
-                    body: JSON.stringify({})
-                });
-                const data = await res.json();
-                if (data.error) {
-                    tg.showAlert(data.error);
-                } else {
-                    tg.showPopup({
-                        title: "Успешно!",
-                        message: "Подписка оформлена. Теперь вы можете подключить VPN на главной.",
-                        buttons: [{ type: "ok" }]
-                    });
-                    fetchMe();
-                    switchSection('home');
-                }
-            } catch (e) {
-                tg.showAlert("Ошибка при покупке.");
-            }
-        }
-
-        async function activateCoupon() {
-            const input = document.getElementById('coupon-input');
-            const resultP = document.getElementById('coupon-result');
-            const code = input.value.trim();
-            if (!code) return;
-
-            try {
-                const res = await fetch(`${API_BASE}/activate_coupon`, {
-                    method: 'POST',
-                    headers: { 'Authorization': authData, 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ code })
-                });
-                const data = await res.json();
-
-                resultP.style.display = 'block';
-                if (data.error) {
-                    resultP.style.color = '#e74c3c';
-                    resultP.innerText = data.error;
-                } else {
-                    resultP.style.color = '#2ecc71';
-                    resultP.innerText = `Успешно! Начислено ${data.amount} ₽`;
-                    input.value = '';
-                }
-            } catch (e) {
-                tg.showAlert("Ошибка при активации купона.");
-            }
-        }
-
-        // === ADD DEVICE MODAL FUNCTIONS ===
-        let deviceCheckInterval = null;
-        let deviceCheckSeconds = 0;
-        let initialDeviceCount = 0;
-
-        function detectUserOS() {
-            const ua = navigator.userAgent;
-            if (/android/i.test(ua)) return 'Android';
-            if (/iPad|iPhone|iPod/.test(ua)) return 'iOS';
-            if (/windows/i.test(ua)) return 'Windows';
-            if (/macintosh/i.test(ua)) return 'macOS';
-            if (/linux/i.test(ua)) return 'Linux';
-            return 'Другая';
-        }
-
-        function getDownloadLinks(os) {
-            const links = {
-                'Android': [
-                    { name: 'Google Play', url: 'https://play.google.com/store/apps/details?id=com.happproxy', icon: '🤖' }
-                ],
-                'iOS': [
-                    { name: 'App Store (RU)', url: 'https://apps.apple.com/ru/app/happ-proxy-utility-plus/id6746188973', icon: '🇷🇺' },
-                    { name: 'App Store (Global)', url: 'https://apps.apple.com/us/app/happ-proxy-utility/id6504287215', icon: '🌍' }
-                ],
-                'Windows': [
-                    { name: 'Скачать для Windows', url: 'https://github.com/Happ-proxy/happ-desktop/releases/latest/download/setup-Happ.x64.exe', icon: '🪟' }
-                ],
-                'macOS': [
-                    { name: 'Скачать для macOS', url: 'https://github.com/Happ-proxy/happ-desktop/releases', icon: '💻' }
-                ],
-                'Linux': [
-                    { name: 'Скачать для Linux', url: 'https://github.com/Happ-proxy/happ-desktop/releases', icon: '🐧' }
-                ],
-                'Другая': [
-                    { name: 'Все версии Happ', url: 'https://github.com/Happ-proxy/happ-desktop/releases', icon: '📥' }
-                ]
-            };
-            return links[os] || links['Другая'];
-        }
-
-        function getHappOpenLink(os) {
-            // Deep link для открытия приложения Happ
-            if (os === 'Android' || os === 'iOS') {
-                return 'happ://';
-            }
-            return null;
-        }
-
-        function openAddDeviceModal() {
-            const os = detectUserOS();
-            document.getElementById('detected-os').value = os;
-            
-            // Сбрасываем все шаги
-            document.getElementById('add-device-step-1').style.display = 'block';
-            document.getElementById('add-device-step-2').style.display = 'none';
-            document.getElementById('add-device-step-3').style.display = 'none';
-            document.getElementById('add-device-skip').style.display = 'none';
-            document.getElementById('add-device-close').style.display = 'flex';
-            document.getElementById('device-connected-msg').style.display = 'none';
-            document.getElementById('skip-wait-btn').style.display = 'none';
-            
-            // Показываем модалку
-            document.getElementById('addDeviceModal').style.display = 'flex';
-        }
-
-        function goToAddDeviceStep2() {
-            const os = document.getElementById('detected-os').value;
-            const links = getDownloadLinks(os);
-            const happLink = getHappOpenLink(os);
-
-            const linksContainer = document.getElementById('download-links');
-            linksContainer.innerHTML = '';
-
-            links.forEach(link => {
-                const btn = document.createElement('a');
-                btn.className = 'btn-primary';
-                btn.href = link.url;
-                btn.target = '_blank';
-                btn.style.display = 'flex';
-                btn.style.alignItems = 'center';
-                btn.style.gap = '8px';
-                btn.style.justifyContent = 'center';
-                btn.innerHTML = `${link.icon} ${link.name}`;
-                linksContainer.appendChild(btn);
-            });
-
-            // Показываем кнопку "Открыть Happ" для мобильных
-            const openHappSection = document.getElementById('open-happ-section');
-            const openHappBtn = document.getElementById('open-happ-btn');
-            if (happLink) {
-                openHappBtn.href = happLink;
-                openHappSection.style.display = 'block';
-            } else {
-                openHappSection.style.display = 'none';
-            }
-
-            document.getElementById('add-device-step-1').style.display = 'none';
-            document.getElementById('add-device-step-2').style.display = 'block';
-        }
-
-        function goToAddDeviceStep3() {
-            // Сохраняем текущее количество устройств
-            initialDeviceCount = allDevices.length;
-            
-            document.getElementById('add-device-step-2').style.display = 'none';
-            document.getElementById('add-device-step-3').style.display = 'block';
-            document.getElementById('add-device-close').style.display = 'none';
-            
-            // Запускаем таймер и проверку
-            deviceCheckSeconds = 0;
-            deviceCheckInterval = setInterval(() => {
-                deviceCheckSeconds++;
-                document.getElementById('waiting-timer').innerText = `Ожидание: ${deviceCheckSeconds} сек`;
-                
-                // Проверяем устройства каждые 2 секунды
-                if (deviceCheckSeconds % 2 === 0) {
-                    checkForNewDevice();
-                }
-                
-                // Показываем кнопку "Пропустить" через 10 секунд
-                if (deviceCheckSeconds >= 10) {
-                    document.getElementById('skip-wait-btn').style.display = 'flex';
-                }
-            }, 1000);
-        }
-
-        async function checkForNewDevice() {
-            try {
-                const res = await fetch(`${API_BASE}/list_devices`, {
-                    headers: { 'Authorization': authData }
-                });
-                const devices = await res.json();
-                
-                if (devices.length > initialDeviceCount) {
-                    // Устройство появилось!
-                    clearInterval(deviceCheckInterval);
-                    document.getElementById('device-connected-msg').style.display = 'block';
-                    document.getElementById('waiting-timer').style.display = 'none';
-                    document.getElementById('skip-wait-btn').style.display = 'none';
-                    
-                    // Обновляем список и закрываем через 1.5 секунды
-                    setTimeout(() => {
-                        fetchDevices();
-                        closeAddDeviceModal();
-                    }, 1500);
-                }
-            } catch (e) {
-                console.error('Error checking devices:', e);
-            }
-        }
-
-        function showSkipOptions() {
-            clearInterval(deviceCheckInterval);
-            document.getElementById('add-device-step-3').style.display = 'none';
-            document.getElementById('add-device-skip').style.display = 'block';
-        }
-
-        function closeAddDeviceModal() {
-            clearInterval(deviceCheckInterval);
-            document.getElementById('addDeviceModal').style.display = 'none';
-        }
-    </script>
+  </div>
+
+  <!-- FOOTER NAV -->
+  <div class="app-footer">
+    <div class="nav-inner" id="navI">
+      <div class="nav-ind" id="navInd"></div>
+      <div class="nav-item active" onclick="go(0)">
+        <svg viewBox="0 0 24 24"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+        <span>Главная</span>
+      </div>
+      <div class="nav-item" onclick="go(1)">
+        <svg viewBox="0 0 24 24"><rect x="2" y="3" width="20" height="14" rx="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg>
+        <span>Устройства</span>
+      </div>
+      <div class="nav-item" onclick="go(2)">
+        <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+        <span>Настройки</span>
+      </div>
+      <div class="nav-item" onclick="go(3)">
+        <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+        <span>Инфо</span>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- RENAME MODAL -->
+<div class="modal-overlay" id="renameModal">
+  <div class="modal-body">
+    <div class="modal-title">✏️ Переименовать</div>
+    <input type="text" class="modal-input" id="newDeviceName" placeholder="Напр. Мой iPhone">
+    <div class="modal-btns">
+      <button class="btn-modal-cancel" onclick="closeRenameModal()">Отмена</button>
+      <button class="btn-modal-save" onclick="saveDeviceName()">Сохранить</button>
+    </div>
+  </div>
+</div>
+
+<!-- ADD DEVICE MODAL -->
+<div class="modal-overlay" id="addDeviceModal">
+  <div class="modal-body" style="max-width:380px">
+    <div class="modal-title" id="add-device-title">➕ Добавление устройства</div>
+
+    <!-- Step 1 -->
+    <div class="add-step" id="add-device-step-1">
+      <p>Установка на этом устройстве</p>
+      <div class="field-label" style="font-size:11px;color:rgba(255,255,255,0.4);margin-bottom:6px">Ваша ОС:</div>
+      <input type="text" class="modal-input" id="detected-os" readonly value="Определение..." style="background:rgba(168,85,247,0.06);border-color:rgba(168,85,247,0.2)">
+      <button class="btn-primary" onclick="goToAddDeviceStep2()">Далее →</button>
+    </div>
+
+    <!-- Step 2 -->
+    <div class="add-step" id="add-device-step-2" style="display:none">
+      <p>1️⃣ Установите приложение Happ</p>
+      <div id="download-links" style="display:grid;gap:8px;margin-bottom:14px"></div>
+      <div id="open-happ-section" style="display:none;margin-bottom:14px">
+        <p style="margin-bottom:8px">2️⃣ Откройте приложение</p>
+        <a id="open-happ-btn" href="#" class="btn-primary" style="text-decoration:none">🚀 Открыть Happ</a>
+      </div>
+      <button class="btn-primary" onclick="goToAddDeviceStep3()">Далее →</button>
+    </div>
+
+    <!-- Step 3 -->
+    <div class="add-step" id="add-device-step-3" style="display:none">
+      <p style="text-align:center">🔄 Ожидание подключения устройства...</p>
+      <div style="text-align:center;padding:16px">
+        <div class="auth-loader" style="margin:0 auto 14px"></div>
+        <p id="waiting-timer" class="t3" style="font-size:13px">Ожидание: 0 сек</p>
+      </div>
+      <div id="device-connected-msg" style="display:none;text-align:center;color:rgba(74,222,128,0.85);margin:14px 0;font-weight:600">
+        ✅ Устройство подключено!
+      </div>
+      <button class="btn-ghost" id="skip-wait-btn" onclick="showSkipOptions()" style="display:none">Пропустить</button>
+    </div>
+
+    <!-- Skip -->
+    <div class="add-step" id="add-device-skip" style="display:none">
+      <p style="text-align:center">Возникли проблемы? Напишите в поддержку:</p>
+      <a href="https://t.me/avestb" target="_blank" class="btn-primary" style="margin-bottom:8px;text-decoration:none">✈️ @avestb</a>
+      <button class="btn-ghost" onclick="closeAddDeviceModal()">Закрыть</button>
+    </div>
+
+    <button class="btn-ghost" onclick="closeAddDeviceModal()" id="add-device-close" style="margin-top:8px">Отмена</button>
+  </div>
+</div>
+
+<script>
+// ===== CANVAS BG =====
+const c = document.getElementById('bg-canvas');
+const x = c.getContext('2d');
+let W, H;
+
+function resize() { W = c.width = innerWidth; H = c.height = innerHeight; }
+resize();
+addEventListener('resize', resize);
+
+const orbs = Array.from({length: 5}, (_, i) => ({
+  x: Math.random() * (W||400), y: Math.random() * (H||800),
+  r: 100 + Math.random() * 180,
+  vx: (Math.random() - 0.5) * 0.25,
+  vy: (Math.random() - 0.5) * 0.25,
+  h: [270, 300, 330, 210, 250][i],
+  a: 0.2 + Math.random() * 0.15
+}));
+
+const pts = Array.from({length: 20}, () => ({
+  x: Math.random() * (W||400), y: Math.random() * (H||800),
+  r: 0.8 + Math.random() * 1.2,
+  vx: (Math.random() - 0.5) * 0.12,
+  vy: (Math.random() - 0.5) * 0.12,
+  a: 0.08 + Math.random() * 0.15
+}));
+
+function draw() {
+  x.clearRect(0, 0, W, H);
+  const bg = x.createLinearGradient(0, 0, W, H);
+  bg.addColorStop(0, '#07070d');
+  bg.addColorStop(0.5, '#0b0916');
+  bg.addColorStop(1, '#09070e');
+  x.fillStyle = bg;
+  x.fillRect(0, 0, W, H);
+
+  for (const o of orbs) {
+    o.x += o.vx; o.y += o.vy;
+    if (o.x < -o.r) o.x = W + o.r;
+    if (o.x > W + o.r) o.x = -o.r;
+    if (o.y < -o.r) o.y = H + o.r;
+    if (o.y > H + o.r) o.y = -o.r;
+    const g = x.createRadialGradient(o.x, o.y, 0, o.x, o.y, o.r);
+    g.addColorStop(0, `hsla(${o.h},65%,18%,${o.a})`);
+    g.addColorStop(1, 'transparent');
+    x.fillStyle = g;
+    x.fillRect(o.x - o.r, o.y - o.r, o.r * 2, o.r * 2);
+  }
+
+  for (const p of pts) {
+    p.x += p.vx; p.y += p.vy;
+    if (p.x < 0) p.x = W; if (p.x > W) p.x = 0;
+    if (p.y < 0) p.y = H; if (p.y > H) p.y = 0;
+    x.beginPath();
+    x.arc(p.x, p.y, p.r, 0, Math.PI * 2);
+    x.fillStyle = `rgba(255,255,255,${p.a})`;
+    x.fill();
+  }
+  requestAnimationFrame(draw);
+}
+draw();
+
+// ===== TELEGRAM WEBAPP =====
+const tg = window.Telegram.WebApp;
+tg.expand();
+tg.ready();
+
+const API_BASE = window.location.origin + "/api";
+const urlParams = new URLSearchParams(window.location.search);
+const tabParam = urlParams.get('tab');
+const authData = tg.initData || tg.initDataUnsafe;
+
+let currentUser = null;
+let selectedDeviceId = null;
+let allDevices = [];
+let currentPage = 1;
+const devicesPerPage = 5;
+
+try { tg.setHeaderColor('#08080e'); } catch(e) {}
+try { tg.enableClosingConfirmation(); } catch(e) {}
+
+const authScreen = document.getElementById('auth-screen');
+const mainApp = document.getElementById('main-app');
+
+function showAuthError() {
+  authScreen.innerHTML = `
+    <div class="auth-error">
+      <div class="auth-error-icon">🔒</div>
+      <div class="auth-error-title">Ошибка авторизации</div>
+      <div class="auth-error-text">Для доступа к панели управления, пожалуйста, войдите через бота</div>
+      <a href="https://t.me/cloudevpnbot" class="btn-telegram" target="_blank">
+        ✈️ Открыть бота
+      </a>
+    </div>
+  `;
+}
+
+async function initApp() {
+  if (!authData || authData === 'null' || authData === 'undefined') {
+    showAuthError();
+    return;
+  }
+
+  try {
+    const res = await fetch(`${API_BASE}/me`, {
+      headers: { 'Authorization': authData }
+    });
+
+    if (!res.ok) throw new Error(`Auth failed: ${res.status}`);
+
+    const data = await res.json();
+    if (data.error) throw new Error(data.error);
+
+    currentUser = data;
+    authScreen.classList.add('hidden');
+    mainApp.style.display = 'flex';
+    updateUserInfo();
+    await fetchDevices();
+
+    if (tabParam === 'devices' || tabParam === 'add') {
+      go(1);
+      if (tabParam === 'add') {
+        setTimeout(() => openAddDeviceModal(), 500);
+      }
+    }
+  } catch (e) {
+    console.error('Auth error:', e);
+    showAuthError();
+  }
+}
+
+initApp();
+
+function updateUserInfo() {
+  document.getElementById('user-balance').innerText = `${currentUser.balance} ₽`;
+  const badge = document.getElementById('sub-badge');
+  const details = document.getElementById('sub-details');
+  const sub = currentUser.subscription;
+
+  if (sub && sub.is_active) {
+    badge.innerText = "Подписка активна";
+    badge.className = "sub-badge badge-active";
+    const encryptedLink = sub.encrypted_link || `https://cloudevpn.cfd/${currentUser.user_id}/${sub.uuid}`;
+    document.getElementById('sub-url-input').value = encryptedLink;
+    details.innerHTML = `Лимит устройств: <b>${sub.limit}</b> · Срок: <b>Безлимитно</b>`;
+  } else {
+    badge.innerText = "Подписка не активна";
+    badge.className = "sub-badge badge-expired";
+    document.getElementById('sub-url-input').value = "Требуется подписка";
+    details.innerText = "Оформите подписку через бота";
+  }
+}
+
+// ===== DEVICES =====
+async function fetchDevices() {
+  const listDiv = document.getElementById('device-list');
+  const footer = document.getElementById('devices-footer');
+  const limitChip = document.getElementById('devices-limit-chip');
+  const progressBar = document.getElementById('devices-progress-bar');
+
+  try {
+    const res = await fetch(`${API_BASE}/list_devices`, {
+      headers: { 'Authorization': authData }
+    });
+    const devices = await res.json();
+    allDevices = devices;
+
+    const limit = currentUser?.subscription?.limit || 5;
+    const used = devices.length;
+    const percent = Math.min((used / limit) * 100, 100);
+
+    limitChip.innerText = `${used} / ${limit}`;
+    progressBar.style.width = `${percent}%`;
+    progressBar.classList.remove('warning', 'danger');
+    limitChip.classList.remove('warning', 'danger');
+
+    if (percent >= 100) {
+      progressBar.classList.add('danger');
+      limitChip.classList.add('danger');
+    } else if (percent >= 80) {
+      progressBar.classList.add('warning');
+      limitChip.classList.add('warning');
+    }
+
+    if (devices.length === 0) {
+      listDiv.innerHTML = `<div style="text-align:center;padding:30px 20px;color:rgba(255,255,255,0.25)">
+        <div style="font-size:40px;margin-bottom:10px;opacity:0.5">📭</div>
+        <div style="font-size:12px">Нет подключенных устройств</div>
+      </div>`;
+      footer.style.display = 'none';
+      return;
+    }
+
+    footer.style.display = 'block';
+    renderDevicesPage();
+  } catch (e) {
+    console.error(e);
+    listDiv.innerHTML = '<div style="color:rgba(248,113,113,0.7);text-align:center;padding:20px;font-size:12px">Ошибка загрузки устройств</div>';
+    footer.style.display = 'none';
+  }
+}
+
+function renderDevicesPage() {
+  const listDiv = document.getElementById('device-list');
+  const totalPages = Math.ceil(allDevices.length / devicesPerPage) || 1;
+  currentPage = Math.max(1, Math.min(currentPage, totalPages));
+  const start = (currentPage - 1) * devicesPerPage;
+  const pageDevices = allDevices.slice(start, start + devicesPerPage);
+  listDiv.innerHTML = '';
+
+  pageDevices.forEach(d => {
+    const card = document.createElement('div');
+    card.className = 'device-item';
+    const lastSeen = new Date(d.last_seen);
+    const isOnline = (new Date() - lastSeen) < (5 * 60 * 1000);
+    const platform = detectPlatform(d.name);
+    const platformIcon = getPlatformIcon(platform);
+
+    card.innerHTML = `
+      <div class="device-header">
+        <div class="device-icon-wrap ${platform}">${platformIcon}</div>
+        <div class="device-meta">
+          <div class="device-name">${escapeHtml(d.name)}</div>
+          <div class="device-sub">
+            <span class="device-hash">${escapeHtml(d.hash.substring(0, 8).toUpperCase())}</span>
+            <span>${escapeHtml(d.client_type || 'v2raytun')}</span>
+          </div>
+        </div>
+        <div style="display:flex;align-items:center;gap:5px">
+          <span class="status-dot ${isOnline ? 'online' : ''}"></span>
+          <span class="t3" style="font-size:10px">${isOnline ? 'Online' : formatDate(lastSeen)}</span>
+        </div>
+      </div>
+      <div class="device-actions">
+        <button class="btn-device btn-rename" onclick="openRenameModal(${d.id}, '${escapeHtml(d.name).replace(/'/g, "\\'")}')">✏️ Имя</button>
+        <button class="btn-device btn-delete" onclick="confirmDelete(${d.id})">🗑️ Удалить</button>
+      </div>
+    `;
+    listDiv.appendChild(card);
+  });
+
+  document.getElementById('page-indicator').innerText = `${currentPage} / ${totalPages}`;
+  document.getElementById('btn-prev-page').disabled = currentPage === 1;
+  document.getElementById('btn-next-page').disabled = currentPage === totalPages;
+}
+
+function detectPlatform(name) {
+  const l = name.toLowerCase();
+  if (l.includes('iphone') || l.includes('ipad') || l.includes('ios')) return 'ios';
+  if (l.includes('android')) return 'android';
+  if (l.includes('windows')) return 'windows';
+  if (l.includes('mac')) return 'macos';
+  if (l.includes('linux')) return 'linux';
+  return 'unknown';
+}
+
+function getPlatformIcon(p) {
+  return { android:'🤖', ios:'🍎', windows:'🪟', macos:'💻', linux:'🐧', unknown:'📱' }[p] || '📱';
+}
+
+function prevPage() { if (currentPage > 1) { currentPage--; renderDevicesPage(); } }
+function nextPage() {
+  const tp = Math.ceil(allDevices.length / devicesPerPage) || 1;
+  if (currentPage < tp) { currentPage++; renderDevicesPage(); }
+}
+
+function escapeHtml(t) { const d = document.createElement('div'); d.textContent = t; return d.innerHTML; }
+
+function formatDate(date) {
+  const diff = new Date() - date;
+  if (diff < 60000) return 'Сейчас';
+  if (diff < 3600000) return Math.floor(diff / 60000) + ' мин';
+  return date.toLocaleString('ru-RU', { day:'numeric', month:'short', hour:'2-digit', minute:'2-digit' });
+}
+
+// ===== COPY / CONNECT =====
+function copySubUrl() {
+  const input = document.getElementById('sub-url-input');
+  if (input.value.startsWith('http')) {
+    navigator.clipboard?.writeText(input.value).catch(() => {
+      input.select();
+      document.execCommand('copy');
+    });
+    hap();
+  }
+}
+
+function openConnection() {
+  const url = document.getElementById('sub-url-input').value;
+  if (url.startsWith('http')) {
+    tg.openLink(url);
+  } else {
+    tg.showAlert("У вас нет активной подписки.");
+  }
+}
+
+// ===== RENAME MODAL =====
+function openRenameModal(id, name) {
+  selectedDeviceId = id;
+  document.getElementById('newDeviceName').value = name || '';
+  document.getElementById('renameModal').classList.add('show');
+}
+
+function closeRenameModal() {
+  document.getElementById('renameModal').classList.remove('show');
+  selectedDeviceId = null;
+}
+
+async function saveDeviceName() {
+  const newName = document.getElementById('newDeviceName').value.trim();
+  if (!newName || !selectedDeviceId) return;
+  try {
+    const res = await fetch(`${API_BASE}/rename_device`, {
+      method: 'POST',
+      headers: { 'Authorization': authData, 'Content-Type': 'application/json' },
+      body: JSON.stringify({ id: selectedDeviceId, name: newName })
+    });
+    const data = await res.json();
+    if (res.ok && data.status === "ok") { closeRenameModal(); fetchDevices(); }
+    else tg.showAlert(data.error || "Не удалось переименовать");
+  } catch (e) { tg.showAlert("Ошибка при переименовании"); }
+}
+
+function confirmDelete(id) {
+  tg.showConfirm("Удалить это устройство?", async (ok) => {
+    if (!ok) return;
+    try {
+      const res = await fetch(`${API_BASE}/delete_device`, {
+        method: 'POST',
+        headers: { 'Authorization': authData, 'Content-Type': 'application/json' },
+        body: JSON.stringify({ device_id: id })
+      });
+      const data = await res.json();
+      if (res.ok && data.status === "ok") fetchDevices();
+      else tg.showAlert(data.error || "Ошибка");
+    } catch (e) { tg.showAlert("Ошибка при удалении"); }
+  });
+}
+
+function confirmUnlinkAll() {
+  tg.showConfirm("Отвязать ВСЕ устройства? Это нельзя отменить.", async (ok) => {
+    if (!ok) return;
+    try {
+      const res = await fetch(`${API_BASE}/unlink_all_devices`, {
+        method: 'POST',
+        headers: { 'Authorization': authData, 'Content-Type': 'application/json' }
+      });
+      const data = await res.json();
+      if (res.ok && data.status === "ok") fetchDevices();
+      else tg.showAlert(data.error || "Ошибка");
+    } catch (e) { tg.showAlert("Ошибка при отвязке"); }
+  });
+}
+
+// ===== ADD DEVICE MODAL =====
+let deviceCheckInterval = null;
+let deviceCheckSeconds = 0;
+let initialDeviceCount = 0;
+
+function detectUserOS() {
+  const ua = navigator.userAgent;
+  if (/android/i.test(ua)) return 'Android';
+  if (/iPad|iPhone|iPod/.test(ua)) return 'iOS';
+  if (/windows/i.test(ua)) return 'Windows';
+  if (/macintosh/i.test(ua)) return 'macOS';
+  if (/linux/i.test(ua)) return 'Linux';
+  return 'Другая';
+}
+
+function getDownloadLinks(os) {
+  const links = {
+    'Android': [{ name: 'Google Play', url: 'https://play.google.com/store/apps/details?id=com.happproxy', icon: '🤖' }],
+    'iOS': [
+      { name: 'App Store (RU)', url: 'https://apps.apple.com/ru/app/happ-proxy-utility-plus/id6746188973', icon: '🇷🇺' },
+      { name: 'App Store (Global)', url: 'https://apps.apple.com/us/app/happ-proxy-utility/id6504287215', icon: '🌍' }
+    ],
+    'Windows': [{ name: 'Скачать для Windows', url: 'https://github.com/Happ-proxy/happ-desktop/releases/latest/download/setup-Happ.x64.exe', icon: '🪟' }],
+    'macOS': [{ name: 'Скачать для macOS', url: 'https://github.com/Happ-proxy/happ-desktop/releases', icon: '💻' }],
+    'Linux': [{ name: 'Скачать для Linux', url: 'https://github.com/Happ-proxy/happ-desktop/releases', icon: '🐧' }],
+    'Другая': [{ name: 'Все версии Happ', url: 'https://github.com/Happ-proxy/happ-desktop/releases', icon: '📥' }]
+  };
+  return links[os] || links['Другая'];
+}
+
+function openAddDeviceModal() {
+  const os = detectUserOS();
+  document.getElementById('detected-os').value = os;
+  document.getElementById('add-device-step-1').style.display = 'block';
+  document.getElementById('add-device-step-2').style.display = 'none';
+  document.getElementById('add-device-step-3').style.display = 'none';
+  document.getElementById('add-device-skip').style.display = 'none';
+  document.getElementById('add-device-close').style.display = 'flex';
+  document.getElementById('device-connected-msg').style.display = 'none';
+  document.getElementById('skip-wait-btn').style.display = 'none';
+  document.getElementById('addDeviceModal').classList.add('show');
+}
+
+function goToAddDeviceStep2() {
+  const os = document.getElementById('detected-os').value;
+  const links = getDownloadLinks(os);
+  const linksContainer = document.getElementById('download-links');
+  linksContainer.innerHTML = '';
+  links.forEach(link => {
+    const btn = document.createElement('a');
+    btn.className = 'btn-primary';
+    btn.href = link.url;
+    btn.target = '_blank';
+    btn.style.textDecoration = 'none';
+    btn.innerHTML = `${link.icon} ${link.name}`;
+    linksContainer.appendChild(btn);
+  });
+
+  const openHappSection = document.getElementById('open-happ-section');
+  if (os === 'Android' || os === 'iOS') {
+    document.getElementById('open-happ-btn').href = 'happ://';
+    openHappSection.style.display = 'block';
+  } else {
+    openHappSection.style.display = 'none';
+  }
+
+  document.getElementById('add-device-step-1').style.display = 'none';
+  document.getElementById('add-device-step-2').style.display = 'block';
+}
+
+function goToAddDeviceStep3() {
+  initialDeviceCount = allDevices.length;
+  document.getElementById('add-device-step-2').style.display = 'none';
+  document.getElementById('add-device-step-3').style.display = 'block';
+  document.getElementById('add-device-close').style.display = 'none';
+  deviceCheckSeconds = 0;
+  deviceCheckInterval = setInterval(() => {
+    deviceCheckSeconds++;
+    document.getElementById('waiting-timer').innerText = `Ожидание: ${deviceCheckSeconds} сек`;
+    if (deviceCheckSeconds % 2 === 0) checkForNewDevice();
+    if (deviceCheckSeconds >= 10) document.getElementById('skip-wait-btn').style.display = 'flex';
+  }, 1000);
+}
+
+async function checkForNewDevice() {
+  try {
+    const res = await fetch(`${API_BASE}/list_devices`, { headers: { 'Authorization': authData } });
+    const devices = await res.json();
+    if (devices.length > initialDeviceCount) {
+      clearInterval(deviceCheckInterval);
+      document.getElementById('device-connected-msg').style.display = 'block';
+      document.getElementById('waiting-timer').style.display = 'none';
+      document.getElementById('skip-wait-btn').style.display = 'none';
+      setTimeout(() => { fetchDevices(); closeAddDeviceModal(); }, 1500);
+    }
+  } catch (e) {}
+}
+
+function showSkipOptions() {
+  clearInterval(deviceCheckInterval);
+  document.getElementById('add-device-step-3').style.display = 'none';
+  document.getElementById('add-device-skip').style.display = 'block';
+}
+
+function closeAddDeviceModal() {
+  clearInterval(deviceCheckInterval);
+  document.getElementById('addDeviceModal').classList.remove('show');
+}
+
+// ===== NAV =====
+let cur = 0;
+const visited = new Set([0]);
+const scrollPositions = {};
+
+function updInd(i) {
+  const items = document.querySelectorAll('.nav-item');
+  const ind = document.getElementById('navInd');
+  const item = items[i];
+  if (!item) return;
+  const r = item.getBoundingClientRect();
+  const pr = document.getElementById('navI').getBoundingClientRect();
+  ind.style.left = (r.left - pr.left) + 'px';
+  ind.style.width = r.width + 'px';
+}
+
+function revealCascade(page) {
+  const items = page.querySelectorAll('.ci');
+  items.forEach(el => {
+    const delay = parseInt(el.getAttribute('data-d') || '0');
+    setTimeout(() => el.classList.add('revealed'), delay);
+  });
+}
+
+function go(i) {
+  if (i === cur) return;
+  hap();
+
+  const oldPage = document.getElementById('p' + cur);
+  scrollPositions[cur] = oldPage.scrollTop;
+
+  for (let j = 0; j < 4; j++) {
+    const p = document.getElementById('p' + j);
+    if (j === i) p.className = 'page active';
+    else if (j < i) p.className = 'page to-left';
+    else p.className = 'page to-right';
+  }
+
+  const newPage = document.getElementById('p' + i);
+  if (scrollPositions[i] !== undefined) newPage.scrollTop = scrollPositions[i];
+
+  if (!visited.has(i)) {
+    visited.add(i);
+    revealCascade(newPage);
+  }
+
+  document.querySelectorAll('.nav-item').forEach((it, j) => it.classList.toggle('active', j === i));
+  updInd(i);
+  cur = i;
+}
+
+setTimeout(() => {
+  updInd(0);
+  revealCascade(document.getElementById('p0'));
+}, 50);
+
+addEventListener('resize', () => updInd(cur));
+
+// ===== SWIPE =====
+let tx = 0, ty = 0;
+document.addEventListener('touchstart', e => { tx = e.touches[0].clientX; ty = e.touches[0].clientY; }, {passive: true});
+document.addEventListener('touchend', e => {
+  const dx = e.changedTouches[0].clientX - tx;
+  const dy = e.changedTouches[0].clientY - ty;
+  if (Math.abs(dx) > 55 && Math.abs(dx) > Math.abs(dy) * 1.4) {
+    if (dx < 0 && cur < 3) go(cur + 1);
+    else if (dx > 0 && cur > 0) go(cur - 1);
+  }
+}, {passive: true});
+
+// ===== VPN TOGGLE (visual) =====
+let vpnOn = false, vpnT = 0, vpnI = null, spI = null;
+
+function toggleVPN() {
+  vpnOn = !vpnOn;
+  const w = document.getElementById('vpnW');
+  const st = document.getElementById('vpnSt');
+  const tm = document.getElementById('vpnTm');
+  hap();
+
+  if (vpnOn) {
+    w.classList.add('on');
+    st.textContent = 'Подключено';
+    st.style.color = 'rgba(74,222,128,0.85)';
+    vpnT = 0;
+    vpnI = setInterval(() => {
+      vpnT++;
+      const h = String(Math.floor(vpnT/3600)).padStart(2,'0');
+      const m = String(Math.floor((vpnT%3600)/60)).padStart(2,'0');
+      const s = String(vpnT%60).padStart(2,'0');
+      tm.textContent = `${h}:${m}:${s}`;
+    }, 1000);
+    spI = setInterval(upSpd, 1500);
+    upSpd();
+  } else {
+    w.classList.remove('on');
+    st.textContent = 'Отключено';
+    st.style.color = 'rgba(255,255,255,0.85)';
+    tm.textContent = '—';
+    clearInterval(vpnI); clearInterval(spI);
+    document.getElementById('dl').textContent = '—';
+    document.getElementById('ul').textContent = '—';
+    document.getElementById('pg').textContent = '—';
+  }
+}
+
+function upSpd() {
+  document.getElementById('dl').textContent = (80 + Math.random() * 60).toFixed(1);
+  document.getElementById('ul').textContent = (30 + Math.random() * 40).toFixed(1);
+  document.getElementById('pg').textContent = Math.floor(15 + Math.random() * 20);
+}
+
+// ===== PROTOCOL / DNS =====
+const prots = ['WireGuard','OpenVPN','IKEv2','Shadowsocks'];
+let pi = 0;
+function cycleP() { pi = (pi+1) % prots.length; document.getElementById('pTxt').textContent = prots[pi]; hap(); }
+
+const dnss = ['Cloudflare','Google','AdGuard','Quad9'];
+let di = 0;
+function cycleD() { di = (di+1) % dnss.length; document.getElementById('dTxt').textContent = dnss[di]; hap(); }
+
+// ===== HAPTIC =====
+function hap() { if (navigator.vibrate) navigator.vibrate(6); }
+</script>
 </body>
-
 </html>
