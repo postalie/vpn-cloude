@@ -34,6 +34,11 @@ echo "📚 Установка зависимостей..."
 pip install --upgrade pip
 pip install -r requirements.txt
 
+# Перед запуском бота добавить:
+echo "🛑 Освобождение порта 8080..."
+fuser -k 8080/tcp 2>/dev/null || true
+sleep 2
+
 # SSL сертификат
 DOMAIN="msk.cloudevpn.cfd"
 SSL_DIR="$PROJECT_DIR/ssl"
