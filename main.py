@@ -7,6 +7,7 @@ import ssl
 sys.dont_write_bytecode = True
 
 from aiogram import Bot, Dispatcher
+from aiogram.exceptions import TelegramAPIError, TelegramNetworkError
 from config import BOT_TOKEN
 from database import create_tables
 from handlers import user_handlers, promo_handlers, admin_handlers, vpn_handlers, pay_handlers
@@ -16,6 +17,22 @@ logging.basicConfig(level=logging.INFO)
 
 from aiohttp import web
 from web_server import setup_web_server
+
+
+async def start_polling_with_retry(bot, dp):
+    while True:
+        try:
+            await dp.start_polling(bot, allowed_updates=dp.resolve_used_update_types())
+        except TelegramNetworkError as e:
+            logging.error(f"Ошибка сети Telegram: {e}. Повтор через 10 секунд...")
+            await asyncio.sleep(10)
+        except TelegramAPIError as e:
+            logging.error(f"Ошибка API Telegram: {e}. Повтор через 10 секунд...")
+            await asyncio.sleep(10)
+        except Exception as e:
+            logging.error(f"Неизвестная ошибка: {e}. Повтор через 15 секунд...")
+            await asyncio.sleep(15)
+
 
 async def main():
     # Создаем таблицы
@@ -54,11 +71,12 @@ async def main():
 
     protocol = "https" if ssl_context else "http"
     print(f"Бот запущен. Сервер подписок работает на порту {port} ({protocol})...")
-    
+
     try:
-        await dp.start_polling(bot)
+        await start_polling_with_retry(bot, dp)
     finally:
         await runner.cleanup()
+
 
 if __name__ == "__main__":
     try:
