@@ -17,18 +17,123 @@
 
 html, body {
   font-family: 'Inter', -apple-system, sans-serif;
-  background: #08080e;
   overflow: hidden;
   height: 100dvh;
   width: 100vw;
   position: fixed;
+  transition: background-color 0.8s cubic-bezier(0.4, 0, 0.2, 1), color 0.8s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* ===== THEME VARS ===== */
+body {
+  --bg1: #08080e;
+  --bg2: #0b0916;
+  --bg3: #09070e;
+  --glass-bg: rgba(255,255,255,0.04);
+  --glass-border: rgba(255,255,255,0.1);
+  --glass-highlight: rgba(255,255,255,0.12);
+  --glass-highlight2: rgba(255,255,255,0.03);
+  --text1: rgba(255,255,255,0.85);
+  --text2: rgba(255,255,255,0.6);
+  --text3: rgba(255,255,255,0.35);
+  --text4: rgba(255,255,255,0.2);
+  --accent: rgba(168,85,247,0.9);
+  --accent-bg: rgba(168,85,247,0.12);
+  --accent-border: rgba(168,85,247,0.2);
+  --accent-glow: rgba(168,85,247,0.4);
+  --green: rgba(74,222,128,0.85);
+  --green-bg: rgba(74,222,128,0.06);
+  --green-border: rgba(74,222,128,0.15);
+  --green-glow: rgba(74,222,128,0.3);
+  --red: rgba(248,113,113,0.85);
+  --red-bg: rgba(248,113,113,0.06);
+  --red-border: rgba(248,113,113,0.2);
+  --yellow-border: rgba(250,204,21,0.3);
+  --yellow: rgba(250,204,21,0.8);
+  --particle-a: 0.08;
+  --orb-lum: 18%;
+  --card-active: rgba(255,255,255,0.05);
+  --sep: rgba(255,255,255,0.04);
+  --tog-off-bg: rgba(255,255,255,0.06);
+  --tog-off-border: rgba(255,255,255,0.1);
+  --tog-off-knob: rgba(255,255,255,0.2);
+  --input-bg: rgba(255,255,255,0.03);
+  --input-border: rgba(255,255,255,0.08);
+  --modal-bg: rgba(18,18,28,0.95);
+  --hash-bg: rgba(255,255,255,0.06);
+  --hash-color: rgba(168,85,247,0.7);
+  --copy-bg: rgba(255,255,255,0.04);
+  --dot-off: rgba(255,255,255,0.15);
+  --badge-active-bg: rgba(74,222,128,0.08);
+  --badge-active-border: rgba(74,222,128,0.35);
+  --badge-active-color: rgba(74,222,128,0.85);
+  --badge-expired-bg: rgba(248,113,113,0.08);
+  --badge-expired-border: rgba(248,113,113,0.35);
+  --badge-expired-color: rgba(248,113,113,0.85);
+  --balance-grad-start: #fff;
+  --balance-grad-end: #c084fc;
+  --progress-bg: rgba(255,255,255,0.04);
+  background: var(--bg1);
   color: #fff;
+}
+
+body.light {
+  --bg1: #f2f0f5;
+  --bg2: #eae7f0;
+  --bg3: #e5e0ed;
+  --glass-bg: rgba(255,255,255,0.55);
+  --glass-border: rgba(180,160,210,0.25);
+  --glass-highlight: rgba(255,255,255,0.6);
+  --glass-highlight2: rgba(255,255,255,0.15);
+  --text1: rgba(30,20,50,0.9);
+  --text2: rgba(30,20,50,0.6);
+  --text3: rgba(30,20,50,0.38);
+  --text4: rgba(30,20,50,0.2);
+  --accent: rgba(128,55,220,0.95);
+  --accent-bg: rgba(128,55,220,0.1);
+  --accent-border: rgba(128,55,220,0.25);
+  --accent-glow: rgba(128,55,220,0.3);
+  --green: rgba(34,180,90,0.9);
+  --green-bg: rgba(34,180,90,0.08);
+  --green-border: rgba(34,180,90,0.2);
+  --green-glow: rgba(34,180,90,0.2);
+  --red: rgba(220,60,60,0.85);
+  --red-bg: rgba(220,60,60,0.06);
+  --red-border: rgba(220,60,60,0.2);
+  --yellow-border: rgba(180,140,30,0.3);
+  --yellow: rgba(180,140,30,0.85);
+  --particle-a: 0.06;
+  --orb-lum: 78%;
+  --card-active: rgba(0,0,0,0.03);
+  --sep: rgba(0,0,0,0.05);
+  --tog-off-bg: rgba(0,0,0,0.05);
+  --tog-off-border: rgba(0,0,0,0.1);
+  --tog-off-knob: rgba(0,0,0,0.12);
+  --input-bg: rgba(255,255,255,0.5);
+  --input-border: rgba(0,0,0,0.08);
+  --modal-bg: rgba(245,242,250,0.97);
+  --hash-bg: rgba(128,55,220,0.08);
+  --hash-color: rgba(128,55,220,0.8);
+  --copy-bg: rgba(0,0,0,0.03);
+  --dot-off: rgba(0,0,0,0.12);
+  --badge-active-bg: rgba(34,180,90,0.08);
+  --badge-active-border: rgba(34,180,90,0.3);
+  --badge-active-color: rgba(34,180,90,0.9);
+  --badge-expired-bg: rgba(220,60,60,0.06);
+  --badge-expired-border: rgba(220,60,60,0.25);
+  --badge-expired-color: rgba(220,60,60,0.85);
+  --balance-grad-start: #2a1850;
+  --balance-grad-end: #8037dc;
+  --progress-bg: rgba(0,0,0,0.06);
+  background: var(--bg1);
+  color: #1e1432;
 }
 
 #bg-canvas {
   position: fixed;
   inset: 0;
   z-index: 0;
+  transition: opacity 0.8s ease;
 }
 
 /* ===== APP LAYOUT ===== */
@@ -74,27 +179,23 @@ html, body {
   gap: 8px;
 }
 
-.logo-icon {
-  width: 28px;
-  height: 28px;
-  position: relative;
-}
-
 .logo-text {
   font-size: 13px;
   font-weight: 600;
   letter-spacing: 1.5px;
   text-transform: uppercase;
-  color: rgba(255,255,255,0.45);
+  color: var(--text3);
+  transition: color 0.8s ease;
 }
 
 /* ===== GLASS ===== */
 .glass-card {
   position: relative;
-  background: rgba(255,255,255,0.04);
-  border: 1px solid rgba(255,255,255,0.1);
+  background: var(--glass-bg);
+  border: 1px solid var(--glass-border);
   border-radius: 20px;
   overflow: hidden;
+  transition: background 0.8s ease, border-color 0.8s ease;
 }
 
 .glass-card::before {
@@ -102,9 +203,10 @@ html, body {
   position: absolute;
   inset: 0;
   border-radius: inherit;
-  background: linear-gradient(168deg, rgba(255,255,255,0.12) 0%, rgba(255,255,255,0.03) 20%, transparent 50%);
+  background: linear-gradient(168deg, var(--glass-highlight) 0%, var(--glass-highlight2) 20%, transparent 50%);
   pointer-events: none;
   z-index: 1;
+  transition: background 0.8s ease;
 }
 
 .glass-card::after {
@@ -179,12 +281,13 @@ html, body {
 /* ===== NAV ===== */
 .nav-inner {
   position: relative;
-  background: rgba(255,255,255,0.04);
-  border: 1px solid rgba(255,255,255,0.08);
+  background: var(--glass-bg);
+  border: 1px solid var(--glass-border);
   border-radius: 22px;
   padding: 4px;
   display: flex;
   overflow: hidden;
+  transition: background 0.8s ease, border-color 0.8s ease;
 }
 
 .nav-inner::before {
@@ -201,8 +304,8 @@ html, body {
   height: calc(100% - 8px);
   top: 4px;
   border-radius: 18px;
-  background: rgba(168,85,247,0.12);
-  border: 1px solid rgba(168,85,247,0.2);
+  background: var(--accent-bg);
+  border: 1px solid var(--accent-border);
   transition: all 0.5s cubic-bezier(0.34, 1.56, 0.64, 1);
   z-index: 0;
 }
@@ -223,7 +326,7 @@ html, body {
 .nav-item svg {
   width: 20px;
   height: 20px;
-  stroke: rgba(255,255,255,0.3);
+  stroke: var(--text4);
   fill: none;
   stroke-width: 1.8;
   stroke-linecap: round;
@@ -233,13 +336,13 @@ html, body {
 
 .nav-item.active svg {
   stroke: #c084fc;
-  filter: drop-shadow(0 0 6px rgba(168,85,247,0.4));
+  filter: drop-shadow(0 0 6px var(--accent-glow));
 }
 
 .nav-item span {
   font-size: 9px;
   font-weight: 500;
-  color: rgba(255,255,255,0.25);
+  color: var(--text4);
   transition: all 0.3s ease;
 }
 
@@ -252,11 +355,11 @@ html, body {
   width: 46px;
   height: 26px;
   border-radius: 13px;
-  background: rgba(255,255,255,0.06);
-  border: 1px solid rgba(255,255,255,0.1);
+  background: var(--tog-off-bg);
+  border: 1px solid var(--tog-off-border);
   position: relative;
   cursor: pointer;
-  transition: all 0.3s ease;
+  transition: all 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
   flex-shrink: 0;
 }
 
@@ -268,26 +371,26 @@ html, body {
   width: 18px;
   height: 18px;
   border-radius: 50%;
-  background: rgba(255,255,255,0.2);
-  transition: all 0.35s cubic-bezier(0.34, 1.56, 0.64, 1);
+  background: var(--tog-off-knob);
+  transition: all 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
 }
 
 .tog.on {
-  background: rgba(168,85,247,0.18);
-  border-color: rgba(168,85,247,0.25);
+  background: var(--accent-bg);
+  border-color: var(--accent-border);
 }
 
 .tog.on::before {
   transform: translateX(20px);
   background: #a855f7;
-  box-shadow: 0 0 8px rgba(168,85,247,0.4);
+  box-shadow: 0 0 8px var(--accent-glow);
 }
 
 /* ===== GLASS BTN ===== */
 .gbtn {
   position: relative;
-  background: rgba(255,255,255,0.05);
-  border: 1px solid rgba(255,255,255,0.1);
+  background: var(--glass-bg);
+  border: 1px solid var(--glass-border);
   border-radius: 12px;
   overflow: hidden;
   transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
@@ -299,13 +402,13 @@ html, body {
   position: absolute;
   inset: 0;
   border-radius: inherit;
-  background: linear-gradient(168deg, rgba(255,255,255,0.1) 0%, transparent 50%);
+  background: linear-gradient(168deg, var(--glass-highlight) 0%, transparent 50%);
   pointer-events: none;
 }
 
 .gbtn:active {
   transform: scale(0.96);
-  background: rgba(255,255,255,0.08);
+  background: var(--card-active);
 }
 
 /* ===== SETTING ROW ===== */
@@ -317,7 +420,7 @@ html, body {
 }
 
 .srow + .srow {
-  border-top: 1px solid rgba(255,255,255,0.04);
+  border-top: 1px solid var(--sep);
 }
 
 /* ===== STAT PILL ===== */
@@ -331,7 +434,7 @@ html, body {
 }
 
 .spill + .spill {
-  border-left: 1px solid rgba(255,255,255,0.05);
+  border-left: 1px solid var(--sep);
 }
 
 /* ===== AVATAR ===== */
@@ -340,7 +443,7 @@ html, body {
   height: 72px;
   border-radius: 50%;
   background: linear-gradient(135deg, rgba(168,85,247,0.25), rgba(236,72,153,0.25));
-  border: 1.5px solid rgba(255,255,255,0.12);
+  border: 1.5px solid var(--glass-border);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -366,17 +469,19 @@ html, body {
   font-size: 10px;
   text-transform: uppercase;
   letter-spacing: 1.5px;
-  color: rgba(255,255,255,0.3);
+  color: var(--text3);
+  transition: color 0.8s ease;
 }
 
 .balance-value {
   font-size: 30px;
   font-weight: 700;
   margin: 6px 0;
-  background: linear-gradient(135deg, #fff 0%, #c084fc 100%);
+  background: linear-gradient(135deg, var(--balance-grad-start) 0%, var(--balance-grad-end) 100%);
   -webkit-background-clip: text;
   background-clip: text;
   -webkit-text-fill-color: transparent;
+  transition: all 0.8s ease;
 }
 
 .sub-badge {
@@ -385,18 +490,19 @@ html, body {
   border-radius: 50px;
   font-size: 11px;
   font-weight: 600;
+  transition: all 0.8s ease;
 }
 
 .badge-active {
-  border: 1px solid rgba(74,222,128,0.35);
-  background: rgba(74,222,128,0.08);
-  color: rgba(74,222,128,0.85);
+  border: 1px solid var(--badge-active-border);
+  background: var(--badge-active-bg);
+  color: var(--badge-active-color);
 }
 
 .badge-expired {
-  border: 1px solid rgba(248,113,113,0.35);
-  background: rgba(248,113,113,0.08);
-  color: rgba(248,113,113,0.85);
+  border: 1px solid var(--badge-expired-border);
+  background: var(--badge-expired-bg);
+  color: var(--badge-expired-color);
 }
 
 /* ===== SUB URL INPUT ===== */
@@ -408,27 +514,28 @@ html, body {
 
 .sub-url-input {
   flex: 1;
-  background: rgba(255,255,255,0.03);
-  border: 1px solid rgba(255,255,255,0.08);
+  background: var(--input-bg);
+  border: 1px solid var(--input-border);
   border-radius: 12px;
   padding: 10px 12px;
-  color: #c084fc;
+  color: #a855f7;
   font-family: 'Fira Code', monospace;
   font-size: 12px;
   outline: none;
   min-width: 0;
+  transition: all 0.8s ease;
 }
 
 .sub-url-input:focus {
-  border-color: rgba(168,85,247,0.35);
+  border-color: var(--accent-border);
 }
 
 .btn-copy {
   width: 40px;
   height: 40px;
   border-radius: 12px;
-  background: rgba(255,255,255,0.04);
-  border: 1px solid rgba(255,255,255,0.08);
+  background: var(--copy-bg);
+  border: 1px solid var(--input-border);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -440,7 +547,7 @@ html, body {
 
 .btn-copy:active {
   transform: scale(0.92);
-  background: rgba(168,85,247,0.1);
+  background: var(--accent-bg);
 }
 
 /* ===== PRIMARY BTN ===== */
@@ -450,7 +557,7 @@ html, body {
   border-radius: 14px;
   border: 1px solid rgba(168,85,247,0.3);
   background: linear-gradient(135deg, rgba(168,85,247,0.15), rgba(236,72,153,0.1));
-  color: rgba(255,255,255,0.85);
+  color: var(--text1);
   font-size: 13px;
   font-weight: 600;
   cursor: pointer;
@@ -481,9 +588,9 @@ html, body {
   width: 100%;
   height: 42px;
   border-radius: 12px;
-  border: 1px solid rgba(255,255,255,0.08);
+  border: 1px solid var(--input-border);
   background: transparent;
-  color: rgba(255,255,255,0.5);
+  color: var(--text2);
   font-size: 12px;
   font-weight: 500;
   cursor: pointer;
@@ -495,13 +602,13 @@ html, body {
 }
 
 .btn-ghost:active {
-  background: rgba(255,255,255,0.04);
+  background: var(--card-active);
 }
 
 /* ===== DEVICE LIST ===== */
 .device-item {
-  background: rgba(255,255,255,0.02);
-  border: 1px solid rgba(255,255,255,0.06);
+  background: var(--glass-bg);
+  border: 1px solid var(--glass-border);
   border-radius: 16px;
   padding: 12px 14px;
   margin-bottom: 8px;
@@ -510,7 +617,7 @@ html, body {
 
 .device-item:active {
   transform: scale(0.98);
-  background: rgba(255,255,255,0.04);
+  background: var(--card-active);
 }
 
 .device-header {
@@ -535,7 +642,7 @@ html, body {
 .device-icon-wrap.windows { background: linear-gradient(135deg, rgba(0,164,239,0.2), rgba(0,164,239,0.05)); }
 .device-icon-wrap.macos { background: linear-gradient(135deg, rgba(255,107,107,0.2), rgba(255,107,107,0.05)); }
 .device-icon-wrap.linux { background: linear-gradient(135deg, rgba(252,198,36,0.2), rgba(252,198,36,0.05)); }
-.device-icon-wrap.unknown { background: rgba(255,255,255,0.05); }
+.device-icon-wrap.unknown { background: var(--card-active); }
 
 .device-meta {
   flex: 1;
@@ -545,7 +652,7 @@ html, body {
 .device-name {
   font-size: 13px;
   font-weight: 600;
-  color: rgba(255,255,255,0.85);
+  color: var(--text1);
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -553,7 +660,7 @@ html, body {
 
 .device-sub {
   font-size: 10px;
-  color: rgba(255,255,255,0.3);
+  color: var(--text3);
   margin-top: 2px;
   display: flex;
   align-items: center;
@@ -561,25 +668,25 @@ html, body {
 }
 
 .device-hash {
-  background: rgba(255,255,255,0.06);
+  background: var(--hash-bg);
   padding: 1px 6px;
   border-radius: 4px;
   font-family: 'Fira Code', monospace;
   font-size: 9px;
-  color: rgba(168,85,247,0.7);
+  color: var(--hash-color);
 }
 
 .status-dot {
   width: 7px;
   height: 7px;
   border-radius: 50%;
-  background: rgba(255,255,255,0.15);
+  background: var(--dot-off);
   flex-shrink: 0;
 }
 
 .status-dot.online {
-  background: rgba(74,222,128,0.8);
-  box-shadow: 0 0 6px rgba(74,222,128,0.4);
+  background: var(--green);
+  box-shadow: 0 0 6px var(--green-glow);
 }
 
 .device-actions {
@@ -592,9 +699,9 @@ html, body {
   flex: 1;
   height: 32px;
   border-radius: 10px;
-  border: 1px solid rgba(255,255,255,0.08);
-  background: rgba(255,255,255,0.03);
-  color: rgba(255,255,255,0.6);
+  border: 1px solid var(--input-border);
+  background: var(--glass-bg);
+  color: var(--text2);
   font-size: 11px;
   font-weight: 500;
   cursor: pointer;
@@ -610,13 +717,13 @@ html, body {
 }
 
 .btn-device.btn-rename {
-  border-color: rgba(168,85,247,0.2);
-  background: rgba(168,85,247,0.06);
+  border-color: var(--accent-border);
+  background: var(--accent-bg);
 }
 
 .btn-device.btn-delete {
-  border-color: rgba(248,113,113,0.2);
-  background: rgba(248,113,113,0.06);
+  border-color: var(--red-border);
+  background: var(--red-bg);
 }
 
 /* ===== DEVICES LIMIT ===== */
@@ -636,27 +743,29 @@ html, body {
   border-radius: 999px;
   font-size: 11px;
   font-weight: 600;
-  background: rgba(255,255,255,0.04);
-  border: 1px solid rgba(255,255,255,0.08);
-  color: rgba(255,255,255,0.5);
+  background: var(--glass-bg);
+  border: 1px solid var(--input-border);
+  color: var(--text2);
+  transition: all 0.8s ease;
 }
 
 .devices-limit-chip.warning {
-  border-color: rgba(250,204,21,0.3);
-  color: rgba(250,204,21,0.8);
+  border-color: var(--yellow-border);
+  color: var(--yellow);
 }
 
 .devices-limit-chip.danger {
-  border-color: rgba(248,113,113,0.3);
-  color: rgba(248,113,113,0.8);
+  border-color: var(--red-border);
+  color: var(--red);
 }
 
 .traffic-progress {
   width: 100%;
   height: 4px;
   border-radius: 2px;
-  background: rgba(255,255,255,0.04);
+  background: var(--progress-bg);
   overflow: hidden;
+  transition: background 0.8s ease;
 }
 
 .traffic-bar {
@@ -687,9 +796,9 @@ html, body {
   height: 32px;
   padding: 0 14px;
   border-radius: 10px;
-  border: 1px solid rgba(255,255,255,0.08);
-  background: rgba(255,255,255,0.03);
-  color: rgba(255,255,255,0.5);
+  border: 1px solid var(--input-border);
+  background: var(--glass-bg);
+  color: var(--text2);
   font-size: 11px;
   cursor: pointer;
   transition: all 0.2s;
@@ -706,7 +815,7 @@ html, body {
 
 .pager-info {
   font-size: 11px;
-  color: rgba(255,255,255,0.25);
+  color: var(--text4);
   font-family: 'Fira Code', monospace;
 }
 
@@ -733,8 +842,8 @@ html, body {
 }
 
 .modal-body {
-  background: rgba(18,18,28,0.95);
-  border: 1px solid rgba(255,255,255,0.1);
+  background: var(--modal-bg);
+  border: 1px solid var(--glass-border);
   border-radius: 20px;
   padding: 20px;
   width: 100%;
@@ -742,6 +851,7 @@ html, body {
   animation: modalSlide 0.35s cubic-bezier(0.34, 1.56, 0.64, 1);
   position: relative;
   overflow: hidden;
+  transition: background 0.8s ease, border-color 0.8s ease;
 }
 
 .modal-body::before {
@@ -749,7 +859,7 @@ html, body {
   position: absolute;
   inset: 0;
   border-radius: inherit;
-  background: linear-gradient(168deg, rgba(255,255,255,0.08) 0%, transparent 40%);
+  background: linear-gradient(168deg, var(--glass-highlight) 0%, transparent 40%);
   pointer-events: none;
 }
 
@@ -763,29 +873,29 @@ html, body {
   font-weight: 700;
   text-align: center;
   margin-bottom: 16px;
-  color: rgba(255,255,255,0.9);
+  color: var(--text1);
   position: relative;
   z-index: 1;
 }
 
 .modal-input {
   width: 100%;
-  background: rgba(255,255,255,0.04);
-  border: 1px solid rgba(255,255,255,0.1);
+  background: var(--input-bg);
+  border: 1px solid var(--input-border);
   border-radius: 12px;
   padding: 12px;
-  color: rgba(255,255,255,0.85);
+  color: var(--text1);
   font-family: 'Fira Code', monospace;
   font-size: 13px;
   outline: none;
   margin-bottom: 14px;
-  transition: border-color 0.2s;
+  transition: border-color 0.2s, background 0.8s ease;
   position: relative;
   z-index: 1;
 }
 
 .modal-input:focus {
-  border-color: rgba(168,85,247,0.4);
+  border-color: var(--accent-border);
 }
 
 .modal-btns {
@@ -799,9 +909,9 @@ html, body {
 .btn-modal-cancel {
   height: 40px;
   border-radius: 12px;
-  border: 1px solid rgba(255,255,255,0.08);
-  background: rgba(255,255,255,0.04);
-  color: rgba(255,255,255,0.6);
+  border: 1px solid var(--input-border);
+  background: var(--glass-bg);
+  color: var(--text2);
   font-weight: 600;
   font-size: 12px;
   cursor: pointer;
@@ -813,7 +923,7 @@ html, body {
   border-radius: 12px;
   border: 1px solid rgba(168,85,247,0.3);
   background: linear-gradient(135deg, rgba(168,85,247,0.2), rgba(236,72,153,0.12));
-  color: rgba(255,255,255,0.85);
+  color: var(--text1);
   font-weight: 600;
   font-size: 12px;
   cursor: pointer;
@@ -829,9 +939,9 @@ html, body {
   width: 100%;
   height: 40px;
   border-radius: 12px;
-  border: 1px solid rgba(248,113,113,0.2);
-  background: rgba(248,113,113,0.06);
-  color: rgba(248,113,113,0.8);
+  border: 1px solid var(--red-border);
+  background: var(--red-bg);
+  color: var(--red);
   font-size: 12px;
   font-weight: 600;
   cursor: pointer;
@@ -847,29 +957,6 @@ html, body {
   transform: scale(0.97);
 }
 
-/* ===== SERVER ROW ===== */
-.srv {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  padding: 13px 14px;
-  border-radius: 16px;
-  background: rgba(255,255,255,0.02);
-  border: 1px solid rgba(255,255,255,0.05);
-  transition: all 0.3s ease;
-  cursor: pointer;
-}
-
-.srv:active {
-  transform: scale(0.98);
-  background: rgba(255,255,255,0.05);
-}
-
-.srv.sel {
-  background: rgba(168,85,247,0.07);
-  border-color: rgba(168,85,247,0.18);
-}
-
 /* ===== INSTRUCTION ===== */
 .instruction-step {
   display: flex;
@@ -882,14 +969,14 @@ html, body {
   height: 28px;
   border-radius: 50%;
   background: linear-gradient(135deg, rgba(168,85,247,0.3), rgba(236,72,153,0.2));
-  border: 1px solid rgba(168,85,247,0.2);
+  border: 1px solid var(--accent-border);
   display: flex;
   align-items: center;
   justify-content: center;
   flex-shrink: 0;
   font-weight: 700;
   font-size: 12px;
-  color: rgba(255,255,255,0.8);
+  color: var(--text1);
 }
 
 /* ===== AUTH SCREEN ===== */
@@ -944,24 +1031,9 @@ html, body {
   max-width: 300px;
 }
 
-.auth-error-icon {
-  font-size: 40px;
-  margin-bottom: 12px;
-}
-
-.auth-error-title {
-  font-size: 16px;
-  font-weight: 700;
-  color: rgba(248,113,113,0.85);
-  margin-bottom: 8px;
-}
-
-.auth-error-text {
-  font-size: 12px;
-  color: rgba(255,255,255,0.35);
-  margin-bottom: 16px;
-  line-height: 1.5;
-}
+.auth-error-icon { font-size: 40px; margin-bottom: 12px; }
+.auth-error-title { font-size: 16px; font-weight: 700; color: rgba(248,113,113,0.85); margin-bottom: 8px; }
+.auth-error-text { font-size: 12px; color: rgba(255,255,255,0.35); margin-bottom: 16px; line-height: 1.5; }
 
 .btn-telegram {
   height: 44px;
@@ -980,107 +1052,141 @@ html, body {
   transition: all 0.2s;
 }
 
-.btn-telegram:active {
-  transform: scale(0.96);
-}
+.btn-telegram:active { transform: scale(0.96); }
 
-/* ===== VPN BUTTON ===== */
-.vpn-outer {
-  position: relative;
-  width: 140px;
-  height: 140px;
-  margin: 12px auto;
-}
-
-.vpn-ring1 {
-  position: absolute;
-  inset: 0;
-  border-radius: 50%;
-  border: 1.5px solid rgba(255,255,255,0.08);
-  transition: all 0.6s ease;
-}
-
-.vpn-ring2 {
-  position: absolute;
-  inset: -10px;
-  border-radius: 50%;
-  border: 1px solid rgba(255,255,255,0.04);
-  transition: all 0.6s ease;
-}
-
-.vpn-btn {
-  position: absolute;
-  inset: 18px;
-  border-radius: 50%;
-  background: rgba(255,255,255,0.04);
-  border: 1px solid rgba(255,255,255,0.1);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  cursor: pointer;
-  transition: all 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
-  overflow: hidden;
-}
-
-.vpn-btn::before {
-  content: '';
-  position: absolute;
-  inset: 0;
-  border-radius: inherit;
-  background: linear-gradient(168deg, rgba(255,255,255,0.14) 0%, transparent 50%);
-  pointer-events: none;
-}
-
-.vpn-btn:active {
-  transform: scale(0.92);
-}
-
-.vpn-btn svg {
-  width: 38px;
-  height: 38px;
-  stroke: rgba(255,255,255,0.4);
-  fill: none;
-  stroke-width: 1.5;
-  transition: all 0.5s ease;
-}
-
-.vpn-outer.on .vpn-ring1 {
-  border-color: rgba(74,222,128,0.25);
-  box-shadow: 0 0 25px rgba(74,222,128,0.08);
-}
-
-.vpn-outer.on .vpn-ring2 {
-  border-color: rgba(74,222,128,0.08);
-  animation: pulse 2.5s ease-in-out infinite;
-}
-
-.vpn-outer.on .vpn-btn {
-  background: rgba(74,222,128,0.06);
-  border-color: rgba(74,222,128,0.15);
-}
-
-.vpn-outer.on .vpn-btn svg {
-  stroke: #4ade80;
-  filter: drop-shadow(0 0 10px rgba(74,222,128,0.3));
-}
-
-@keyframes pulse {
-  0%, 100% { transform: scale(1); opacity: 1; }
-  50% { transform: scale(1.06); opacity: 0.4; }
-}
+/* ===== STAT PILL (kept for future use) ===== */
 
 /* ===== COLORS ===== */
-.t1 { color: rgba(255,255,255,0.85); }
-.t2 { color: rgba(255,255,255,0.6); }
-.t3 { color: rgba(255,255,255,0.35); }
-.t4 { color: rgba(255,255,255,0.2); }
-.ta { color: rgba(168,85,247,0.9); }
-.tg { color: rgba(74,222,128,0.8); }
+.t1 { color: var(--text1); transition: color 0.8s ease; }
+.t2 { color: var(--text2); transition: color 0.8s ease; }
+.t3 { color: var(--text3); transition: color 0.8s ease; }
+.t4 { color: var(--text4); transition: color 0.8s ease; }
+.ta { color: var(--accent); transition: color 0.8s ease; }
+.tg { color: var(--green); }
 
 /* ===== ADD DEVICE STEPS ===== */
 .add-step { position: relative; z-index: 1; }
-.add-step p { color: rgba(255,255,255,0.4); font-size: 12px; margin-bottom: 12px; }
-.add-step .field-label { font-size: 12px; color: rgba(255,255,255,0.5); margin-bottom: 6px; }
+.add-step p { color: var(--text3); font-size: 12px; margin-bottom: 12px; }
+.add-step .field-label { font-size: 12px; color: var(--text2); margin-bottom: 6px; }
+
+/* ===== THEME SWITCH ANIMATION ===== */
+.theme-morph {
+  position: fixed;
+  border-radius: 50%;
+  z-index: 9999;
+  pointer-events: none;
+  transform: scale(0);
+  animation: themeMorphAnim 0.85s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+}
+
+@keyframes themeMorphAnim {
+  0% { transform: scale(0); opacity: 1; }
+  100% { transform: scale(1); opacity: 1; }
+}
+
+/* ===== LANG MODAL ===== */
+.lang-option {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 14px;
+  border-radius: 14px;
+  cursor: pointer;
+  transition: all 0.25s ease;
+  border: 1px solid transparent;
+  margin-bottom: 6px;
+}
+
+.lang-option:hover, .lang-option:active {
+  background: var(--card-active);
+}
+
+.lang-option.selected {
+  background: var(--accent-bg);
+  border-color: var(--accent-border);
+}
+
+.lang-option .lang-flag {
+  font-size: 24px;
+}
+
+.lang-option .lang-name {
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--text1);
+}
+
+.lang-option .lang-native {
+  font-size: 11px;
+  color: var(--text3);
+}
+
+.lang-check {
+  margin-left: auto;
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  border: 1.5px solid var(--input-border);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.3s ease;
+  font-size: 12px;
+}
+
+.lang-option.selected .lang-check {
+  background: #a855f7;
+  border-color: #a855f7;
+  color: #fff;
+}
+
+/* ===== WIZARD ===== */
+@keyframes wizardIn {
+  from { opacity:0; transform:translateY(40px) scale(0.96); }
+  to   { opacity:1; transform:translateY(0) scale(1); }
+}
+@keyframes popIn {
+  from { transform:scale(0); opacity:0; }
+  to   { transform:scale(1); opacity:1; }
+}
+
+/* ===== THEME ICON ANIMATION ===== */
+.theme-icon-wrap {
+  position: relative;
+  width: 24px;
+  height: 24px;
+}
+
+.theme-icon-wrap .ti-sun,
+.theme-icon-wrap .ti-moon {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 17px;
+  transition: all 0.5s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+.theme-icon-wrap .ti-sun {
+  opacity: 0;
+  transform: rotate(-90deg) scale(0);
+}
+
+.theme-icon-wrap .ti-moon {
+  opacity: 1;
+  transform: rotate(0) scale(1);
+}
+
+body.light .theme-icon-wrap .ti-sun {
+  opacity: 1;
+  transform: rotate(0) scale(1);
+}
+
+body.light .theme-icon-wrap .ti-moon {
+  opacity: 0;
+  transform: rotate(90deg) scale(0);
+}
 </style>
 </head>
 <body>
@@ -1102,7 +1208,6 @@ html, body {
     <div class="logo-wrap">
       <div class="logo-icon">
         <svg viewBox="0 0 100 100" width="28" height="28" fill="none">
-          <!-- Cloud shape -->
           <defs>
             <linearGradient id="cloudGrad" x1="0%" y1="0%" x2="100%" y2="100%">
               <stop offset="0%" style="stop-color:rgba(255,255,255,0.9)"/>
@@ -1113,13 +1218,10 @@ html, body {
               <stop offset="100%" style="stop-color:rgba(192,132,252,0.8)"/>
             </linearGradient>
           </defs>
-          <!-- Cloud -->
           <path d="M25 65 C10 65 5 52 15 44 C10 30 25 20 38 25 C42 15 58 12 67 20 C78 15 92 22 90 36 C98 42 95 58 82 60 C85 68 75 72 68 65 Z" 
                 stroke="url(#cloudGrad)" stroke-width="2.5" fill="rgba(255,255,255,0.06)"/>
-          <!-- Shield inside cloud -->
           <path d="M50 30 L62 35 L62 48 C62 56 56 62 50 65 C44 62 38 56 38 48 L38 35 Z" 
                 stroke="url(#shieldGrad)" stroke-width="2" fill="rgba(168,85,247,0.08)"/>
-          <!-- Lock keyhole -->
           <circle cx="50" cy="45" r="3" fill="rgba(255,255,255,0.8)"/>
           <rect x="48.5" y="47" width="3" height="5" rx="1" fill="rgba(255,255,255,0.8)"/>
         </svg>
@@ -1133,7 +1235,6 @@ html, body {
 
     <!-- PAGE 0: HOME -->
     <div class="page active" id="p0">
-      <!-- Balance -->
       <div class="glass-card ci" data-d="50">
         <div class="glass-inner balance-card">
           <div class="balance-label">Ваш баланс</div>
@@ -1142,7 +1243,6 @@ html, body {
         </div>
       </div>
 
-      <!-- Sub URL -->
       <div class="glass-card ci" data-d="100" style="margin-top:12px">
         <div class="glass-inner" style="padding:14px">
           <p class="t3" style="font-size:11px;margin-bottom:8px">Ваша ссылка для подключения:</p>
@@ -1153,47 +1253,7 @@ html, body {
         </div>
       </div>
 
-      <!-- Connect Button -->
-      <div class="ci" data-d="150" style="margin-top:12px">
-        <button class="btn-primary" onclick="openConnection()">🚀 Подключить VPN</button>
-      </div>
-
-      <p id="sub-details" class="t3 ci" data-d="180" style="text-align:center;font-size:11px;margin-top:12px"></p>
-
-      <!-- VPN Toggle (visual demo) -->
-      <div class="ci" data-d="200" style="text-align:center;margin-top:8px">
-        <p class="t1" style="font-size:18px;font-weight:600" id="vpnSt">Статус</p>
-        <p class="t4" style="font-size:11px;margin-top:2px" id="vpnTm">—</p>
-      </div>
-
-      <div class="vpn-outer ci" data-d="230" id="vpnW">
-        <div class="vpn-ring2"></div>
-        <div class="vpn-ring1"></div>
-        <div class="vpn-btn" onclick="toggleVPN()">
-          <svg viewBox="0 0 24 24"><path d="M18.36 6.64A9 9 0 1 1 5.64 6.64"/><line x1="12" y1="2" x2="12" y2="12"/></svg>
-        </div>
-      </div>
-
-      <!-- Stats -->
-      <div class="glass-card ci" data-d="260">
-        <div class="glass-inner" style="display:flex">
-          <div class="spill">
-            <span style="font-size:10px" class="t3">↓ Загрузка</span>
-            <span style="font-size:16px;font-weight:600" class="t1" id="dl">—</span>
-            <span style="font-size:9px" class="t4">Мбит/с</span>
-          </div>
-          <div class="spill">
-            <span style="font-size:10px" class="t3">↑ Отдача</span>
-            <span style="font-size:16px;font-weight:600" class="t1" id="ul">—</span>
-            <span style="font-size:9px" class="t4">Мбит/с</span>
-          </div>
-          <div class="spill">
-            <span style="font-size:10px" class="t3">Пинг</span>
-            <span style="font-size:16px;font-weight:600" class="t1" id="pg">—</span>
-            <span style="font-size:9px" class="t4">мс</span>
-          </div>
-        </div>
-      </div>
+      <p id="sub-details" class="t3 ci" data-d="150" style="text-align:center;font-size:11px;margin-top:12px"></p>
 
       <p class="t3 ci" data-d="300" style="text-align:center;font-size:11px;margin-top:16px">
         По всем вопросам: <a href="https://t.me/soldenchain" style="color:#c084fc;text-decoration:none">Техподдержка</a>
@@ -1205,7 +1265,6 @@ html, body {
       <p class="t1 ci" data-d="50" style="font-size:20px;font-weight:600;text-align:center;margin-bottom:4px">Устройства</p>
       <p class="t3 ci" data-d="80" style="font-size:11px;text-align:center;margin-bottom:14px">Управление подключениями</p>
 
-      <!-- Devices Limit -->
       <div class="glass-card ci" data-d="100" style="margin-bottom:12px">
         <div class="glass-inner devices-limit-card">
           <div class="devices-limit-header">
@@ -1218,12 +1277,10 @@ html, body {
         </div>
       </div>
 
-      <!-- Device List -->
       <div id="device-list" class="ci" data-d="130">
-        <div style="text-align:center;padding:20px;color:rgba(255,255,255,0.3);font-size:12px">Загружаем список устройств...</div>
+        <div style="text-align:center;padding:20px;color:var(--text3);font-size:12px">Загружаем список устройств...</div>
       </div>
 
-      <!-- Devices Footer -->
       <div id="devices-footer" class="ci" data-d="160" style="display:none">
         <button class="btn-unlink-all" onclick="confirmUnlinkAll()">⚠️ Отвязать все устройства</button>
         <div class="pager">
@@ -1243,95 +1300,59 @@ html, body {
       </p>
     </div>
 
-    <!-- PAGE 2: SETTINGS -->
+    <!-- PAGE 2: SETTINGS (only Theme + Language) -->
     <div class="page to-right" id="p2">
       <p class="t1 ci" data-d="50" style="font-size:20px;font-weight:600;text-align:center;margin-bottom:4px">Настройки</p>
-      <p class="t3 ci" data-d="80" style="font-size:11px;text-align:center;margin-bottom:14px">Конфигурация</p>
+      <p class="t3 ci" data-d="80" style="font-size:11px;text-align:center;margin-bottom:14px">Персонализация</p>
 
-      <div class="glass-card ci" data-d="100" style="margin-bottom:12px">
-        <div class="glass-inner">
-          <p class="t4" style="font-size:10px;padding:12px 14px 6px;text-transform:uppercase;letter-spacing:1px">Подключение</p>
-          <div class="srow">
-            <div style="display:flex;align-items:center;gap:10px">
-              <span style="font-size:17px">⚡</span>
-              <div><p class="t1" style="font-size:13px">Протокол</p><p class="t4" style="font-size:10px">Шифрование</p></div>
-            </div>
-            <div class="gbtn" style="padding:5px 11px" onclick="cycleP()"><span style="font-size:11px" class="ta" id="pTxt">WireGuard</span></div>
-          </div>
-          <div class="srow">
-            <div style="display:flex;align-items:center;gap:10px">
-              <span style="font-size:17px">🛡️</span>
-              <div><p class="t1" style="font-size:13px">Kill Switch</p><p class="t4" style="font-size:10px">Блокировка при обрыве</p></div>
-            </div>
-            <div class="tog on" onclick="this.classList.toggle('on');hap()"></div>
-          </div>
-          <div class="srow">
-            <div style="display:flex;align-items:center;gap:10px">
-              <span style="font-size:17px">🔄</span>
-              <div><p class="t1" style="font-size:13px">Double VPN</p><p class="t4" style="font-size:10px">Двойное шифрование</p></div>
-            </div>
-            <div class="tog" onclick="this.classList.toggle('on');hap()"></div>
-          </div>
-          <div class="srow">
-            <div style="display:flex;align-items:center;gap:10px">
-              <span style="font-size:17px">🚫</span>
-              <div><p class="t1" style="font-size:13px">Блок рекламы</p><p class="t4" style="font-size:10px">AdBlock</p></div>
-            </div>
-            <div class="tog on" onclick="this.classList.toggle('on');hap()"></div>
-          </div>
-        </div>
-      </div>
-
-      <div class="glass-card ci" data-d="150" style="margin-bottom:12px">
-        <div class="glass-inner">
-          <p class="t4" style="font-size:10px;padding:12px 14px 6px;text-transform:uppercase;letter-spacing:1px">Сеть</p>
-          <div class="srow">
-            <div style="display:flex;align-items:center;gap:10px">
-              <span style="font-size:17px">🌐</span>
-              <div><p class="t1" style="font-size:13px">DNS</p><p class="t4" style="font-size:10px">Приватный DNS</p></div>
-            </div>
-            <div class="gbtn" style="padding:5px 11px" onclick="cycleD()"><span style="font-size:11px" class="ta" id="dTxt">Cloudflare</span></div>
-          </div>
-          <div class="srow">
-            <div style="display:flex;align-items:center;gap:10px">
-              <span style="font-size:17px">🎣</span>
-              <div><p class="t1" style="font-size:13px">Антифишинг</p><p class="t4" style="font-size:10px">Защита от мошенников</p></div>
-            </div>
-            <div class="tog on" onclick="this.classList.toggle('on');hap()"></div>
-          </div>
-          <div class="srow">
-            <div style="display:flex;align-items:center;gap:10px">
-              <span style="font-size:17px">📡</span>
-              <div><p class="t1" style="font-size:13px">Split Tunneling</p><p class="t4" style="font-size:10px">Раздельный трафик</p></div>
-            </div>
-            <div class="tog" onclick="this.classList.toggle('on');hap()"></div>
-          </div>
-        </div>
-      </div>
-
-      <div class="glass-card ci" data-d="200">
+      <div class="glass-card ci" data-d="100">
         <div class="glass-inner">
           <p class="t4" style="font-size:10px;padding:12px 14px 6px;text-transform:uppercase;letter-spacing:1px">Приложение</p>
-          <div class="srow">
+          
+          <!-- Theme Toggle -->
+          <div class="srow" id="theme-row" onclick="toggleTheme(event)" style="cursor:pointer">
             <div style="display:flex;align-items:center;gap:10px">
-              <span style="font-size:17px">🌙</span>
-              <p class="t1" style="font-size:13px">Тёмная тема</p>
+              <div class="theme-icon-wrap">
+                <div class="ti-moon">🌙</div>
+                <div class="ti-sun">☀️</div>
+              </div>
+              <div>
+                <p class="t1" style="font-size:13px;font-weight:600" id="theme-label">Тёмная тема</p>
+                <p class="t4" style="font-size:10px" id="theme-sublabel">Переключить на светлую</p>
+              </div>
             </div>
-            <div class="tog on" onclick="this.classList.toggle('on');hap()"></div>
+            <div class="tog on" id="theme-tog"></div>
           </div>
-          <div class="srow">
-            <div style="display:flex;align-items:center;gap:10px">
-              <span style="font-size:17px">🔔</span>
-              <p class="t1" style="font-size:13px">Уведомления</p>
-            </div>
-            <div class="tog on" onclick="this.classList.toggle('on');hap()"></div>
-          </div>
-          <div class="srow">
+
+          <!-- Language -->
+          <div class="srow" onclick="openLangModal()" style="cursor:pointer">
             <div style="display:flex;align-items:center;gap:10px">
               <span style="font-size:17px">🌍</span>
-              <p class="t1" style="font-size:13px">Язык</p>
+              <div>
+                <p class="t1" style="font-size:13px;font-weight:600">Язык</p>
+                <p class="t4" style="font-size:10px" id="current-lang-sub">Выбор языка интерфейса</p>
+              </div>
             </div>
-            <div class="gbtn" style="padding:5px 11px"><span style="font-size:11px" class="ta">Русский</span></div>
+            <div class="gbtn" style="padding:5px 11px"><span style="font-size:11px" class="ta" id="lang-display">Русский</span></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- About section -->
+      <div class="glass-card ci" data-d="150" style="margin-top:12px">
+        <div class="glass-inner">
+          <p class="t4" style="font-size:10px;padding:12px 14px 6px;text-transform:uppercase;letter-spacing:1px">О сервисе</p>
+          <div class="srow">
+            <p class="t2" style="font-size:12px">Версия</p>
+            <span class="t3" style="font-size:12px;font-family:'Fira Code',monospace">2.1.0</span>
+          </div>
+          <div class="srow">
+            <p class="t2" style="font-size:12px">Протоколы</p>
+            <span class="t3" style="font-size:12px">WG / VLESS / SS</span>
+          </div>
+          <div class="srow">
+            <p class="t2" style="font-size:12px">Серверы</p>
+            <span class="t3" style="font-size:12px">12 локаций</span>
           </div>
         </div>
       </div>
@@ -1347,7 +1368,7 @@ html, body {
             <div class="step-num">1</div>
             <div>
               <p class="t1" style="font-size:13px;font-weight:600;margin-bottom:4px">Скачайте приложение</p>
-              <p class="t3" style="font-size:11px;line-height:1.4">Для iOS/Android мы рекомендуем <b style="color:rgba(255,255,255,0.7)">Happ</b>. Ссылка доступна по кнопке на главной.</p>
+              <p class="t3" style="font-size:11px;line-height:1.4">Для iOS/Android мы рекомендуем <b style="color:var(--text1)">Happ</b>. Ссылка доступна по кнопке на главной.</p>
             </div>
           </div>
           <div class="instruction-step">
@@ -1367,25 +1388,7 @@ html, body {
         </div>
       </div>
 
-      <div class="glass-card ci" data-d="150" style="margin-bottom:12px">
-        <div class="glass-inner" style="padding:16px 14px">
-          <p class="t4" style="font-size:10px;text-transform:uppercase;letter-spacing:1px;margin-bottom:12px">О сервисе</p>
-          <div class="srow" style="padding:8px 0">
-            <p class="t2" style="font-size:12px">Версия</p>
-            <span class="t3" style="font-size:12px;font-family:'Fira Code',monospace">2.1.0</span>
-          </div>
-          <div class="srow" style="padding:8px 0">
-            <p class="t2" style="font-size:12px">Протоколы</p>
-            <span class="t3" style="font-size:12px">WG / VLESS / SS</span>
-          </div>
-          <div class="srow" style="padding:8px 0">
-            <p class="t2" style="font-size:12px">Серверы</p>
-            <span class="t3" style="font-size:12px">12 локаций</span>
-          </div>
-        </div>
-      </div>
-
-      <div style="display:flex;gap:8px" class="ci" data-d="200">
+      <div style="display:flex;gap:8px" class="ci" data-d="150">
         <a href="https://t.me/soldenchain" target="_blank" class="glass-card" style="flex:1;text-decoration:none;cursor:pointer">
           <div class="glass-inner" style="padding:14px;text-align:center">
             <span style="font-size:20px">💬</span>
@@ -1445,51 +1448,165 @@ html, body {
   </div>
 </div>
 
-<!-- ADD DEVICE MODAL -->
-<div class="modal-overlay" id="addDeviceModal">
-  <div class="modal-body" style="max-width:380px">
-    <div class="modal-title" id="add-device-title">➕ Добавление устройства</div>
+<!-- ADD DEVICE WIZARD (fullscreen overlay) -->
+<div id="addDeviceWizard" style="
+  position:fixed;inset:0;z-index:1500;
+  display:none;flex-direction:column;align-items:center;justify-content:flex-start;
+  padding: max(env(safe-area-inset-top,0px),24px) 20px 32px;
+  background:var(--modal-bg);
+  animation: wizardIn 0.4s cubic-bezier(0.34,1.56,0.64,1);
+  overflow-y:auto;
+">
+  <!-- Close btn -->
+  <button onclick="closeAddDeviceModal()" style="
+    position:absolute;top:max(env(safe-area-inset-top,0px),16px);right:16px;
+    width:34px;height:34px;border-radius:50%;
+    background:var(--glass-bg);border:1px solid var(--glass-border);
+    color:var(--text2);font-size:16px;cursor:pointer;
+    display:flex;align-items:center;justify-content:center;
+    transition:all 0.2s;
+  " id="wiz-close-btn">✕</button>
 
-    <!-- Step 1 -->
-    <div class="add-step" id="add-device-step-1">
-      <p>Установка на этом устройстве</p>
-      <div class="field-label" style="font-size:11px;color:rgba(255,255,255,0.4);margin-bottom:6px">Ваша ОС:</div>
-      <input type="text" class="modal-input" id="detected-os" readonly value="Определение..." style="background:rgba(168,85,247,0.06);border-color:rgba(168,85,247,0.2)">
-      <button class="btn-primary" onclick="goToAddDeviceStep2()">Далее →</button>
+  <!-- Progress ring -->
+  <div style="margin-top:8px;margin-bottom:24px;position:relative;width:120px;height:120px;flex-shrink:0">
+    <svg width="120" height="120" viewBox="0 0 120 120" style="transform:rotate(-90deg)">
+      <circle cx="60" cy="60" r="50" fill="none" stroke="var(--glass-border)" stroke-width="6"/>
+      <circle id="wiz-ring" cx="60" cy="60" r="50" fill="none"
+        stroke="url(#ringGrad)" stroke-width="6"
+        stroke-linecap="round"
+        stroke-dasharray="314"
+        stroke-dashoffset="314"
+        style="transition:stroke-dashoffset 0.6s cubic-bezier(0.34,1.56,0.64,1)"
+      />
+      <defs>
+        <linearGradient id="ringGrad" x1="0%" y1="0%" x2="100%" y2="0%">
+          <stop offset="0%" style="stop-color:#a855f7"/>
+          <stop offset="100%" style="stop-color:#ec4899"/>
+        </linearGradient>
+      </defs>
+    </svg>
+    <div style="
+      position:absolute;inset:0;display:flex;flex-direction:column;
+      align-items:center;justify-content:center;
+    ">
+      <span id="wiz-pct" style="font-size:22px;font-weight:700;color:var(--text1);line-height:1">33%</span>
+      <span id="wiz-step-lbl" style="font-size:10px;color:var(--text3);margin-top:2px">Шаг 1 / 3</span>
+    </div>
+  </div>
+
+  <!-- STEP 1 -->
+  <div id="wiz-step-1" style="width:100%;max-width:360px">
+    <p class="t1" style="font-size:18px;font-weight:700;text-align:center;margin-bottom:6px">Выберите устройство</p>
+    <p class="t3" style="font-size:12px;text-align:center;margin-bottom:20px">Мы автоматически определили вашу ОС</p>
+
+    <div id="os-cards" style="display:grid;gap:10px;margin-bottom:24px"></div>
+
+    <button class="btn-primary" onclick="wizStep2()">Далее →</button>
+    <button class="btn-ghost" onclick="closeAddDeviceModal()" style="margin-top:8px">Отмена</button>
+  </div>
+
+  <!-- STEP 2 -->
+  <div id="wiz-step-2" style="width:100%;max-width:360px;display:none">
+    <p class="t1" style="font-size:18px;font-weight:700;text-align:center;margin-bottom:6px">Установите Happ</p>
+    <p class="t3" style="font-size:12px;text-align:center;margin-bottom:20px">Выберите подходящую версию</p>
+
+    <div id="wiz-download-links" style="display:grid;gap:10px;margin-bottom:24px"></div>
+
+    <button class="btn-primary" onclick="wizStep3()">Далее →</button>
+    <button class="btn-ghost" onclick="wizStep1()" style="margin-top:8px">← Назад</button>
+  </div>
+
+  <!-- STEP 3 -->
+  <div id="wiz-step-3" style="width:100%;max-width:360px;display:none">
+    <p class="t1" style="font-size:18px;font-weight:700;text-align:center;margin-bottom:6px">Добавить в Happ</p>
+    <p class="t3" style="font-size:12px;text-align:center;margin-bottom:20px">Нажмите кнопку — конфиг откроется в приложении</p>
+
+    <!-- Success state (hidden initially) -->
+    <div id="wiz-success" style="display:none;text-align:center;margin-bottom:20px">
+      <div style="font-size:56px;margin-bottom:12px;animation:popIn 0.5s cubic-bezier(0.34,1.56,0.64,1)">✅</div>
+      <p class="t1" style="font-size:16px;font-weight:700;margin-bottom:6px">Всё готово!</p>
+      <p class="t3" style="font-size:12px;line-height:1.5">Конфиг отправлен в Happ.<br>Выберите сервер и подключайтесь!</p>
     </div>
 
-    <!-- Step 2 -->
-    <div class="add-step" id="add-device-step-2" style="display:none">
-      <p>1️⃣ Установите приложение Happ</p>
-      <div id="download-links" style="display:grid;gap:8px;margin-bottom:14px"></div>
-      <div id="open-happ-section" style="display:none;margin-bottom:14px">
-        <p style="margin-bottom:8px">2️⃣ Откройте приложение</p>
-        <a id="open-happ-btn" href="#" class="btn-primary" style="text-decoration:none">🚀 Открыть Happ</a>
+    <!-- Happ button (shown initially) -->
+    <div id="wiz-happ-btn-wrap">
+      <div class="glass-card" style="margin-bottom:16px;overflow:hidden">
+        <div class="glass-inner" style="padding:14px">
+          <div style="display:flex;align-items:center;gap:12px">
+            <div style="
+              width:44px;height:44px;border-radius:14px;flex-shrink:0;
+              background:linear-gradient(135deg,rgba(168,85,247,0.25),rgba(236,72,153,0.15));
+              border:1px solid var(--accent-border);
+              display:flex;align-items:center;justify-content:center;font-size:22px;
+            ">🚀</div>
+            <div>
+              <p class="t1" style="font-size:13px;font-weight:600;margin-bottom:2px">Happ VPN</p>
+              <p class="t3" style="font-size:10px">Откроет конфиг автоматически</p>
+            </div>
+          </div>
+        </div>
       </div>
-      <button class="btn-primary" onclick="goToAddDeviceStep3()">Далее →</button>
+
+      <button class="btn-primary" id="wiz-open-happ" onclick="openInHapp()" style="margin-bottom:8px">
+        <span style="font-size:16px">🔗</span> Добавить в Happ
+      </button>
+      <button class="btn-ghost" onclick="wizStep2()">← Назад</button>
     </div>
 
-    <!-- Step 3 -->
-    <div class="add-step" id="add-device-step-3" style="display:none">
-      <p style="text-align:center">🔄 Ожидание подключения устройства...</p>
-      <div style="text-align:center;padding:16px">
-        <div class="auth-loader" style="margin:0 auto 14px"></div>
-        <p id="waiting-timer" class="t3" style="font-size:13px">Ожидание: 0 сек</p>
+    <button class="btn-ghost" onclick="closeAddDeviceModal()" id="wiz-done-btn" style="margin-top:8px;display:none">Готово ✓</button>
+  </div>
+</div>
+
+<!-- OLD ADD DEVICE MODAL (kept for compat, hidden) -->
+<div class="modal-overlay" id="addDeviceModal" style="display:none!important"></div>
+
+<!-- LANGUAGE MODAL -->
+<div class="modal-overlay" id="langModal">
+  <div class="modal-body" style="max-width:360px">
+    <div class="modal-title">🌍 Выбор языка</div>
+    <div id="lang-list" style="position:relative;z-index:1">
+      <div class="lang-option selected" data-lang="ru" onclick="selectLang(this)">
+        <span class="lang-flag">🇷🇺</span>
+        <div>
+          <div class="lang-name">Русский</div>
+          <div class="lang-native">Russian</div>
+        </div>
+        <div class="lang-check">✓</div>
       </div>
-      <div id="device-connected-msg" style="display:none;text-align:center;color:rgba(74,222,128,0.85);margin:14px 0;font-weight:600">
-        ✅ Устройство подключено!
+      <div class="lang-option" data-lang="en" onclick="selectLang(this)">
+        <span class="lang-flag">🇬🇧</span>
+        <div>
+          <div class="lang-name">English</div>
+          <div class="lang-native">Английский</div>
+        </div>
+        <div class="lang-check">✓</div>
       </div>
-      <button class="btn-ghost" id="skip-wait-btn" onclick="showSkipOptions()" style="display:none">Пропустить</button>
+      <div class="lang-option" data-lang="uk" onclick="selectLang(this)">
+        <span class="lang-flag">🇺🇦</span>
+        <div>
+          <div class="lang-name">Українська</div>
+          <div class="lang-native">Украинский</div>
+        </div>
+        <div class="lang-check">✓</div>
+      </div>
+      <div class="lang-option" data-lang="kz" onclick="selectLang(this)">
+        <span class="lang-flag">🇰🇿</span>
+        <div>
+          <div class="lang-name">Қазақша</div>
+          <div class="lang-native">Казахский</div>
+        </div>
+        <div class="lang-check">✓</div>
+      </div>
+      <div class="lang-option" data-lang="uz" onclick="selectLang(this)">
+        <span class="lang-flag">🇺🇿</span>
+        <div>
+          <div class="lang-name">O'zbekcha</div>
+          <div class="lang-native">Узбекский</div>
+        </div>
+        <div class="lang-check">✓</div>
+      </div>
     </div>
-
-    <!-- Skip -->
-    <div class="add-step" id="add-device-skip" style="display:none">
-      <p style="text-align:center">Возникли проблемы? Напишите в поддержку:</p>
-      <a href="https://t.me/avestb" target="_blank" class="btn-primary" style="margin-bottom:8px;text-decoration:none">✈️ @avestb</a>
-      <button class="btn-ghost" onclick="closeAddDeviceModal()">Закрыть</button>
-    </div>
-
-    <button class="btn-ghost" onclick="closeAddDeviceModal()" id="add-device-close" style="margin-top:8px">Отмена</button>
+    <button class="btn-ghost" onclick="closeLangModal()" style="margin-top:12px;position:relative;z-index:1">Закрыть</button>
   </div>
 </div>
 
@@ -1498,6 +1615,7 @@ html, body {
 const c = document.getElementById('bg-canvas');
 const x = c.getContext('2d');
 let W, H;
+let isDark = true;
 
 function resize() { W = c.width = innerWidth; H = c.height = innerHeight; }
 resize();
@@ -1522,13 +1640,25 @@ const pts = Array.from({length: 20}, () => ({
 
 function draw() {
   x.clearRect(0, 0, W, H);
-  const bg = x.createLinearGradient(0, 0, W, H);
-  bg.addColorStop(0, '#07070d');
-  bg.addColorStop(0.5, '#0b0916');
-  bg.addColorStop(1, '#09070e');
-  x.fillStyle = bg;
+
+  if (isDark) {
+    const bg = x.createLinearGradient(0, 0, W, H);
+    bg.addColorStop(0, '#07070d');
+    bg.addColorStop(0.5, '#0b0916');
+    bg.addColorStop(1, '#09070e');
+    x.fillStyle = bg;
+  } else {
+    const bg = x.createLinearGradient(0, 0, W, H);
+    bg.addColorStop(0, '#f2f0f5');
+    bg.addColorStop(0.5, '#eae7f0');
+    bg.addColorStop(1, '#e5e0ed');
+    x.fillStyle = bg;
+  }
   x.fillRect(0, 0, W, H);
 
+  const orbLum = isDark ? 18 : 82;
+  const orbAlphaMultiplier = isDark ? 1 : 0.4;
+  
   for (const o of orbs) {
     o.x += o.vx; o.y += o.vy;
     if (o.x < -o.r) o.x = W + o.r;
@@ -1536,19 +1666,21 @@ function draw() {
     if (o.y < -o.r) o.y = H + o.r;
     if (o.y > H + o.r) o.y = -o.r;
     const g = x.createRadialGradient(o.x, o.y, 0, o.x, o.y, o.r);
-    g.addColorStop(0, `hsla(${o.h},65%,18%,${o.a})`);
+    g.addColorStop(0, `hsla(${o.h},65%,${orbLum}%,${o.a * orbAlphaMultiplier})`);
     g.addColorStop(1, 'transparent');
     x.fillStyle = g;
     x.fillRect(o.x - o.r, o.y - o.r, o.r * 2, o.r * 2);
   }
 
+  const ptAlpha = isDark ? 1 : 0.5;
   for (const p of pts) {
     p.x += p.vx; p.y += p.vy;
     if (p.x < 0) p.x = W; if (p.x > W) p.x = 0;
     if (p.y < 0) p.y = H; if (p.y > H) p.y = 0;
     x.beginPath();
     x.arc(p.x, p.y, p.r, 0, Math.PI * 2);
-    x.fillStyle = `rgba(255,255,255,${p.a})`;
+    const pColor = isDark ? `rgba(255,255,255,${p.a * ptAlpha})` : `rgba(128,55,220,${p.a * ptAlpha})`;
+    x.fillStyle = pColor;
     x.fill();
   }
   requestAnimationFrame(draw);
@@ -1612,6 +1744,28 @@ async function initApp() {
     updateUserInfo();
     await fetchDevices();
 
+    // Restore saved theme
+    const savedTheme = localStorage.getItem('cloudvpn-theme');
+    if (savedTheme === 'light') {
+      isDark = false;
+      document.body.classList.add('light');
+      document.getElementById('theme-tog').classList.remove('on');
+      document.getElementById('theme-label').textContent = 'Светлая тема';
+      document.getElementById('theme-sublabel').textContent = 'Переключить на тёмную';
+      try { tg.setHeaderColor('#f2f0f5'); } catch(e) {}
+    }
+
+    // Restore saved lang
+    const savedLang = localStorage.getItem('cloudvpn-lang');
+    if (savedLang) {
+      const langEl = document.querySelector(`.lang-option[data-lang="${savedLang}"]`);
+      if (langEl) {
+        document.querySelectorAll('.lang-option').forEach(o => o.classList.remove('selected'));
+        langEl.classList.add('selected');
+        document.getElementById('lang-display').textContent = langEl.querySelector('.lang-name').textContent;
+      }
+    }
+
     if (tabParam === 'devices' || tabParam === 'add') {
       go(1);
       if (tabParam === 'add') {
@@ -1646,6 +1800,99 @@ function updateUserInfo() {
   }
 }
 
+// ===== THEME TOGGLE =====
+function toggleTheme(e) {
+  const tog = document.getElementById('theme-tog');
+  const label = document.getElementById('theme-label');
+  const sublabel = document.getElementById('theme-sublabel');
+  
+  // Get click position for morph animation
+  const rect = tog.getBoundingClientRect();
+  const cx = rect.left + rect.width / 2;
+  const cy = rect.top + rect.height / 2;
+  
+  // Calculate radius to cover entire screen
+  const maxR = Math.max(
+    Math.hypot(cx, cy),
+    Math.hypot(innerWidth - cx, cy),
+    Math.hypot(cx, innerHeight - cy),
+    Math.hypot(innerWidth - cx, innerHeight - cy)
+  );
+
+  // Create morph circle
+  const morph = document.createElement('div');
+  morph.className = 'theme-morph';
+  morph.style.left = cx + 'px';
+  morph.style.top = cy + 'px';
+  morph.style.width = maxR * 2 + 'px';
+  morph.style.height = maxR * 2 + 'px';
+  morph.style.marginLeft = -maxR + 'px';
+  morph.style.marginTop = -maxR + 'px';
+  
+  if (isDark) {
+    // Going to light
+    morph.style.background = '#f2f0f5';
+  } else {
+    // Going to dark
+    morph.style.background = '#08080e';
+  }
+  
+  document.body.appendChild(morph);
+  
+  // After animation midpoint, switch actual theme
+  setTimeout(() => {
+    isDark = !isDark;
+    
+    if (isDark) {
+      document.body.classList.remove('light');
+      tog.classList.add('on');
+      label.textContent = 'Тёмная тема';
+      sublabel.textContent = 'Переключить на светлую';
+      localStorage.setItem('cloudvpn-theme', 'dark');
+      try { tg.setHeaderColor('#08080e'); } catch(e) {}
+    } else {
+      document.body.classList.add('light');
+      tog.classList.remove('on');
+      label.textContent = 'Светлая тема';
+      sublabel.textContent = 'Переключить на тёмную';
+      localStorage.setItem('cloudvpn-theme', 'light');
+      try { tg.setHeaderColor('#f2f0f5'); } catch(e) {}
+    }
+    
+    // Remove morph circle
+    setTimeout(() => {
+      morph.remove();
+    }, 500);
+  }, 450);
+  
+  hap();
+}
+
+// ===== LANGUAGE =====
+function openLangModal() {
+  document.getElementById('langModal').classList.add('show');
+  hap();
+}
+
+function closeLangModal() {
+  document.getElementById('langModal').classList.remove('show');
+}
+
+function selectLang(el) {
+  document.querySelectorAll('.lang-option').forEach(o => o.classList.remove('selected'));
+  el.classList.add('selected');
+  
+  const langName = el.querySelector('.lang-name').textContent;
+  const langCode = el.getAttribute('data-lang');
+  
+  document.getElementById('lang-display').textContent = langName;
+  localStorage.setItem('cloudvpn-lang', langCode);
+  
+  hap();
+  
+  setTimeout(() => closeLangModal(), 300);
+}
+
 // ===== DEVICES =====
 async function fetchDevices() {
   const listDiv = document.getElementById('device-list');
@@ -1678,7 +1925,7 @@ async function fetchDevices() {
     }
 
     if (devices.length === 0) {
-      listDiv.innerHTML = `<div style="text-align:center;padding:30px 20px;color:rgba(255,255,255,0.25)">
+      listDiv.innerHTML = `<div style="text-align:center;padding:30px 20px;color:var(--text3)">
         <div style="font-size:40px;margin-bottom:10px;opacity:0.5">📭</div>
         <div style="font-size:12px">Нет подключенных устройств</div>
       </div>`;
@@ -1690,7 +1937,7 @@ async function fetchDevices() {
     renderDevicesPage();
   } catch (e) {
     console.error(e);
-    listDiv.innerHTML = '<div style="color:rgba(248,113,113,0.7);text-align:center;padding:20px;font-size:12px">Ошибка загрузки устройств</div>';
+    listDiv.innerHTML = '<div style="color:var(--red);text-align:center;padding:20px;font-size:12px">Ошибка загрузки устройств</div>';
     footer.style.display = 'none';
   }
 }
@@ -1847,10 +2094,27 @@ function confirmUnlinkAll() {
   });
 }
 
-// ===== ADD DEVICE MODAL =====
-let deviceCheckInterval = null;
-let deviceCheckSeconds = 0;
-let initialDeviceCount = 0;
+// ===== ADD DEVICE WIZARD =====
+let wizSelectedOS = '';
+
+const OS_LIST = [
+  { os: 'iOS',     icon: '🍎', label: 'iPhone / iPad',   sub: 'iOS' },
+  { os: 'Android', icon: '🤖', label: 'Android',          sub: 'Android' },
+  { os: 'Windows', icon: '🪟', label: 'Windows',          sub: 'ПК / Ноутбук' },
+  { os: 'macOS',   icon: '💻', label: 'macOS',            sub: 'Mac / MacBook' },
+  { os: 'Linux',   icon: '🐧', label: 'Linux',            sub: 'Ubuntu и др.' },
+];
+
+const DOWNLOAD_LINKS = {
+  'Android': [{ name: 'Google Play', url: 'https://play.google.com/store/apps/details?id=com.happproxy', icon: '🤖' }],
+  'iOS': [
+    { name: 'App Store — RU 🇷🇺', url: 'https://apps.apple.com/ru/app/happ-proxy-utility-plus/id6746188973', icon: '🇷🇺' },
+    { name: 'App Store — Global 🌍', url: 'https://apps.apple.com/us/app/happ-proxy-utility/id6504287215', icon: '🌍' }
+  ],
+  'Windows': [{ name: 'Скачать .exe', url: 'https://github.com/Happ-proxy/happ-desktop/releases/latest/download/setup-Happ.x64.exe', icon: '🪟' }],
+  'macOS':   [{ name: 'Скачать для macOS', url: 'https://github.com/Happ-proxy/happ-desktop/releases', icon: '💻' }],
+  'Linux':   [{ name: 'Скачать для Linux', url: 'https://github.com/Happ-proxy/happ-desktop/releases', icon: '🐧' }],
+};
 
 function detectUserOS() {
   const ua = navigator.userAgent;
@@ -1859,101 +2123,153 @@ function detectUserOS() {
   if (/windows/i.test(ua)) return 'Windows';
   if (/macintosh/i.test(ua)) return 'macOS';
   if (/linux/i.test(ua)) return 'Linux';
-  return 'Другая';
+  return 'Android';
 }
 
-function getDownloadLinks(os) {
-  const links = {
-    'Android': [{ name: 'Google Play', url: 'https://play.google.com/store/apps/details?id=com.happproxy', icon: '🤖' }],
-    'iOS': [
-      { name: 'App Store (RU)', url: 'https://apps.apple.com/ru/app/happ-proxy-utility-plus/id6746188973', icon: '🇷🇺' },
-      { name: 'App Store (Global)', url: 'https://apps.apple.com/us/app/happ-proxy-utility/id6504287215', icon: '🌍' }
-    ],
-    'Windows': [{ name: 'Скачать для Windows', url: 'https://github.com/Happ-proxy/happ-desktop/releases/latest/download/setup-Happ.x64.exe', icon: '🪟' }],
-    'macOS': [{ name: 'Скачать для macOS', url: 'https://github.com/Happ-proxy/happ-desktop/releases', icon: '💻' }],
-    'Linux': [{ name: 'Скачать для Linux', url: 'https://github.com/Happ-proxy/happ-desktop/releases', icon: '🐧' }],
-    'Другая': [{ name: 'Все версии Happ', url: 'https://github.com/Happ-proxy/happ-desktop/releases', icon: '📥' }]
-  };
-  return links[os] || links['Другая'];
+function setWizRing(pct, step) {
+  const circ = 314;
+  const offset = circ - (circ * pct / 100);
+  document.getElementById('wiz-ring').style.strokeDashoffset = offset;
+  document.getElementById('wiz-pct').textContent = pct + '%';
+  document.getElementById('wiz-step-lbl').textContent = `Шаг ${step} / 3`;
 }
 
 function openAddDeviceModal() {
-  const os = detectUserOS();
-  document.getElementById('detected-os').value = os;
-  document.getElementById('add-device-step-1').style.display = 'block';
-  document.getElementById('add-device-step-2').style.display = 'none';
-  document.getElementById('add-device-step-3').style.display = 'none';
-  document.getElementById('add-device-skip').style.display = 'none';
-  document.getElementById('add-device-close').style.display = 'flex';
-  document.getElementById('device-connected-msg').style.display = 'none';
-  document.getElementById('skip-wait-btn').style.display = 'none';
-  document.getElementById('addDeviceModal').classList.add('show');
-}
-
-function goToAddDeviceStep2() {
-  const os = document.getElementById('detected-os').value;
-  const links = getDownloadLinks(os);
-  const linksContainer = document.getElementById('download-links');
-  linksContainer.innerHTML = '';
-  links.forEach(link => {
-    const btn = document.createElement('a');
-    btn.className = 'btn-primary';
-    btn.href = link.url;
-    btn.target = '_blank';
-    btn.style.textDecoration = 'none';
-    btn.innerHTML = `${link.icon} ${link.name}`;
-    linksContainer.appendChild(btn);
+  // Build OS cards
+  const detectedOS = detectUserOS();
+  wizSelectedOS = detectedOS;
+  const container = document.getElementById('os-cards');
+  container.innerHTML = '';
+  OS_LIST.forEach(item => {
+    const card = document.createElement('div');
+    card.className = 'glass-card';
+    card.setAttribute('data-os', item.os);
+    card.style.cursor = 'pointer';
+    card.style.transition = 'all 0.25s ease';
+    if (item.os === detectedOS) card.style.borderColor = 'rgba(168,85,247,0.5)';
+    card.innerHTML = `
+      <div class="glass-inner" style="padding:12px 14px;display:flex;align-items:center;gap:12px">
+        <span style="font-size:26px">${item.icon}</span>
+        <div style="flex:1">
+          <p class="t1" style="font-size:13px;font-weight:600">${item.label}</p>
+          <p class="t3" style="font-size:10px">${item.sub}</p>
+        </div>
+        <div class="wiz-os-check" style="
+          width:22px;height:22px;border-radius:50%;
+          border:1.5px solid var(--input-border);
+          display:flex;align-items:center;justify-content:center;
+          font-size:11px;transition:all 0.3s;
+          ${item.os === detectedOS ? 'background:#a855f7;border-color:#a855f7;color:#fff' : ''}
+        ">${item.os === detectedOS ? '✓' : ''}</div>
+      </div>
+    `;
+    card.addEventListener('click', () => {
+      wizSelectedOS = item.os;
+      document.querySelectorAll('#os-cards .glass-card').forEach(c => {
+        c.style.borderColor = 'var(--glass-border)';
+        c.querySelector('.wiz-os-check').style.background = '';
+        c.querySelector('.wiz-os-check').style.borderColor = 'var(--input-border)';
+        c.querySelector('.wiz-os-check').style.color = '';
+        c.querySelector('.wiz-os-check').textContent = '';
+      });
+      card.style.borderColor = 'rgba(168,85,247,0.5)';
+      card.querySelector('.wiz-os-check').style.background = '#a855f7';
+      card.querySelector('.wiz-os-check').style.borderColor = '#a855f7';
+      card.querySelector('.wiz-os-check').style.color = '#fff';
+      card.querySelector('.wiz-os-check').textContent = '✓';
+      hap();
+    });
+    container.appendChild(card);
   });
 
-  const openHappSection = document.getElementById('open-happ-section');
-  if (os === 'Android' || os === 'iOS') {
-    document.getElementById('open-happ-btn').href = 'happ://';
-    openHappSection.style.display = 'block';
-  } else {
-    openHappSection.style.display = 'none';
-  }
-
-  document.getElementById('add-device-step-1').style.display = 'none';
-  document.getElementById('add-device-step-2').style.display = 'block';
+  // Show wizard
+  wizStep1(true);
+  document.getElementById('addDeviceWizard').style.display = 'flex';
+  hap();
 }
 
-function goToAddDeviceStep3() {
-  initialDeviceCount = allDevices.length;
-  document.getElementById('add-device-step-2').style.display = 'none';
-  document.getElementById('add-device-step-3').style.display = 'block';
-  document.getElementById('add-device-close').style.display = 'none';
-  deviceCheckSeconds = 0;
-  deviceCheckInterval = setInterval(() => {
-    deviceCheckSeconds++;
-    document.getElementById('waiting-timer').innerText = `Ожидание: ${deviceCheckSeconds} сек`;
-    if (deviceCheckSeconds % 2 === 0) checkForNewDevice();
-    if (deviceCheckSeconds >= 10) document.getElementById('skip-wait-btn').style.display = 'flex';
-  }, 1000);
+function wizStep1(init) {
+  if (!init) setWizRing(33, 1);
+  else setTimeout(() => setWizRing(33, 1), 80);
+  document.getElementById('wiz-step-1').style.display = 'block';
+  document.getElementById('wiz-step-2').style.display = 'none';
+  document.getElementById('wiz-step-3').style.display = 'none';
 }
 
-async function checkForNewDevice() {
+function wizStep2() {
+  if (!wizSelectedOS) { hap(); return; }
+  setWizRing(66, 2);
+
+  // Build download links
+  const links = DOWNLOAD_LINKS[wizSelectedOS] || DOWNLOAD_LINKS['Android'];
+  const container = document.getElementById('wiz-download-links');
+  container.innerHTML = '';
+  links.forEach(link => {
+    const a = document.createElement('a');
+    a.className = 'btn-primary';
+    a.href = link.url;
+    a.target = '_blank';
+    a.rel = 'noopener';
+    a.style.textDecoration = 'none';
+    a.innerHTML = `<span>${link.icon}</span> ${link.name}`;
+    a.addEventListener('click', () => hap());
+    container.appendChild(a);
+  });
+
+  document.getElementById('wiz-step-1').style.display = 'none';
+  document.getElementById('wiz-step-2').style.display = 'block';
+  document.getElementById('wiz-step-3').style.display = 'none';
+  hap();
+}
+
+function wizStep3() {
+  setWizRing(100, 3);
+  document.getElementById('wiz-step-1').style.display = 'none';
+  document.getElementById('wiz-step-2').style.display = 'none';
+  document.getElementById('wiz-step-3').style.display = 'block';
+  document.getElementById('wiz-success').style.display = 'none';
+  document.getElementById('wiz-happ-btn-wrap').style.display = 'block';
+  document.getElementById('wiz-done-btn').style.display = 'none';
+  hap();
+}
+
+async function openInHapp() {
+  hap();
+  const btn = document.getElementById('wiz-open-happ');
+  btn.textContent = '⏳ Получаем ссылку...';
+  btn.style.opacity = '0.7';
+  btn.style.pointerEvents = 'none';
+
   try {
-    const res = await fetch(`${API_BASE}/list_devices`, { headers: { 'Authorization': authData } });
-    const devices = await res.json();
-    if (devices.length > initialDeviceCount) {
-      clearInterval(deviceCheckInterval);
-      document.getElementById('device-connected-msg').style.display = 'block';
-      document.getElementById('waiting-timer').style.display = 'none';
-      document.getElementById('skip-wait-btn').style.display = 'none';
-      setTimeout(() => { fetchDevices(); closeAddDeviceModal(); }, 1500);
-    }
-  } catch (e) {}
-}
+    // Get short link from API
+    const res = await fetch(`${API_BASE}/me`, { headers: { 'Authorization': authData } });
+    const data = await res.json();
+    const sub = data?.subscription;
+    const shortUrl = sub?.encrypted_link || sub?.short_link || `https://cloudevpn.cfd/${data?.user_id}/${sub?.uuid}`;
 
-function showSkipOptions() {
-  clearInterval(deviceCheckInterval);
-  document.getElementById('add-device-step-3').style.display = 'none';
-  document.getElementById('add-device-skip').style.display = 'block';
+    // Build happ deep link: happ://add/<url>
+    const happLink = `happ://add/${encodeURIComponent(shortUrl)}`;
+
+    // Open in new tab/window
+    window.open(happLink, '_blank');
+
+    // Show success
+    document.getElementById('wiz-happ-btn-wrap').style.display = 'none';
+    document.getElementById('wiz-success').style.display = 'block';
+    document.getElementById('wiz-close-btn').style.display = 'none';
+    document.getElementById('wiz-done-btn').style.display = 'flex';
+    hap();
+  } catch(e) {
+    btn.textContent = '🔗 Добавить в Happ';
+    btn.style.opacity = '';
+    btn.style.pointerEvents = '';
+    tg.showAlert('Ошибка получения ссылки. Попробуйте ещё раз.');
+  }
 }
 
 function closeAddDeviceModal() {
-  clearInterval(deviceCheckInterval);
-  document.getElementById('addDeviceModal').classList.remove('show');
+  document.getElementById('addDeviceWizard').style.display = 'none';
+  document.getElementById('wiz-close-btn').style.display = 'flex';
 }
 
 // ===== NAV =====
@@ -2026,56 +2342,7 @@ document.addEventListener('touchend', e => {
   }
 }, {passive: true});
 
-// ===== VPN TOGGLE (visual) =====
-let vpnOn = false, vpnT = 0, vpnI = null, spI = null;
 
-function toggleVPN() {
-  vpnOn = !vpnOn;
-  const w = document.getElementById('vpnW');
-  const st = document.getElementById('vpnSt');
-  const tm = document.getElementById('vpnTm');
-  hap();
-
-  if (vpnOn) {
-    w.classList.add('on');
-    st.textContent = 'Подключено';
-    st.style.color = 'rgba(74,222,128,0.85)';
-    vpnT = 0;
-    vpnI = setInterval(() => {
-      vpnT++;
-      const h = String(Math.floor(vpnT/3600)).padStart(2,'0');
-      const m = String(Math.floor((vpnT%3600)/60)).padStart(2,'0');
-      const s = String(vpnT%60).padStart(2,'0');
-      tm.textContent = `${h}:${m}:${s}`;
-    }, 1000);
-    spI = setInterval(upSpd, 1500);
-    upSpd();
-  } else {
-    w.classList.remove('on');
-    st.textContent = 'Отключено';
-    st.style.color = 'rgba(255,255,255,0.85)';
-    tm.textContent = '—';
-    clearInterval(vpnI); clearInterval(spI);
-    document.getElementById('dl').textContent = '—';
-    document.getElementById('ul').textContent = '—';
-    document.getElementById('pg').textContent = '—';
-  }
-}
-
-function upSpd() {
-  document.getElementById('dl').textContent = (80 + Math.random() * 60).toFixed(1);
-  document.getElementById('ul').textContent = (30 + Math.random() * 40).toFixed(1);
-  document.getElementById('pg').textContent = Math.floor(15 + Math.random() * 20);
-}
-
-// ===== PROTOCOL / DNS =====
-const prots = ['WireGuard','OpenVPN','IKEv2','Shadowsocks'];
-let pi = 0;
-function cycleP() { pi = (pi+1) % prots.length; document.getElementById('pTxt').textContent = prots[pi]; hap(); }
-
-const dnss = ['Cloudflare','Google','AdGuard','Quad9'];
-let di = 0;
-function cycleD() { di = (di+1) % dnss.length; document.getElementById('dTxt').textContent = dnss[di]; hap(); }
 
 // ===== HAPTIC =====
 function hap() { if (navigator.vibrate) navigator.vibrate(6); }
