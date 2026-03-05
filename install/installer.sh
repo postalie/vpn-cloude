@@ -16,7 +16,7 @@ sed -i '/bullseye-backports/d' /etc/apt/sources.list
 # Обновление и установка пакетов
 echo "📦 Обновление и установка пакетов..."
 apt update
-apt install -y python3 python3-pip python3-venv curl net-tools openssl certbot
+apt install -y python3 python3-pip python3-venv curl net-tools openssl certbot dnsutils
 
 # Директория проекта
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
@@ -34,10 +34,24 @@ echo "📚 Установка зависимостей..."
 pip install --upgrade pip
 pip install -r requirements.txt
 
-# Перед запуском бота добавить:
-echo "🛑 Освобождение порта 8080..."
+# Убиваем все старые процессы бота и освобождаем порты
+echo "🛑 Остановка старых процессов..."
+pkill -9 -f "python.*main.py" 2>/dev/null || true
 fuser -k 8080/tcp 2>/dev/null || true
-sleep 2
+fuser -k 80/tcp 2>/dev/null || true
+
+# Ждём пока порты точно освободятся
+echo "⏳ Ожидание освобождения портов..."
+for i in $(seq 1 15); do
+    PORT_8080=$(ss -tlnp | grep ':8080 ' || true)
+    PORT_80=$(ss -tlnp | grep ':80 ' || true)
+    if [ -z "$PORT_8080" ] && [ -z "$PORT_80" ]; then
+        echo "✅ Порты 80 и 8080 свободны"
+        break
+    fi
+    echo "⏳ Ждём... ($i/15)"
+    sleep 1
+done
 
 # SSL сертификат
 DOMAIN="msk.cloudevpn.cfd"
@@ -47,29 +61,32 @@ mkdir -p "$SSL_DIR"
 echo ""
 echo "🔐 Получение SSL-сертификата от Let's Encrypt для $DOMAIN..."
 
-# Останавливаем старый процесс на порту 80
-echo "🛑 Остановка старого процесса..."
-pkill -f "python.*main.py" 2>/dev/null || true
-sleep 2
+# Получаем внешний IP сервера
+echo "🔍 Определение внешнего IP сервера..."
+SERVER_IP=$(curl -s --max-time 5 https://api.ipify.org 2>/dev/null || \
+            curl -s --max-time 5 https://ifconfig.me 2>/dev/null || \
+            curl -s --max-time 5 https://icanhazip.com 2>/dev/null || \
+            echo "")
 
-# Проверяем что порт 80 свободен
-if ss -tlnp | grep -q ':80 '; then
-    echo "⚠️  Порт 80 занят, пробуем освободить..."
-    fuser -k 80/tcp 2>/dev/null || true
-    sleep 2
+if [ -z "$SERVER_IP" ]; then
+    echo "⚠️  Не удалось определить внешний IP"
+    SERVER_IP=$(hostname -I | awk '{print $1}')
+    echo "⚠️  Используем локальный IP: $SERVER_IP"
+else
+    echo "✅ Внешний IP сервера: $SERVER_IP"
 fi
 
 # Проверяем DNS резолвинг домена
 echo "🔍 Проверка DNS для $DOMAIN..."
-# Стало (берёт реальный внешний IP):
-SERVER_IP=$(curl -s https://api.ipify.org || curl -s https://ifconfig.me || curl -s https://icanhazip.com)
-DOMAIN_IP=$(dig +short "$DOMAIN" 2>/dev/null | tail -1 || host "$DOMAIN" 2>/dev/null | awk '/has address/ {print $4}' | head -1 || echo "")
+DOMAIN_IP=$(dig +short "$DOMAIN" 2>/dev/null | tail -1 || \
+            host "$DOMAIN" 2>/dev/null | awk '/has address/ {print $4}' | head -1 || \
+            echo "")
 
 CERT_OK=false
 
 if [ "$DOMAIN_IP" = "$SERVER_IP" ]; then
     echo "✅ DNS корректен: $DOMAIN -> $SERVER_IP"
-    
+
     # Получаем сертификат через standalone режим
     if certbot certonly --standalone -d "$DOMAIN" --non-interactive --agree-tos --email admin@cloudevpn.cfd; then
         if [ -f "/etc/letsencrypt/live/$DOMAIN/fullchain.pem" ]; then
@@ -83,7 +100,7 @@ if [ "$DOMAIN_IP" = "$SERVER_IP" ]; then
             # Скрипт автообновления через cron
             cat > /etc/cron.daily/certbot-renew << CRONEOF
 #!/bin/bash
-certbot renew --quiet --deploy-hook "cp /etc/letsencrypt/live/$DOMAIN/fullchain.pem $SSL_DIR/server.crt && cp /etc/letsencrypt/live/$DOMAIN/privkey.pem $SSL_DIR/server.key && chmod 600 $SSL_DIR/server.key && pkill -f 'python.*main.py' 2>/dev/null || true && sleep 2 && bash $PROJECT_DIR/start_bot.sh"
+certbot renew --quiet --deploy-hook "cp /etc/letsencrypt/live/$DOMAIN/fullchain.pem $SSL_DIR/server.crt && cp /etc/letsencrypt/live/$DOMAIN/privkey.pem $SSL_DIR/server.key && chmod 600 $SSL_DIR/server.key && pkill -9 -f 'python.*main.py' 2>/dev/null || true && sleep 3 && bash $PROJECT_DIR/start_bot.sh"
 CRONEOF
             chmod +x /etc/cron.daily/certbot-renew
             echo "✅ Автообновление сертификата настроено"
@@ -123,19 +140,30 @@ cat > "$PROJECT_DIR/start_bot.sh" << EOF
 cd "$PROJECT_DIR"
 source venv/bin/activate
 
-# Останавливаем старый процесс если есть
-if [ -f "$PROJECT_DIR/bot.pid" ]; then
-    OLD_PID=\$(cat "$PROJECT_DIR/bot.pid")
-    if ps -p "\$OLD_PID" > /dev/null 2>&1; then
-        echo "🛑 Останавливаем старый процесс (PID: \$OLD_PID)..."
-        kill "\$OLD_PID"
-        sleep 2
+echo "🛑 Останавливаем старые процессы..."
+pkill -9 -f "python.*main.py" 2>/dev/null || true
+fuser -k 8080/tcp 2>/dev/null || true
+
+# Ждём пока порт 8080 точно освободится
+for i in \$(seq 1 15); do
+    if ! ss -tlnp | grep -q ':8080 '; then
+        echo "✅ Порт 8080 свободен"
+        break
     fi
+    echo "⏳ Ждём освобождения порта 8080... (\$i/15)"
+    sleep 1
+done
+
+# Финальная проверка
+if ss -tlnp | grep -q ':8080 '; then
+    echo "❌ Порт 8080 всё ещё занят! Прерываем запуск."
+    exit 1
 fi
 
 nohup python main.py > "$PROJECT_DIR/main.log" 2>&1 &
-echo \$! > "$PROJECT_DIR/bot.pid"
-echo "✅ Бот запущен с PID: \$(cat "$PROJECT_DIR/bot.pid")"
+BOT_PID=\$!
+echo \$BOT_PID > "$PROJECT_DIR/bot.pid"
+echo "✅ Бот запущен с PID: \$BOT_PID"
 EOF
 chmod +x "$PROJECT_DIR/start_bot.sh"
 
@@ -143,12 +171,15 @@ chmod +x "$PROJECT_DIR/start_bot.sh"
 echo "🚀 Запуск бота..."
 bash "$PROJECT_DIR/start_bot.sh"
 
-sleep 3
+# Ждём дольше чтобы бот успел инициализироваться
+sleep 5
 
 # Проверка что процесс запущен
-if [ -f "$PROJECT_DIR/bot.pid" ] && ps -p "$(cat "$PROJECT_DIR/bot.pid")" > /dev/null 2>&1; then
+BOT_PID=$(cat "$PROJECT_DIR/bot.pid" 2>/dev/null || echo "")
+
+if [ -n "$BOT_PID" ] && ps -p "$BOT_PID" > /dev/null 2>&1; then
     echo ""
-    echo "✅ Готово! Бот запущен в фоне (PID: $(cat "$PROJECT_DIR/bot.pid"))"
+    echo "✅ Готово! Бот запущен в фоне (PID: $BOT_PID)"
     echo ""
     echo "🌐 HTTPS доступен:"
     echo "   - https://$DOMAIN:8080/dashboard"
@@ -161,16 +192,18 @@ if [ -f "$PROJECT_DIR/bot.pid" ] && ps -p "$(cat "$PROJECT_DIR/bot.pid")" > /dev
     fi
     echo ""
     echo "📋 Команды:"
-    echo "   - Логи (realtime):          tail -f $PROJECT_DIR/main.log"
+    echo "   - Логи (realtime):           tail -f $PROJECT_DIR/main.log"
     echo "   - Логи (последние 50 строк): tail -n 50 $PROJECT_DIR/main.log"
-    echo "   - Остановить:               pkill -f 'python.*main.py'"
-    echo "   - Статус:                   ps aux | grep 'python.*main.py'"
-    echo "   - Перезапустить:            bash $PROJECT_DIR/start_bot.sh"
+    echo "   - Остановить:                pkill -f 'python.*main.py'"
+    echo "   - Статус:                    ps aux | grep 'python.*main.py'"
+    echo "   - Перезапустить:             bash $PROJECT_DIR/start_bot.sh"
     echo ""
 else
     echo ""
     echo "❌ Ошибка! Бот не запустился."
-    echo "Проверь логи: tail -n 50 $PROJECT_DIR/main.log"
-    cat "$PROJECT_DIR/main.log" 2>/dev/null | tail -n 20
+    echo "Последние строки лога:"
+    echo "---"
+    cat "$PROJECT_DIR/main.log" 2>/dev/null | tail -n 30
+    echo "---"
     exit 1
 fi
