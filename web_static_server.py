@@ -146,16 +146,18 @@ async def health_handler(request):
 
 def setup_web_static():
     app = web.Application()
+
+    # CORS - настраиваем вручную для конкретных маршрутов
+    from aiohttp_cors import setup as cors_setup, ResourceOptions
     
-    # CORS
-    cors = aiohttp_cors.setup(app, defaults={
-        "*": aiohttp_cors.ResourceOptions(
+    cors = cors_setup(app, defaults={
+        "*": ResourceOptions(
             allow_credentials=True,
             expose_headers="*",
             allow_headers="*",
         )
     })
-    
+
     # Маршруты
     app.router.add_get('/health', health_handler)
     app.router.add_get('/dashboard', dashboard_handler)
@@ -172,9 +174,13 @@ def setup_web_static():
     
     app.router.add_get('/{path:.*}', spa_handler)
 
-    # Применяем CORS
+    # Применяем CORS только к обычным маршрутам (не wildcard)
     for route in list(app.router.routes()):
-        cors.add(route)
+        try:
+            cors.add(route)
+        except ValueError:
+            # Пропускаем wildcard маршруты
+            pass
 
     print(f"🌐 Web Static Server запущен на порту {WEB_PORT}")
     return app
