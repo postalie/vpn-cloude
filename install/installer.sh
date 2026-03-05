@@ -56,7 +56,8 @@ fi
 
 # Проверяем DNS резолвинг домена
 echo "🔍 Проверка DNS для $DOMAIN..."
-SERVER_IP=$(hostname -I | awk '{print $1}')
+# Стало (берёт реальный внешний IP):
+SERVER_IP=$(curl -s https://api.ipify.org || curl -s https://ifconfig.me || curl -s https://icanhazip.com)
 DOMAIN_IP=$(dig +short "$DOMAIN" 2>/dev/null | tail -1 || host "$DOMAIN" 2>/dev/null | awk '/has address/ {print $4}' | head -1 || echo "")
 
 CERT_OK=false
